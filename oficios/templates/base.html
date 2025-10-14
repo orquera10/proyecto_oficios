@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+{% load static %}
+{% load crispy_forms_tags %}
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Oficios</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome para iconos -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Estilos personalizados -->
+    <link href="{% static 'oficios/css/styles.css' %}" rel="stylesheet">
+    <!-- Agrega esto para crispy forms -->
+    {{ form.media }}
+</head>
+<body>
+    <!-- Barra de navegación (solo visible cuando el usuario está autenticado) -->
+    {% if user.is_authenticated %}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'oficios:list' %}">Sistema de Oficios</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="oficiosDropdown" role="button" 
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-file-alt me-1"></i> Oficios
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="oficiosDropdown">
+                            <li>
+                                <a class="dropdown-item" href="{% url 'oficios:list' %}">
+                                    <i class="fas fa-list me-2"></i>Listado de Oficios
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'oficios:create' %}">
+                                    <i class="fas fa-plus-circle me-2"></i>Nuevo Oficio
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="personasDropdown" role="button" 
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-users me-1"></i> Personas
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="personasDropdown">
+                            <li>
+                                <a class="dropdown-item" href="{% url 'personas:nino_list' %}">
+                                    <i class="fas fa-child me-2"></i>Niños
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'personas:parte_list' %}">
+                                    <i class="fas fa-user-friends me-2"></i>Partes
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+                {% if user.is_authenticated %}
+                    <div class="dropdown">
+                        <button class="btn btn-outline-light dropdown-toggle d-flex align-items-center" type="button" 
+                                id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="user-avatar me-2">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <span class="d-none d-sm-inline">{{ user.get_full_name|default:user.username }}</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li>
+                                <a class="dropdown-item" href="#">
+                                    <i class="fas fa-user me-2"></i>Mi perfil
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form id="logout-form" method="post" action="{% url 'logout' %}" style="display: none;">
+                                    {% csrf_token %}
+                                </form>
+                                <a class="dropdown-item text-danger" href="#" 
+                                   onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Cerrar sesión
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn btn-outline-light">
+                        <i class="fas fa-sign-in-alt me-1"></i> Iniciar sesión
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+
+    <div class="container {% if not user.is_authenticated %}mt-5{% else %}mt-2{% endif %}">
+        <!-- Mensajes de alerta -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <!-- Scripts al final del body -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Script para cerrar automáticamente los mensajes después de 5 segundos -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cerrar automáticamente los mensajes después de 5 segundos
+            setTimeout(function() {
+                var alerts = document.querySelectorAll('.alert');
+                alerts.forEach(function(alert) {
+                    var bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+            
+            // Cerrar mensajes al hacer clic en el botón de cierre
+            var closeButtons = document.querySelectorAll('.btn-close');
+            closeButtons.forEach(function(button) {
+                button.addEventListener('click', function() {
+                    var alert = this.closest('.alert');
+                    var bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            });
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

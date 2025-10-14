@@ -1,0 +1,122 @@
+[
+  {
+    "model": "oficios.institucion",
+    "pk": 1,
+    "fields": {
+      "nombre": "Ministerio de Educación",
+      "direccion": "Av. Santa Fe 1548, C1060 CABA",
+      "creado": "2025-10-13T14:00:00Z",
+      "actualizado": "2025-10-13T14:00:00Z"
+    }
+  },
+  {
+    "model": "oficios.institucion",
+    "pk": 2,
+    "fields": {
+      "nombre": "Secretaría de Hacienda",
+      "direccion": "Hipólito Yrigoyen 250, C1086 CABA",
+      "creado": "2025-10-13T14:00:00Z",
+      "actualizado": "2025-10-13T14:00:00Z"
+    }
+  },
+  {
+    "model": "oficios.caratula",
+    "pk": 1,
+    "fields": {
+      "nombre": "Expediente Administrativo",
+      "nota": "Trámites administrativos generales",
+      "creado": "2025-10-13T14:00:00Z",
+      "actualizado": "2025-10-13T14:00:00Z"
+    }
+  },
+  {
+    "model": "oficios.caratula",
+    "pk": 2,
+    "fields": {
+      "nombre": "Licencias",
+      "nota": "Expedientes de licencias",
+      "creado": "2025-10-13T14:00:00Z",
+      "actualizado": "2025-10-13T14:00:00Z"
+    }
+  },
+  {
+    "model": "oficios.carátulaoficio",
+    "pk": 1,
+    "fields": {
+      "nombre": "Solicitud de Información",
+      "nota": "Oficios solicitando información",
+      "creado": "2025-10-13T14:00:00Z",
+      "actualizado": "2025-10-13T14:00:00Z"
+    }
+  },
+  {
+    "model": "oficios.carátulaoficio",
+    "pk": 2,
+    "fields": {
+      "nombre": "Nota Simple",
+      "nota": "Comunicaciones informales",
+      "creado": "2025-10-13T14:00:00Z",
+      "actualizado": "2025-10-13T14:00:00Z"
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 1,
+    "fields": {
+      "password": "pbkdf2_sha256$600000$...",
+      "last_login": null,
+      "is_superuser": true,
+      "username": "admin",
+      "first_name": "Admin",
+      "last_name": "Sistema",
+      "email": "admin@example.com",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2025-10-13T14:00:00Z"
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 2,
+    "fields": {
+      "password": "pbkdf2_sha256$600000$...",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "jperez",
+      "first_name": "Juan",
+      "last_name": "Pérez",
+      "email": "jperez@example.com",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2025-10-13T14:00:00Z"
+    }
+  },
+  {
+    "model": "oficios.agente",
+    "pk": 1,
+    "fields": {
+      "usuario": 2,
+      "descripcion": "Agente de mesa de entrada",
+      "creado": "2025-10-13T14:00:00Z",
+      "actualizado": "2025-10-13T14:00:00Z"
+    }
+  },
+  {
+    "model": "oficios.oficio",
+    "pk": 1,
+    "fields": {
+      "tipo": "entrante",
+      "expte": "EX-2025-00000001- -GDEBA-DGRC",
+      "institucion": 1,
+      "agente": 1,
+      "estado": "pendiente",
+      "plazo_horas": 48,
+      "fecha_emision": "2025-10-13T10:00:00Z",
+      "fecha_vencimiento": "2025-10-15T10:00:00Z",
+      "caratula": 1,
+      "caratula_oficio": 1,
+      "creado": "2025-10-13T14:00:00Z",
+      "actualizado": "2025-10-13T14:00:00Z"
+    }
+  }
+]

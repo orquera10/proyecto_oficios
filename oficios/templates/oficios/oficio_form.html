@@ -1,0 +1,291 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4>{{ titulo }}</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="oficio-form">
+                        {% csrf_token %}
+                        
+                        <!-- Datos principales del oficio -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">Datos del Oficio</h5>
+                            </div>
+                            <div class="card-body">
+                                {{ form|crispy }}
+                            </div>
+                        </div>
+
+                        <!-- Sección de Niños -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">Niños relacionados</h5>
+                            </div>
+                            <div class="card-body">
+                                {{ nino_formset.management_form }}
+                                <div id="nino-formset">
+                                    {% for form in nino_formset %}
+                                    <div class="nino-form row mb-3 border-bottom pb-3">
+                                        {% for field in form.visible_fields %}
+                                            <div class="col-md-4">
+                                                {{ field|as_crispy_field }}
+                                            </div>
+                                        {% endfor %}
+                                        {% if form.DELETE %}
+                                            {% if form.instance.pk %}
+                                            <div class="col-md-2 d-flex align-items-end">
+                                                <div class="form-check form-switch">
+                                                    {{ form.DELETE }}
+                                                    <label class="form-check-label ms-2" for="{{ form.DELETE.id_for_label }}">
+                                                        Eliminar
+                                                    </label>
+                                                    {{ form.id }}
+                                                </div>
+                                            </div>
+                                            {% else %}
+                                                {{ form.DELETE.as_hidden }}
+                                                {{ form.id }}
+                                            {% endif %}
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="add-nino">
+                                    <i class="fas fa-plus"></i> Agregar Niño
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Sección de Partes -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">Partes relacionadas</h5>
+                            </div>
+                            <div class="card-body">
+                                {{ parte_formset.management_form }}
+                                <div id="parte-formset">
+                                    {% for form in parte_formset %}
+                                    <div class="parte-form row mb-3 border-bottom pb-3">
+                                        {% for field in form.visible_fields %}
+                                            <div class="col-md-4">
+                                                {{ field|as_crispy_field }}
+                                            </div>
+                                        {% endfor %}
+                                        {% if form.DELETE %}
+                                            {% if form.instance.pk %}
+                                            <div class="col-md-2 d-flex align-items-end">
+                                                <div class="form-check form-switch">
+                                                    {{ form.DELETE }}
+                                                    <label class="form-check-label ms-2" for="{{ form.DELETE.id_for_label }}">
+                                                        Eliminar
+                                                    </label>
+                                                    {{ form.id }}
+                                                </div>
+                                            </div>
+                                            {% else %}
+                                                {{ form.DELETE.as_hidden }}
+                                                {{ form.id }}
+                                            {% endif %}
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="add-parte">
+                                    <i class="fas fa-plus"></i> Agregar Parte
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Guardar
+                            </button>
+                            <a href="{% url 'oficios:list' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+
+<script>
+$(document).ready(function() {
+    // Inicializar select2 para los selects
+    function initializeSelect2() {
+        $('.select2').select2({
+            theme: 'bootstrap-5',
+            width: '100%',
+            placeholder: 'Seleccione una opción',
+            allowClear: true
+        });
+    }
+    
+    // Inicializar select2 al cargar la página
+    initializeSelect2();
+    
+    // Configurar select2 para los nuevos formularios que se agreguen dinámicamente
+    $(document).on('select2:open', () => {
+        document.querySelector('.select2-search__field').focus();
+    });
+
+    // Función para actualizar los totales de los formularios
+    function updateFormsetCounts() {
+        $('#id_ninos-TOTAL_FORMS').val($('.nino-form').length);
+        $('#id_partes-TOTAL_FORMS').val($('.parte-form').length);
+    }
+
+    // Manejar clic en checkboxes de eliminar
+    function setupDeleteHandlers() {
+        $('input[id$="-DELETE"]').off('change').on('change', function() {
+            const formRow = $(this).closest('.nino-form, .parte-form');
+            const formType = formRow.hasClass('nino-form') ? 'nino' : 'parte';
+            const visibleForms = $('.' + formType + '-form:visible').length;
+            
+            // Si solo queda un formulario visible, no permitir eliminarlo
+            if (visibleForms <= 1 && $(this).is(':checked')) {
+                $(this).prop('checked', false);
+                return false;
+            }
+            
+            if ($(this).is(':checked')) {
+                // Ocultar la fila con una animación
+                formRow.slideUp(200, function() {
+                    formRow.hide();
+                });
+            } else {
+                // Mostrar la fila si se desmarca el checkbox
+                formRow.slideDown(200);
+                formRow.show();
+            }
+        });
+    }
+
+    // Función para manejar la adición de nuevos formularios
+    function setupNewForm(formRow, formType) {
+        // Configurar manejador de eliminación para el nuevo formulario
+        formRow.find('input[id$="-DELETE"]').on('change', function() {
+            if ($(this).is(':checked')) {
+                formRow.slideUp(200, function() {
+                    formRow.hide();
+                });
+            } else {
+                formRow.slideDown(200);
+                formRow.show();
+            }
+        });
+    }
+
+    // Configurar manejadores iniciales
+    setupDeleteHandlers();
+
+    // Agregar formulario de niño
+    $('#add-nino').on('click', function(e) {
+        e.preventDefault();
+        
+        // Obtener el número total de formularios actual
+        const totalForms = $('#id_ninos-TOTAL_FORMS');
+        const formIdx = parseInt(totalForms.val());
+        
+        // Clonar el primer formulario
+        const newForm = $('.nino-form').first().clone();
+        
+        // Limpiar valores del formulario clonado
+        newForm.find('input, select').val('');
+        newForm.find('input[type="checkbox"]').prop('checked', false);
+        
+        // Actualizar los IDs y names de los campos
+        newForm.html(newForm.html().replace(/ninos-\d+-/g, 'ninos-' + formIdx + '-'));
+        
+        // Actualizar el ID del formulario
+        newForm.attr('id', `nino-${formIdx}`);
+        
+        // Asegurarse de que el checkbox de eliminar esté desmarcado
+        const deleteCheckbox = newForm.find('input[type="checkbox"][id$="-DELETE"]');
+        deleteCheckbox.prop('checked', false);
+        
+        // Mostrar el contenedor del checkbox de eliminar
+        deleteCheckbox.closest('.form-check').show();
+        
+        // Agregar el nuevo formulario al contenedor
+        $('#nino-formset').append(newForm);
+        
+        // Incrementar el contador de formularios
+        totalForms.val(formIdx + 1);
+        
+        // Inicializar select2 para el nuevo select
+        newForm.find('.select2').select2({
+            theme: 'bootstrap-5',
+            width: '100%',
+            placeholder: 'Seleccione un niño',
+            allowClear: true
+        });
+        
+        // Configurar manejador de eliminación
+        setupDeleteHandlers();
+    });
+
+    // Agregar formulario de parte
+    $('#add-parte').on('click', function(e) {
+        e.preventDefault();
+        
+        // Obtener el número total de formularios actual
+        const totalForms = $('#id_partes-TOTAL_FORMS');
+        const formIdx = parseInt(totalForms.val());
+        
+        // Clonar el primer formulario
+        const newForm = $('.parte-form').first().clone();
+        
+        // Limpiar valores del formulario clonado
+        newForm.find('input, select').val('');
+        newForm.find('input[type="checkbox"]').prop('checked', false);
+        
+        // Actualizar los IDs y names de los campos
+        newForm.html(newForm.html().replace(/partes-\d+-/g, 'partes-' + formIdx + '-'));
+        
+        // Actualizar el ID del formulario
+        newForm.attr('id', `parte-${formIdx}`);
+        
+        // Asegurarse de que el checkbox de eliminar esté desmarcado
+        const deleteCheckbox = newForm.find('input[type="checkbox"][id$="-DELETE"]');
+        deleteCheckbox.prop('checked', false);
+        
+        // Mostrar el contenedor del checkbox de eliminar
+        deleteCheckbox.closest('.form-check').show();
+        
+        // Agregar el nuevo formulario al contenedor
+        $('#parte-formset').append(newForm);
+        
+        // Incrementar el contador de formularios
+        totalForms.val(formIdx + 1);
+        
+        // Inicializar select2 para el nuevo select
+        newForm.find('.select2').select2({
+            theme: 'bootstrap-5',
+            width: '100%',
+            placeholder: 'Seleccione una parte',
+            allowClear: true
+        });
+        
+        // Configurar manejador de eliminación
+        setupDeleteHandlers();
+    });
+});
+</script>
+{% endblock %}

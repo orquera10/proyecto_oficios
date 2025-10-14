@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestión de Personas{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Gestión de Personas</h2>
+    
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Niños</h5>
+                    <p class="card-text">Administre la información de los niños.</p>
+                    <a href="{{ ninos_url }}" class="btn btn-primary">Ver Niños</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Partes</h5>
+                    <p class="card-text">Gestione los partes de los niños.</p>
+                    <a href="{{ partes_url }}" class="btn btn-primary">Ver Partes</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
