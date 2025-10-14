@@ -211,7 +211,15 @@ $(document).ready(function() {
         newForm.find('input[type="checkbox"]').prop('checked', false);
         
         // Actualizar los IDs y names de los campos
-        newForm.html(newForm.html().replace(/ninos-\d+-/g, 'ninos-' + formIdx + '-'));
+        newForm.find('[id]').each(function() {
+            const $this = $(this);
+            $this.attr('id', $this.attr('id').replace(/ninos-\d+-/g, 'ninos-' + formIdx + '-'));
+        });
+        
+        newForm.find('[name]').each(function() {
+            const $this = $(this);
+            $this.attr('name', $this.attr('name').replace(/ninos-\d+-/g, 'ninos-' + formIdx + '-'));
+        });
         
         // Actualizar el ID del formulario
         newForm.attr('id', `nino-${formIdx}`);
@@ -229,13 +237,26 @@ $(document).ready(function() {
         // Incrementar el contador de formularios
         totalForms.val(formIdx + 1);
         
+        // Limpiar cualquier instancia de select2 existente en el nuevo formulario
+        newForm.find('.select2-container').remove();
+        
+        // Quitar la clase select2-hidden-accessible para evitar problemas de visualización
+        newForm.find('select').removeClass('select2-hidden-accessible');
+        newForm.find('select').next('.select2-container').remove();
+        
         // Inicializar select2 para el nuevo select
-        newForm.find('.select2').select2({
-            theme: 'bootstrap-5',
-            width: '100%',
-            placeholder: 'Seleccione un niño',
-            allowClear: true
-        });
+        const selectElement = newForm.find('select');
+        if (selectElement.length) {
+            select2Instance = selectElement.select2({
+                theme: 'bootstrap-5',
+                width: '100%',
+                placeholder: 'Seleccione un niño',
+                allowClear: true
+            });
+            
+            // Forzar la actualización del select2
+            selectElement.trigger('change.select2');
+        }
         
         // Configurar manejador de eliminación
         setupDeleteHandlers();
@@ -257,7 +278,15 @@ $(document).ready(function() {
         newForm.find('input[type="checkbox"]').prop('checked', false);
         
         // Actualizar los IDs y names de los campos
-        newForm.html(newForm.html().replace(/partes-\d+-/g, 'partes-' + formIdx + '-'));
+        newForm.find('[id]').each(function() {
+            const $this = $(this);
+            $this.attr('id', $this.attr('id').replace(/partes-\d+-/g, 'partes-' + formIdx + '-'));
+        });
+        
+        newForm.find('[name]').each(function() {
+            const $this = $(this);
+            $this.attr('name', $this.attr('name').replace(/partes-\d+-/g, 'partes-' + formIdx + '-'));
+        });
         
         // Actualizar el ID del formulario
         newForm.attr('id', `parte-${formIdx}`);
@@ -275,13 +304,26 @@ $(document).ready(function() {
         // Incrementar el contador de formularios
         totalForms.val(formIdx + 1);
         
+        // Limpiar cualquier instancia de select2 existente en el nuevo formulario
+        newForm.find('.select2-container').remove();
+        
+        // Quitar la clase select2-hidden-accessible para evitar problemas de visualización
+        newForm.find('select').removeClass('select2-hidden-accessible');
+        newForm.find('select').next('.select2-container').remove();
+        
         // Inicializar select2 para el nuevo select
-        newForm.find('.select2').select2({
-            theme: 'bootstrap-5',
-            width: '100%',
-            placeholder: 'Seleccione una parte',
-            allowClear: true
-        });
+        const selectElement = newForm.find('select');
+        if (selectElement.length) {
+            select2Instance = selectElement.select2({
+                theme: 'bootstrap-5',
+                width: '100%',
+                placeholder: 'Seleccione una parte',
+                allowClear: true
+            });
+            
+            // Forzar la actualización del select2
+            selectElement.trigger('change.select2');
+        }
         
         // Configurar manejador de eliminación
         setupDeleteHandlers();
