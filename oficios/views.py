@@ -86,21 +86,79 @@ class OficioCreateView(LoginRequiredMixin, CreateView):
         nino_formset = context['nino_formset']
         parte_formset = context['parte_formset']
         
-        if nino_formset.is_valid() and parte_formset.is_valid():
+        # Validar el formulario principal
+        if not form.is_valid():
+            return self.form_invalid(form)
+            
+        # Validar los formsets
+        nino_formset_valid = nino_formset.is_valid()
+        parte_formset_valid = parte_formset.is_valid()
+        
+        if nino_formset_valid and parte_formset_valid:
+            # Guardar el oficio primero
             self.object = form.save(commit=False)
             self.object.usuario = self.request.user
             self.object.save()
             
-            nino_formset.instance = self.object
-            nino_formset.save()
+            # Guardar el formset de niños
+            for nino_form in nino_formset:
+                # Solo procesar formularios con datos y no marcados para borrar
+                if (nino_form.cleaned_data and 
+                    not nino_form.cleaned_data.get('DELETE', False) and 
+                    nino_form.cleaned_data.get('nino')):
+                    
+                    # Guardar la relación oficio-niño
+                    oficio_nino = nino_form.save(commit=False)
+                    oficio_nino.oficio = self.object
+                    oficio_nino.save()
             
-            parte_formset.instance = self.object
-            parte_formset.save()
+            # Eliminar relaciones marcadas para borrar
+            for nino_form in nino_formset.deleted_forms:
+                if nino_form.instance.pk:
+                    nino_form.instance.delete()
+            
+            # Guardar el formset de partes
+            for parte_form in parte_formset:
+                if (parte_form.cleaned_data and 
+                    not parte_form.cleaned_data.get('DELETE', False) and 
+                    parte_form.cleaned_data.get('parte')):
+                    
+                    # Guardar la relación oficio-parte
+                    oficio_parte = parte_form.save(commit=False)
+                    oficio_parte.oficio = self.object
+                    oficio_parte.save()
+            
+            # Eliminar relaciones de partes marcadas para borrar
+            for parte_form in parte_formset.deleted_forms:
+                if parte_form.instance.pk:
+                    parte_form.instance.delete()
+            
+            # Eliminar los formsets marcados para eliminar
+            for form in nino_formset.deleted_forms:
+                if form.instance and form.instance.pk:
+                    form.instance.delete()
+                    
+            for form in parte_formset.deleted_forms:
+                if form.instance and form.instance.pk:
+                    form.instance.delete()
             
             messages.success(self.request, 'El oficio se ha creado exitosamente.')
             return super().form_valid(form)
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            # Si hay errores, mostrarlos
+            if not nino_formset_valid:
+                for i, error in enumerate(nino_formset.errors):
+                    if error:
+                        for field, errors in error.items():
+                            for error_msg in errors:
+                                messages.error(self.request, f'Error en niño {i+1} - {field}: {error_msg}')
+            if not parte_formset_valid:
+                for i, error in enumerate(parte_formset.errors):
+                    if error:
+                        for field, errors in error.items():
+                            for error_msg in errors:
+                                messages.error(self.request, f'Error en parte {i+1} - {field}: {error_msg}')
+            return self.form_invalid(form)
 
 
 class OficioDetailView(LoginRequiredMixin, DetailView):

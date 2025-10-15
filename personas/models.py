@@ -4,9 +4,9 @@ class Nino(models.Model):
     id_ninos = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=100)
     apellido = models.CharField(max_length=100)
-    direccion = models.CharField(max_length=200)
-    dni = models.CharField(max_length=20, unique=True)
-    fecha_nac = models.DateField()
+    direccion = models.CharField(max_length=200, blank=True, null=True)
+    dni = models.CharField(max_length=20, unique=True, blank=True, null=True)
+    fecha_nac = models.DateField(blank=True, null=True)
 
     class Meta:
         verbose_name = 'Niño'

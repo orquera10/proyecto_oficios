@@ -1,9 +1,10 @@
+import os
 from django.db import models
 from django.utils import timezone
 from django.core.validators import MinValueValidator, FileExtensionValidator
 from django.contrib.auth import get_user_model
+from django.conf import settings
 from personas.models import Nino, Parte
-import os
 
 def oficio_upload_path(instance, filename):
     # Guarda el archivo en: MEDIA_ROOT/oficios/oficio_<id>/<filename>
