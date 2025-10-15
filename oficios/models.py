@@ -1,8 +1,13 @@
 from django.db import models
 from django.utils import timezone
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, FileExtensionValidator
 from django.contrib.auth import get_user_model
 from personas.models import Nino, Parte
+import os
+
+def oficio_upload_path(instance, filename):
+    # Guarda el archivo en: MEDIA_ROOT/oficios/oficio_<id>/<filename>
+    return f'oficios/oficio_{instance.id}/{filename}'
 
 User = get_user_model()
 
@@ -282,5 +287,69 @@ class Oficio(models.Model):
         }
         return estado_map.get(self.estado, 'light')
 
+    archivo_pdf = models.FileField(
+        upload_to=oficio_upload_path,
+        verbose_name='Archivo PDF del oficio',
+        null=True,
+        blank=True,
+        validators=[
+            FileExtensionValidator(
+                allowed_extensions=['pdf'],
+                message='Solo se permiten archivos PDF.'
+            )
+        ],
+        help_text='Sube el archivo PDF del oficio. Tamaño máximo: 10MB.'
+    )
+
     def __str__(self):
         return f"Oficio {self.id} - {self.get_tipo_display()}"
+
+    def save(self, *args, **kwargs):
+        # Imprimir la ruta base y la ruta de medios
+        from pathlib import Path
+        base_dir = Path(__file__).resolve().parent.parent.parent
+        print(f"DEBUG - BASE_DIR: {base_dir}")
+        print(f"DEBUG - MEDIA_ROOT configurado: {os.path.join(base_dir, 'media')}")
+        
+        # Si es un nuevo oficio, guardamos primero para obtener un ID
+        if not self.pk:
+            # Guardamos el oficio sin el archivo primero
+            pdf_file = getattr(self, 'archivo_pdf', None)
+            if pdf_file:
+                print(f"DEBUG - Ruta del archivo antes de guardar: {pdf_file}")
+                print(f"DEBUG - Ruta absoluta del archivo: {os.path.abspath(pdf_file.name) if pdf_file else 'Ninguna'}")
+                
+                self.archivo_pdf = None
+                super().save(*args, **kwargs)
+                
+                # Ahora guardamos el archivo con el ID correcto
+                self.archivo_pdf = pdf_file
+                update_fields = kwargs.get('update_fields', None)
+                if update_fields is not None:
+                    update_fields = set(update_fields) | {'archivo_pdf'}
+                    kwargs['update_fields'] = update_fields
+                
+                # Imprimir la ruta final donde se guardará el archivo
+                upload_to = self._meta.get_field('archivo_pdf').upload_to
+                if callable(upload_to):
+                    upload_path = upload_to(self, pdf_file.name)
+                else:
+                    upload_path = upload_to
+                full_path = os.path.join(settings.MEDIA_ROOT, upload_path)
+                print(f"DEBUG - Ruta final del archivo: {full_path}")
+                
+                super().save(update_fields=['archivo_pdf'])
+                return
+        
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        # Eliminar el archivo físico si existe
+        if self.archivo_pdf:
+            if os.path.isfile(self.archivo_pdf.path):
+                os.remove(self.archivo_pdf.path)
+                # Eliminar el directorio si está vacío
+                directory = os.path.dirname(self.archivo_pdf.path)
+                if os.path.exists(directory) and not os.listdir(directory):
+                    os.rmdir(directory)
+        super().delete(*args, **kwargs)

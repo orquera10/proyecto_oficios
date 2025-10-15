@@ -58,17 +58,35 @@ class OficioForm(forms.ModelForm):
         model = Oficio
         fields = [
             'tipo', 'expte', 'institucion', 'juzgado',
-            'plazo_horas', 'fecha_emision', 'caratula', 'caratula_oficio'
+            'plazo_horas', 'fecha_emision', 'caratula', 'caratula_oficio',
+            'archivo_pdf'
         ]
         widgets = {
             'fecha_emision': forms.DateTimeInput(attrs={'type': 'datetime-local'}, format='%Y-%m-%dT%H:%M'),
             'expte': forms.TextInput(attrs={'class': 'form-control'}),
             'plazo_horas': forms.NumberInput(attrs={'class': 'form-control'}),
             'juzgado': forms.Select(attrs={'class': 'form-control'}),
+            'archivo_pdf': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': '.pdf',
+            }),
         }
         labels = {
-            'juzgado': 'Agente'
+            'juzgado': 'Agente',
+            'archivo_pdf': 'Archivo PDF del Oficio'
         }
+        help_texts = {
+            'archivo_pdf': 'Sube el archivo PDF del oficio. Tamaño máximo: 10MB.'
+        }
+
+    def clean_archivo_pdf(self):
+        archivo = self.cleaned_data.get('archivo_pdf', False)
+        if archivo:
+            if archivo.size > 10 * 1024 * 1024:  # 10MB
+                raise forms.ValidationError("El archivo es demasiado grande. El tamaño máximo permitido es 10MB.")
+            if not archivo.name.lower().endswith('.pdf'):
+                raise forms.ValidationError("Solo se permiten archivos PDF.")
+        return archivo
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

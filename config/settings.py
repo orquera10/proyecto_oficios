@@ -14,7 +14,11 @@ from pathlib import Path
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
+# Ajustamos para que apunte a la carpeta del proyecto
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Imprimir la ruta base para depuración
+print(f"DEBUG - Ruta base del proyecto: {BASE_DIR}")
 
 
 # Quick-start development settings - unsuitable for production
@@ -148,3 +152,11 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Media files configuration
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Tamaño máximo de archivo para cargar (10MB)
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB en bytes
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB en bytes

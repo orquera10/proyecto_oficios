@@ -4,6 +4,8 @@ URL configuration for core project.
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -17,3 +19,7 @@ urlpatterns = [
 # Configuraciones de autenticación
 LOGIN_REDIRECT_URL = 'oficios:list'
 LOGOUT_REDIRECT_URL = 'login'  # Redirige al login después del logout
+
+# Configuración para servir archivos de medios en desarrollo
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
