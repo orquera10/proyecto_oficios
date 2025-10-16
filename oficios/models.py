@@ -151,10 +151,11 @@ class Oficio(models.Model):
     ]
     
     ESTADO_CHOICES = [
-        ('pendiente', 'Pendiente'),
-        ('en_proceso', 'En Proceso'),
-        ('completado', 'Completado'),
-        ('vencido', 'Vencido'),
+        ('cargado', 'Cargado'),
+        ('asignado', 'Asignado'),
+        ('respondido', 'Respondido'),
+        ('enviado', 'Enviado'),
+        ('devuelto', 'Devuelto'),
     ]
     
     tipo = models.CharField(
@@ -195,7 +196,7 @@ class Oficio(models.Model):
     estado = models.CharField(
         max_length=20,
         choices=ESTADO_CHOICES,
-        default='pendiente',
+        default='cargado',
         verbose_name='Estado'
     )
     plazo_horas = models.PositiveIntegerField(
@@ -300,10 +301,11 @@ class Oficio(models.Model):
     def get_estado_badge_class(self):
         """Devuelve la clase de Bootstrap para el badge de estado."""
         estado_map = {
-            'pendiente': 'secondary',
-            'en_proceso': 'info',
-            'completado': 'success',
-            'vencido': 'danger',
+            'cargado': 'secondary',      # gris claro
+            'asignado': 'warning',       # naranja
+            'respondido': 'primary',     # azul
+            'enviado': 'success',        # verde
+            'devuelto': 'violet',        # violeta (custom)
         }
         return estado_map.get(self.estado, 'light')
 

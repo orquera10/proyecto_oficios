@@ -12,10 +12,10 @@ class OficioFilter(django_filters.FilterSet):
     
     ESTADO_CHOICES = [
         ('', 'Todos'),
-        ('pendiente', 'Pendiente'),
-        ('en_proceso', 'En Proceso'),
-        ('completado', 'Completado'),
-        ('vencido', 'Vencido'),
+        ('cargado', 'Cargado'),
+        ('asignado', 'Asignado'),
+        ('respondido', 'Respondido'),
+        ('enviado', 'Enviado'),
     ]
     
     # Filtro de búsqueda general

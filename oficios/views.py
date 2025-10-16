@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.utils import timezone
 from django.forms import inlineformset_factory
 from django.http import JsonResponse
-from django.db.models import Q
+from django.db.models import Q, F
 
 from .models import (
     Oficio, Institucion, Caratula, CaratulaOficio, Juzgado,
@@ -54,7 +54,12 @@ class OficioListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         queryset = super().get_queryset()
         self.filterset = OficioFilter(self.request.GET, queryset=queryset)
-        return self.filterset.qs.select_related('institucion', 'juzgado', 'usuario')
+        # Orden por fecha de vencimiento ascendente (nulos al final), luego por emisión desc
+        return (
+            self.filterset.qs
+            .select_related('institucion', 'juzgado', 'usuario')
+            .order_by(F('fecha_vencimiento').asc(nulls_last=True), '-fecha_emision')
+        )
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

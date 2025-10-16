@@ -104,72 +104,51 @@
                 </div>
             {% endif %}
             
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="text-nowrap">N°</th>
-                            <th class="text-nowrap">Tipo</th>
-                            <th class="text-nowrap">Expediente</th>
-                            <th class="text-nowrap">Institución</th>
-                            <th class="text-nowrap">Juzgado</th>
-                            <th class="text-nowrap">Estado</th>
-                            <th class="text-nowrap">Emisión</th>
-                            <th class="text-nowrap">Vencimiento</th>
-                            <th class="text-nowrap">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for oficio in page_obj %}
-                        <tr>
-                            <td class="text-nowrap">{{ oficio.id }}</td>
-                            <td class="text-nowrap">{{ oficio.get_tipo_display }}</td>
-                            <td class="text-nowrap">{{ oficio.expte|default:"-" }}</td>
-                            <td class="text-nowrap">{{ oficio.institucion.nombre|truncatechars:20|default:"-" }}</td>
-                            <td class="text-nowrap">{{ oficio.juzgado.nombre|default:"-"|truncatechars:20 }}</td>
-                            <td class="text-nowrap">
-                                <span class="badge bg-{{ oficio.get_estado_badge_class }}">
-                                    {{ oficio.get_estado_display }}
-                                </span>
-                            </td>
-                            <td class="text-nowrap">{{ oficio.fecha_emision|date:"d/m/Y H:i" }}</td>
-                            <td class="text-nowrap">
-                                {% if oficio.fecha_vencimiento %}
-                                    {{ oficio.fecha_vencimiento|date:"d/m/Y H:i" }}
-                                    {% if oficio.estado != 'vencido' and oficio.estado != 'completado' %}
-                                        <br><small class="text-muted">
-                                            {{ oficio.fecha_vencimiento|timeuntil }}
-                                        </small>
-                                    {% endif %}
-                                {% else %}
-                                    -
-                                {% endif %}
-                            </td>
-                            <td class="text-nowrap">
+            <div class="row g-3">
+                {% for oficio in page_obj %}
+                <div class="col-12">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="d-flex align-items-center mb-1 flex-wrap">
+                                    <span class="badge bg-{{ oficio.get_estado_badge_class }} me-2">{{ oficio.get_estado_display }}</span>
+                                    <strong class="me-2">#{{ oficio.id }}</strong>
+                                    <span class="text-muted">{{ oficio.get_tipo_display }}</span>
+                                </div>
+                                <div class="text-muted small">
+                                    Expte: {{ oficio.expte|default:"-" }} · Institución: {{ oficio.institucion.nombre|default:"-" }} · Agente: {{ oficio.juzgado.nombre|default:"-" }}
+                                </div>
+                                <div class="mt-1 small">
+                                    Emisión: {{ oficio.fecha_emision|date:"d/m/Y H:i" }} · Vence:
+                                    {% if oficio.fecha_vencimiento %}
+                                        {{ oficio.fecha_vencimiento|date:"d/m/Y H:i" }}
+                                        {% if oficio.estado != 'vencido' and oficio.estado != 'completado' %}
+                                            <span class="text-muted ms-1">({{ oficio.fecha_vencimiento|timeuntil }})</span>
+                                        {% endif %}
+                                    {% else %}-{% endif %}
+                                </div>
+                            </div>
+                            <div class="ms-3">
                                 <div class="btn-group btn-group-sm" role="group">
-                                    <a href="{% url 'oficios:detail' oficio.pk %}" class="btn btn-info" 
-                                       data-bs-toggle="tooltip" title="Ver">
+                                    <a href="{% url 'oficios:detail' oficio.pk %}" class="btn btn-info" data-bs-toggle="tooltip" title="Ver">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <a href="{% url 'oficios:update' oficio.pk %}" class="btn btn-warning"
-                                       data-bs-toggle="tooltip" title="Editar">
+                                    <a href="{% url 'oficios:update' oficio.pk %}" class="btn btn-warning" data-bs-toggle="tooltip" title="Editar">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <a href="{% url 'oficios:delete' oficio.pk %}" class="btn btn-danger"
-                                       data-bs-toggle="tooltip" title="Eliminar"
-                                       onclick="return confirm('¿Está seguro que desea eliminar este oficio?')">
+                                    <a href="{% url 'oficios:delete' oficio.pk %}" class="btn btn-danger" data-bs-toggle="tooltip" title="Eliminar" onclick="return confirm('¿Está seguro que desea eliminar este oficio?')">
                                         <i class="fas fa-trash"></i>
                                     </a>
                                 </div>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="9" class="text-center">No se encontraron oficios con los filtros seleccionados</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="alert alert-warning mb-0">No se encontraron oficios con los filtros seleccionados</div>
+                </div>
+                {% endfor %}
             </div>
             
             <!-- Paginación -->
