@@ -286,6 +286,10 @@ $(document).ready(function() {
                 console.log('API niños respuesta:', response);
                 ninosDisponibles = Array.isArray(response) ? response : [];
                 actualizarTablaNinos();
+                // Si estamos en edición con IDs ya en ninosSeleccionados, refrescar resumen con datos completos
+                if (ninosSeleccionados && ninosSeleccionados.size > 0) {
+                    actualizarNinosSeleccionados();
+                }
             },
             error: function(xhr, status, error) {
                 console.error('Error al cargar los niños:', error, 'status:', status, 'response:', xhr && xhr.responseText);
@@ -472,7 +476,13 @@ $(document).ready(function() {
         if (ninosIniciales) {
             ninosSeleccionados = new Set(ninosIniciales.split(',').filter(id => id).map(Number));
             if (ninosSeleccionados.size > 0) {
+                // Cargar tabla (para checks) y también mostrar de inmediato el resumen
                 cargarNinos();
+                actualizarNinosSeleccionados();
+                // Inyectar/actualizar input oculto para que se mantengan al guardar sin reabrir modal
+                const ninosIds = Array.from(ninosSeleccionados).join(',');
+                $('input[name="ninos_seleccionados"]').remove();
+                $('<input>').attr({ type: 'hidden', name: 'ninos_seleccionados', value: ninosIds }).appendTo('form');
             }
         }
     });

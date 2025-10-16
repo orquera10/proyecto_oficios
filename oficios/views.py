@@ -163,8 +163,8 @@ class OficioUpdateView(LoginRequiredMixin, UpdateView):
             context['parte_formset'] = OficioParteFormSet(self.request.POST, instance=self.object, prefix='partes')
         else:
             context['parte_formset'] = OficioParteFormSet(instance=self.object, prefix='partes')
-            # Proveer IDs de niños seleccionados para prellenar en el front
-            context['ninos_seleccionados'] = ','.join(str(i) for i in self.object.ninos.values_list('id', flat=True))
+        # Proveer IDs de niños seleccionados para prellenar en el front (usar pk para soportar id_ninos)
+        context['ninos_seleccionados'] = ','.join(str(i) for i in self.object.ninos.values_list('pk', flat=True))
         return context
     
     def form_valid(self, form):

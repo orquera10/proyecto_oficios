@@ -264,19 +264,38 @@ class Oficio(models.Model):
         ordering = ['-fecha_emision']
 
     def save(self, *args, **kwargs):
-        # Obtener la instancia actual si existe
-        if self.pk:
-            old_instance = Oficio.objects.get(pk=self.pk)
-            # Si se modificó el plazo_horas o la fecha_emision, recalcular fecha_vencimiento
-            if (self.plazo_horas and self.fecha_emision and 
-                (self.plazo_horas != getattr(old_instance, 'plazo_horas', None) or 
-                 self.fecha_emision != getattr(old_instance, 'fecha_emision', None))):
+        """Guardar Oficio calculando fecha_vencimiento y gestionando archivo_pdf correctamente."""
+        # Calcular fecha de vencimiento según plazo_horas y fecha_emision
+        if self.plazo_horas and self.fecha_emision:
+            # Si es actualización, solo recalcular si cambió plazo o fecha_emision
+            if self.pk:
+                try:
+                    old = Oficio.objects.get(pk=self.pk)
+                except Oficio.DoesNotExist:
+                    old = None
+                if (not old or self.plazo_horas != getattr(old, 'plazo_horas', None) or self.fecha_emision != getattr(old, 'fecha_emision', None)):
+                    self.fecha_vencimiento = self.fecha_emision + timezone.timedelta(hours=self.plazo_horas)
+            else:
                 self.fecha_vencimiento = self.fecha_emision + timezone.timedelta(hours=self.plazo_horas)
-        # Para nuevos registros, establecer la fecha de vencimiento si hay plazo_horas y fecha_emision
-        elif self.plazo_horas and self.fecha_emision:
-            self.fecha_vencimiento = self.fecha_emision + timezone.timedelta(hours=self.plazo_horas)
-            
-        super().save(*args, **kwargs)
+
+        # Manejo especial de archivo_pdf para ubicarlo en carpeta con ID
+        pdf_file = getattr(self, 'archivo_pdf', None)
+        if not self.pk:
+            if pdf_file:
+                # Guardar primero sin archivo para obtener PK
+                self.archivo_pdf = None
+                super().save(*args, **kwargs)
+                # Ahora guardar el archivo asignándolo tras tener PK
+                self.archivo_pdf = pdf_file
+                super().save(update_fields=['archivo_pdf'])
+                return
+            else:
+                # No hay archivo, guardado normal
+                super().save(*args, **kwargs)
+                return
+        else:
+            # Actualización normal (con o sin cambio de archivo)
+            super().save(*args, **kwargs)
 
     def get_estado_badge_class(self):
         """Devuelve la clase de Bootstrap para el badge de estado."""
@@ -305,44 +324,7 @@ class Oficio(models.Model):
     def __str__(self):
         return f"Oficio {self.id} - {self.get_tipo_display()}"
 
-    def save(self, *args, **kwargs):
-        # Imprimir la ruta base y la ruta de medios
-        from pathlib import Path
-        base_dir = Path(__file__).resolve().parent.parent.parent
-        print(f"DEBUG - BASE_DIR: {base_dir}")
-        print(f"DEBUG - MEDIA_ROOT configurado: {os.path.join(base_dir, 'media')}")
-        
-        # Si es un nuevo oficio, guardamos primero para obtener un ID
-        if not self.pk:
-            # Guardamos el oficio sin el archivo primero
-            pdf_file = getattr(self, 'archivo_pdf', None)
-            if pdf_file:
-                print(f"DEBUG - Ruta del archivo antes de guardar: {pdf_file}")
-                print(f"DEBUG - Ruta absoluta del archivo: {os.path.abspath(pdf_file.name) if pdf_file else 'Ninguna'}")
-                
-                self.archivo_pdf = None
-                super().save(*args, **kwargs)
-                
-                # Ahora guardamos el archivo con el ID correcto
-                self.archivo_pdf = pdf_file
-                update_fields = kwargs.get('update_fields', None)
-                if update_fields is not None:
-                    update_fields = set(update_fields) | {'archivo_pdf'}
-                    kwargs['update_fields'] = update_fields
-                
-                # Imprimir la ruta final donde se guardará el archivo
-                upload_to = self._meta.get_field('archivo_pdf').upload_to
-                if callable(upload_to):
-                    upload_path = upload_to(self, pdf_file.name)
-                else:
-                    upload_path = upload_to
-                full_path = os.path.join(settings.MEDIA_ROOT, upload_path)
-                print(f"DEBUG - Ruta final del archivo: {full_path}")
-                
-                super().save(update_fields=['archivo_pdf'])
-                return
-        
-        super().save(*args, **kwargs)
+    # Nota: Se removió el segundo save duplicado que sobrescribía el cálculo de fecha_vencimiento
 
     def delete(self, *args, **kwargs):
         # Eliminar el archivo físico si existe
