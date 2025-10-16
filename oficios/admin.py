@@ -7,8 +7,8 @@ from django.contrib import messages
 from django.utils.html import format_html
 
 from .models import (
-    Institucion, Caratula, CaratulaOficio, 
-    Juzgado, Oficio
+    Institucion, Caratula, 
+    Juzgado, Oficio, CaratulaOficio
 )
 
 User = get_user_model()
@@ -76,6 +76,13 @@ class InstitucionAdmin(admin.ModelAdmin):
     list_filter = ('creado', 'actualizado')
     ordering = ('nombre',)
 
+@admin.register(CaratulaOficio)
+class CaratulaOficioAdmin(admin.ModelAdmin):
+    list_display = ('nombre', 'descripcion', 'creado', 'actualizado')
+    search_fields = ('nombre', 'descripcion')
+    list_filter = ('creado', 'actualizado')
+    ordering = ('nombre',)
+
 @admin.register(Caratula)
 class CaratulaAdmin(admin.ModelAdmin):
     list_display = ('nombre', 'creado', 'actualizado')
@@ -83,12 +90,6 @@ class CaratulaAdmin(admin.ModelAdmin):
     list_filter = ('creado', 'actualizado')
     ordering = ('nombre',)
 
-@admin.register(CaratulaOficio)
-class CaratulaOficioAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'creado', 'actualizado')
-    search_fields = ('nombre', 'nota')
-    list_filter = ('creado', 'actualizado')
-    ordering = ('nombre',)
 
 @admin.register(Juzgado)
 class JuzgadoAdmin(admin.ModelAdmin):

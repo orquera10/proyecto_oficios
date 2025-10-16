@@ -9,7 +9,7 @@ from django.http import JsonResponse
 from django.db.models import Q, F
 
 from .models import (
-    Oficio, Institucion, Caratula, CaratulaOficio, Juzgado,
+    Oficio, Institucion, Caratula, Juzgado,
     OficioNino, OficioParte, Nino
 )
 from .forms import OficioForm, OficioNinoFormSet, OficioParteFormSet

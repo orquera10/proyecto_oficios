@@ -115,9 +115,10 @@ class Caratula(models.Model):
     def __str__(self):
         return self.nombre
 
+
 class CaratulaOficio(models.Model):
     nombre = models.CharField(max_length=100, verbose_name='Nombre de la Carátula de Oficio')
-    nota = models.TextField(verbose_name='Notas', blank=True, null=True)
+    descripcion = models.TextField(verbose_name='Descripción', blank=True, null=True)
     creado = models.DateTimeField(auto_now_add=True)
     actualizado = models.DateTimeField(auto_now=True)
 
@@ -222,13 +223,11 @@ class Oficio(models.Model):
         blank=True,
         related_name='oficios'
     )
-    caratula_oficio = models.ForeignKey(
-        CaratulaOficio,
-        on_delete=models.PROTECT,
-        verbose_name='Carátula de oficio',
-        null=True,
+    caratula_oficio = models.CharField(
+        max_length=255,
+        verbose_name='Carátula de Oficio',
         blank=True,
-        related_name='oficios'
+        null=True
     )
     creado = models.DateTimeField(
         auto_now_add=True,

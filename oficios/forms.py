@@ -2,8 +2,8 @@ from django import forms
 from django.utils import timezone
 from django.forms import inlineformset_factory
 from .models import (
-    Oficio, Institucion, Caratula, CaratulaOficio, Juzgado,
-    OficioNino, OficioParte
+    Oficio, Institucion, Caratula, Juzgado,
+    OficioNino, OficioParte, CaratulaOficio
 )
 from personas.models import Nino, Parte
 
@@ -58,8 +58,8 @@ class OficioForm(forms.ModelForm):
         model = Oficio
         fields = [
             'tipo', 'expte', 'institucion', 'juzgado',
-            'plazo_horas', 'fecha_emision', 'caratula', 'caratula_oficio',
-            'archivo_pdf'
+            'plazo_horas', 'fecha_emision', 'caratula',
+            'caratula_oficio', 'archivo_pdf'
         ]
         widgets = {
             'fecha_emision': forms.DateTimeInput(attrs={'type': 'datetime-local'}, format='%Y-%m-%dT%H:%M'),
