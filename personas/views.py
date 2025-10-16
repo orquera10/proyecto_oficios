@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 from django.utils.translation import gettext_lazy as _
 from django.db.models import Q
+from .filters import NinoFilter
 from oficios.models import Oficio
 from oficios.filters import OficioFilter
 from .models import Nino, Parte
@@ -16,6 +17,16 @@ class NinoListView(ListView):
     context_object_name = 'ninos'
     paginate_by = 10
     ordering = ['apellido', 'nombre']
+
+    def get_queryset(self):
+        base_qs = super().get_queryset().order_by('apellido', 'nombre')
+        self.filterset = NinoFilter(self.request.GET, queryset=base_qs)
+        return self.filterset.qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['filter'] = getattr(self, 'filterset', NinoFilter(self.request.GET, queryset=self.get_queryset()))
+        return context
 
 class NinoCreateView(SuccessMessageMixin, CreateView):
     model = Nino
