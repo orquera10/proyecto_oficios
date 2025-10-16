@@ -54,6 +54,18 @@
                     </div>
                 </div>
                 
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="id_edad" class="form-label">Edad (años)</label>
+                            {{ form.edad }}
+                            <div class="invalid-feedback">
+                                Por favor ingrese una edad válida.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="mb-3">
                     <div class="form-group">
                         <label for="id_direccion" class="form-label">Dirección</label>
@@ -96,5 +108,28 @@
             }, false)
         })
 })()
+
+// Función para calcular la edad a partir de la fecha de nacimiento
+function calcularEdad(fechaNacimiento) {
+    const hoy = new Date();
+    const fechaNac = new Date(fechaNacimiento);
+    let edad = hoy.getFullYear() - fechaNac.getFullYear();
+    const mes = hoy.getMonth() - fechaNac.getMonth();
+    
+    if (mes < 0 || (mes === 0 && hoy.getDate() < fechaNac.getDate())) {
+        edad--;
+    }
+    
+    return edad >= 0 ? edad : 0;
+}
+
+// Escuchar cambios en el campo de fecha de nacimiento
+document.getElementById('id_fecha_nac').addEventListener('change', function() {
+    const fechaNacimiento = this.value;
+    if (fechaNacimiento) {
+        const edad = calcularEdad(fechaNacimiento);
+        document.getElementById('id_edad').value = edad;
+    }
+});
 </script>
 {% endblock %}

@@ -5,7 +5,7 @@ from .models import Nino, Parte
 class NinoForm(forms.ModelForm):
     class Meta:
         model = Nino
-        fields = ['nombre', 'apellido', 'dni', 'fecha_nac', 'direccion']
+        fields = ['nombre', 'apellido', 'dni', 'fecha_nac', 'edad', 'direccion']
         widgets = {
             'nombre': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -26,6 +26,11 @@ class NinoForm(forms.ModelForm):
                 'type': 'date',
                 'placeholder': _('Seleccione la fecha de nacimiento (opcional)')
             }),
+            'edad': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': 0,
+                'placeholder': _('Edad en años (opcional)')
+            }),
             'direccion': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 3,
@@ -37,6 +42,7 @@ class NinoForm(forms.ModelForm):
             'apellido': _('Apellido *'),
             'dni': _('DNI (opcional)'),
             'fecha_nac': _('Fecha de Nacimiento (opcional)'),
+            'edad': _('Edad (opcional)'),
             'direccion': _('Dirección (opcional)'),
         }
         
@@ -57,6 +63,7 @@ class NinoForm(forms.ModelForm):
         self.fields['apellido'].required = True
         self.fields['dni'].required = False
         self.fields['fecha_nac'].required = False
+        self.fields['edad'].required = False
         self.fields['direccion'].required = False
 
 class ParteForm(forms.ModelForm):

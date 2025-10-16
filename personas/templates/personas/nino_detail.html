@@ -22,12 +22,18 @@
                             <hr>
                             <div class="row">
                                 <div class="col-md-6">
-                                    <p><strong>DNI:</strong> {{ nino.dni }}</p>
-                                    <p><strong>Fecha de Nacimiento:</strong> {{ nino.fecha_nac|date:"d/m/Y" }}</p>
+                                    <p><strong>DNI:</strong> {{ nino.dni|default:"-" }}</p>
+                                    <p><strong>Fecha de Nacimiento:</strong> {{ nino.fecha_nac|date:"d/m/Y"|default:"-" }}</p>
                                 </div>
                                 <div class="col-md-6">
-                                    <p><strong>Dirección:</strong> {{ nino.direccion }}</p>
-                                    <p><strong>Edad:</strong> {{ nino.fecha_nac|timesince }}</p>
+                                    <p><strong>Dirección:</strong> {{ nino.direccion|default:"-" }}</p>
+                                    <p><strong>Edad:</strong> 
+                                        {% if nino.edad_calculada is not None %}
+                                            {{ nino.edad_calculada }} años
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </p>
                                 </div>
                             </div>
                         </div>

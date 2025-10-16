@@ -171,7 +171,7 @@
                             <tr>
                                 <td>{{ relacion.nino.nombre }} {{ relacion.nino.apellido }}</td>
                                 <td>{{ relacion.nino.fecha_nac|date:"d/m/Y"|default:"-" }}</td>
-                                <td>{% if relacion.nino.fecha_nac %}{{ relacion.nino.fecha_nac|timesince }}{% else %}-{% endif %}</td>
+                                <td>{% if relacion.nino.edad_calculada is not None %}{{ relacion.nino.edad_calculada }} años{% else %}-{% endif %}</td>
                                 <td>{{ relacion.nino.dni|default:"-" }}</td>
                                 <td>{{ relacion.nino.direccion|default:"-"|truncatechars:30 }}</td>
                                 <td>{{ relacion.observaciones|default:"-" }}</td>
