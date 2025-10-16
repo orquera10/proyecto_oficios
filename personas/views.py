@@ -55,7 +55,7 @@ class NinoDetailView(DetailView):
         
         # Obtener los oficios relacionados con el niño
         oficios = self.object.oficios.select_related(
-            'institucion', 'juzgado', 'caratula', 'caratula_oficio'
+            'institucion', 'juzgado', 'caratula'
         ).order_by('-fecha_emision')
         
         # Aplicar filtros
