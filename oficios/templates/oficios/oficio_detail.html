@@ -113,40 +113,6 @@
         </div>
     </div>
 
-    <!-- Sección de Documento Adjunto -->
-    <div class="card mt-4">
-        <div class="card-header bg-secondary text-white">
-            <h4 class="mb-0">Documento Adjunto</h4>
-        </div>
-        <div class="card-body">
-            {% if oficio.archivo_pdf %}
-                <div class="d-flex flex-column">
-                    <div class="mb-3">
-                        <a href="{{ oficio.archivo_pdf.url }}" 
-                           target="_blank" 
-                           class="btn btn-primary">
-                            <i class="fas fa-file-pdf me-2"></i>Ver Documento PDF
-                        </a>
-                        <a href="{{ oficio.archivo_pdf.url }}" 
-                           download
-                           class="btn btn-outline-secondary ms-2">
-                            <i class="fas fa-download me-2"></i>Descargar
-                        </a>
-                    </div>
-                    <div class="text-muted small">
-                        <i class="fas fa-info-circle me-1"></i>
-                        {{ oficio.archivo_pdf.name|slice:"-50:" }}
-                    </div>
-                </div>
-            {% else %}
-                <div class="alert alert-info mb-0">
-                    <i class="fas fa-info-circle me-2"></i>
-                    No hay ningún documento adjunto a este oficio.
-                </div>
-            {% endif %}
-        </div>
-    </div>
-
     <!-- Sección de Niños Relacionados -->
     <div class="card mt-4">
         <div class="card-header bg-info text-white">
@@ -239,6 +205,39 @@
                onclick="return confirm('¿Está seguro que desea eliminar este oficio?')">
                 <i class="fas fa-trash me-1"></i> Eliminar
             </a>
+        </div>
+    </div>
+    <!-- Sección de Documento Adjunto -->
+    <div class="card mt-4">
+        <div class="card-header bg-secondary text-white">
+            <h4 class="mb-0">Documento Adjunto</h4>
+        </div>
+        <div class="card-body">
+            {% if oficio.archivo_pdf %}
+                <div class="d-flex flex-column">
+                    <div class="mb-3">
+                        <a href="{{ oficio.archivo_pdf.url }}" 
+                           target="_blank" 
+                           class="btn btn-primary">
+                            <i class="fas fa-file-pdf me-2"></i>Ver Documento PDF
+                        </a>
+                        <a href="{{ oficio.archivo_pdf.url }}" 
+                           download
+                           class="btn btn-outline-secondary ms-2">
+                            <i class="fas fa-download me-2"></i>Descargar
+                        </a>
+                    </div>
+                    <div class="text-muted small">
+                        <i class="fas fa-info-circle me-1"></i>
+                        {{ oficio.archivo_pdf.name|slice:"-50:" }}
+                    </div>
+                </div>
+            {% else %}
+                <div class="alert alert-info mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    No hay ningún documento adjunto a este oficio.
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>
