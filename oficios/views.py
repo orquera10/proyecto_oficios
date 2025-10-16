@@ -68,6 +68,28 @@ class OficioListView(LoginRequiredMixin, ListView):
         return context
 
 
+class OficioEstadoListView(LoginRequiredMixin, ListView):
+    model = Oficio
+    template_name = 'oficios/oficio_list.html'
+    context_object_name = 'oficios'
+    paginate_by = 20
+
+    def get_queryset(self):
+        estado = self.kwargs.get('estado')
+        base_qs = Oficio.objects.select_related('institucion', 'juzgado', 'usuario').filter(estado=estado)
+        # Aplicar filtros enviados por GET sobre el queryset ya filtrado por estado
+        self.filterset = OficioFilter(self.request.GET, queryset=base_qs)
+        return self.filterset.qs.order_by(F('fecha_vencimiento').asc(nulls_last=True), '-fecha_emision')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['now'] = timezone.now()
+        # Reusar el mismo formulario de filtros, mostrando el filterset aplicado
+        estado = self.kwargs.get('estado')
+        context['filter'] = getattr(self, 'filterset', OficioFilter(self.request.GET, queryset=self.get_queryset()))
+        context['estado_actual'] = estado
+        return context
+
 class OficioCreateView(LoginRequiredMixin, CreateView):
     model = Oficio
     form_class = OficioForm

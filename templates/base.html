@@ -41,6 +41,32 @@
                                 </a>
                             </li>
                             <li><hr class="dropdown-divider"></li>
+                            <li class="dropdown-header">Por estado</li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'oficios:list_by_estado' 'cargado' %}">
+                                    <span class="badge bg-secondary me-2">Cargado</span> Cargados
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'oficios:list_by_estado' 'asignado' %}">
+                                    <span class="badge bg-warning text-dark me-2">Asignado</span> Asignados
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'oficios:list_by_estado' 'respondido' %}">
+                                    <span class="badge bg-primary me-2">Respondido</span> Respondidos
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'oficios:list_by_estado' 'enviado' %}">
+                                    <span class="badge bg-success me-2">Enviado</span> Enviados
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'oficios:list_by_estado' 'devuelto' %}">
+                                    <span class="badge bg-violet me-2">Devuelto</span> Devueltos
+                                </a>
+                            </li>
                             <li>
                                 <a class="dropdown-item" href="#">
                                     <i class="fas fa-search me-2"></i>Buscar Oficios
