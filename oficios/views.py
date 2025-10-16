@@ -74,90 +74,53 @@ class OficioCreateView(LoginRequiredMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if self.request.POST:
-            context['nino_formset'] = OficioNinoFormSet(self.request.POST, prefix='nino')
-            context['parte_formset'] = OficioParteFormSet(self.request.POST, prefix='parte')
+            context['parte_formset'] = OficioParteFormSet(self.request.POST, prefix='partes')
         else:
-            context['nino_formset'] = OficioNinoFormSet(prefix='nino')
-            context['parte_formset'] = OficioParteFormSet(prefix='parte')
+            context['parte_formset'] = OficioParteFormSet(prefix='partes')
         return context
     
     def form_valid(self, form):
         context = self.get_context_data()
-        nino_formset = context['nino_formset']
-        parte_formset = context['parte_formset']
-        
-        # Validar el formulario principal
+        parte_formset_post = context['parte_formset']
+
+        # Validar formulario principal por las dudas
         if not form.is_valid():
             return self.form_invalid(form)
-            
-        # Validar los formsets
-        nino_formset_valid = nino_formset.is_valid()
-        parte_formset_valid = parte_formset.is_valid()
-        
-        if nino_formset_valid and parte_formset_valid:
-            # Guardar el oficio primero
-            self.object = form.save(commit=False)
-            self.object.usuario = self.request.user
-            self.object.save()
-            
-            # Guardar el formset de niños
-            for nino_form in nino_formset:
-                # Solo procesar formularios con datos y no marcados para borrar
-                if (nino_form.cleaned_data and 
-                    not nino_form.cleaned_data.get('DELETE', False) and 
-                    nino_form.cleaned_data.get('nino')):
-                    
-                    # Guardar la relación oficio-niño
-                    oficio_nino = nino_form.save(commit=False)
-                    oficio_nino.oficio = self.object
-                    oficio_nino.save()
-            
-            # Eliminar relaciones marcadas para borrar
-            for nino_form in nino_formset.deleted_forms:
-                if nino_form.instance.pk:
-                    nino_form.instance.delete()
-            
-            # Guardar el formset de partes
-            for parte_form in parte_formset:
-                if (parte_form.cleaned_data and 
-                    not parte_form.cleaned_data.get('DELETE', False) and 
-                    parte_form.cleaned_data.get('parte')):
-                    
-                    # Guardar la relación oficio-parte
-                    oficio_parte = parte_form.save(commit=False)
-                    oficio_parte.oficio = self.object
-                    oficio_parte.save()
-            
-            # Eliminar relaciones de partes marcadas para borrar
-            for parte_form in parte_formset.deleted_forms:
-                if parte_form.instance.pk:
-                    parte_form.instance.delete()
-            
-            # Eliminar los formsets marcados para eliminar
-            for form in nino_formset.deleted_forms:
-                if form.instance and form.instance.pk:
-                    form.instance.delete()
-                    
-            for form in parte_formset.deleted_forms:
-                if form.instance and form.instance.pk:
-                    form.instance.delete()
-            
+
+        # Guardar el oficio primero para tener instancia
+        self.object = form.save(commit=False)
+        self.object.usuario = self.request.user
+        self.object.save()
+
+        # Re-instanciar formset con la instancia recién creada
+        parte_formset = OficioParteFormSet(self.request.POST, instance=self.object, prefix='partes')
+
+        if parte_formset.is_valid():
+            parte_formset.save()
+
+            # Manejar niños seleccionados desde el campo oculto
+            ninos_ids_str = self.request.POST.get('ninos_seleccionados', '').strip()
+            if ninos_ids_str:
+                try:
+                    ninos_ids = [int(x) for x in ninos_ids_str.split(',') if x]
+                except ValueError:
+                    ninos_ids = []
+                for nino_id in ninos_ids:
+                    try:
+                        nino_obj = Nino.objects.get(pk=nino_id)
+                        OficioNino.objects.get_or_create(oficio=self.object, nino=nino_obj)
+                    except Nino.DoesNotExist:
+                        continue
+
             messages.success(self.request, 'El oficio se ha creado exitosamente.')
             return super().form_valid(form)
         else:
-            # Si hay errores, mostrarlos
-            if not nino_formset_valid:
-                for i, error in enumerate(nino_formset.errors):
-                    if error:
-                        for field, errors in error.items():
-                            for error_msg in errors:
-                                messages.error(self.request, f'Error en niño {i+1} - {field}: {error_msg}')
-            if not parte_formset_valid:
-                for i, error in enumerate(parte_formset.errors):
-                    if error:
-                        for field, errors in error.items():
-                            for error_msg in errors:
-                                messages.error(self.request, f'Error en parte {i+1} - {field}: {error_msg}')
+            # Mostrar errores de partes
+            for i, error in enumerate(parte_formset.errors):
+                if error:
+                    for field, errors in error.items():
+                        for error_msg in errors:
+                            messages.error(self.request, f'Error en parte {i+1} - {field}: {error_msg}')
             return self.form_invalid(form)
 
 
@@ -197,22 +160,41 @@ class OficioUpdateView(LoginRequiredMixin, UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if self.request.POST:
-            context['nino_formset'] = OficioNinoFormSet(self.request.POST, instance=self.object, prefix='nino')
-            context['parte_formset'] = OficioParteFormSet(self.request.POST, instance=self.object, prefix='parte')
+            context['parte_formset'] = OficioParteFormSet(self.request.POST, instance=self.object, prefix='partes')
         else:
-            context['nino_formset'] = OficioNinoFormSet(instance=self.object, prefix='nino')
-            context['parte_formset'] = OficioParteFormSet(instance=self.object, prefix='parte')
+            context['parte_formset'] = OficioParteFormSet(instance=self.object, prefix='partes')
+            # Proveer IDs de niños seleccionados para prellenar en el front
+            context['ninos_seleccionados'] = ','.join(str(i) for i in self.object.ninos.values_list('id', flat=True))
         return context
     
     def form_valid(self, form):
         context = self.get_context_data()
-        nino_formset = context['nino_formset']
         parte_formset = context['parte_formset']
-        
-        if nino_formset.is_valid() and parte_formset.is_valid():
+
+        if parte_formset.is_valid():
             self.object = form.save()
-            nino_formset.save()
+
+            # Actualizar niños desde el campo oculto
+            ninos_ids_str = self.request.POST.get('ninos_seleccionados', '').strip()
+            nuevos_ids = []
+            if ninos_ids_str:
+                try:
+                    nuevos_ids = [int(x) for x in ninos_ids_str.split(',') if x]
+                except ValueError:
+                    nuevos_ids = []
+
+            # Sincronizar relaciones OficioNino
+            OficioNino.objects.filter(oficio=self.object).exclude(nino_id__in=nuevos_ids).delete()
+            for nino_id in nuevos_ids:
+                try:
+                    nino_obj = Nino.objects.get(pk=nino_id)
+                    OficioNino.objects.get_or_create(oficio=self.object, nino=nino_obj)
+                except Nino.DoesNotExist:
+                    continue
+
+            # Guardar partes
             parte_formset.save()
+
             messages.success(self.request, 'El oficio se ha actualizado exitosamente.')
             return super().form_valid(form)
         else:

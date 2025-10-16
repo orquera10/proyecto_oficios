@@ -2,6 +2,7 @@ from django.urls import path
 from django.shortcuts import render
 from django.urls import reverse
 from . import views
+from .api_views import NinoAPIView, ParteAPIView
 
 def personas_home(request):
     context = {
@@ -20,10 +21,13 @@ urlpatterns = [
     path('ninos/nuevo/', views.NinoCreateView.as_view(), name='nino_create'),
     path('ninos/editar/<int:pk>/', views.NinoUpdateView.as_view(), name='nino_update'),
     path('ninos/eliminar/<int:pk>/', views.NinoDeleteView.as_view(), name='nino_delete'),
+    path('api/ninos/', NinoAPIView.as_view(), name='api_ninos'),
     
     # URLs para Partes
     path('partes/', views.ParteListView.as_view(), name='parte_list'),
     path('partes/nuevo/', views.ParteCreateView.as_view(), name='parte_create'),
     path('partes/editar/<int:pk>/', views.ParteUpdateView.as_view(), name='parte_update'),
     path('partes/eliminar/<int:pk>/', views.ParteDeleteView.as_view(), name='parte_delete'),
+    path('api/partes/', ParteAPIView.as_view(), name='api_partes'),
+    
 ]

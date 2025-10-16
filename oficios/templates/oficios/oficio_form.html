@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+    {% extends 'base.html' %}
 {% load crispy_forms_tags %}
 
 {% block content %}
@@ -38,37 +38,54 @@
                                 <h5 class="mb-0">Niños relacionados</h5>
                             </div>
                             <div class="card-body">
-                                {{ nino_formset.management_form }}
-                                <div id="nino-formset">
-                                    {% for form in nino_formset %}
-                                    <div class="nino-form row mb-3 border-bottom pb-3">
-                                        {% for field in form.visible_fields %}
-                                            <div class="col-md-4">
-                                                {{ field|as_crispy_field }}
-                                            </div>
-                                        {% endfor %}
-                                        {% if form.DELETE %}
-                                            {% if form.instance.pk %}
-                                            <div class="col-md-2 d-flex align-items-end">
-                                                <div class="form-check form-switch">
-                                                    {{ form.DELETE }}
-                                                    <label class="form-check-label ms-2" for="{{ form.DELETE.id_for_label }}">
-                                                        Eliminar
-                                                    </label>
-                                                    {{ form.id }}
-                                                </div>
-                                            </div>
-                                            {% else %}
-                                                {{ form.DELETE.as_hidden }}
-                                                {{ form.id }}
-                                            {% endif %}
-                                        {% endif %}
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                                <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="add-nino">
+                                <button type="button" class="btn btn-outline-primary" id="add-nino" data-bs-toggle="modal" data-bs-target="#ninosModal">
                                     <i class="fas fa-plus"></i> Agregar Niño
                                 </button>
+                                <!-- Contenedor para los niños seleccionados -->
+                                <div id="ninos-seleccionados" class="mt-3">
+                                    <!-- Aquí se agregarán los niños seleccionados -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modal para seleccionar niños -->
+                        <div class="modal fade" id="ninosModal" tabindex="-1" aria-labelledby="ninosModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="ninosModalLabel">Seleccionar Niño</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" id="buscarNino" placeholder="Buscar por nombre o apellido...">
+                                                <button class="btn btn-outline-primary" type="button" id="btnBuscarNino">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="table-responsive">
+                                            <table class="table table-hover" id="tablaNinos">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Seleccionar</th>
+                                                        <th>Apellido</th>
+                                                        <th>Nombre</th>
+                                                        <th>DNI</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <!-- Los niños se cargarán aquí mediante JavaScript -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                        <button type="button" class="btn btn-primary" id="confirmarNinos">Confirmar selección</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -78,35 +95,56 @@
                                 <h5 class="mb-0">Partes relacionadas</h5>
                             </div>
                             <div class="card-body">
-                                {{ parte_formset.management_form }}
-                                <div id="parte-formset">
+                                <div class="d-none" aria-hidden="true">
+                                    {{ parte_formset.management_form }}
+                                </div>
+                                {% if parte_formset.non_form_errors %}
+                                <div class="alert alert-danger">
+                                    <strong>Errores en Partes:</strong>
+                                    <ul class="mb-0">
+                                        {% for e in parte_formset.non_form_errors %}
+                                        <li>{{ e }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                {% endif %}
+                                {% for subform in parte_formset.forms %}
+                                    {% if subform.errors %}
+                                    <div class="alert alert-warning">
+                                        <strong>Error en una parte:</strong>
+                                        <ul class="mb-0">
+                                        {% for field, errs in subform.errors.items %}
+                                            {% for err in errs %}
+                                            <li>{{ field }}: {{ err }}</li>
+                                            {% endfor %}
+                                        {% endfor %}
+                                        </ul>
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+                                <!-- Resumen de Partes seleccionadas -->
+                                <div id="partes-seleccionadas" class="mb-3">
+                                    <!-- Lista de partes seleccionadas se renderiza por JS -->
+                                </div>
+                                <div id="parte-formset" class="d-none" aria-hidden="true">
                                     {% for form in parte_formset %}
                                     <div class="parte-form row mb-3 border-bottom pb-3">
                                         {% for field in form.visible_fields %}
-                                            <div class="col-md-4">
-                                                {{ field|as_crispy_field }}
+                                            <div class="col-md-4 d-none">
+                                                {{ field }}
                                             </div>
                                         {% endfor %}
+                                        {# Renderizar todos los campos ocultos del subform, incluyendo 'id' #}
+                                        {% for hidden in form.hidden_fields %}
+                                            {{ hidden }}
+                                        {% endfor %}
                                         {% if form.DELETE %}
-                                            {% if form.instance.pk %}
-                                            <div class="col-md-2 d-flex align-items-end">
-                                                <div class="form-check form-switch">
-                                                    {{ form.DELETE }}
-                                                    <label class="form-check-label ms-2" for="{{ form.DELETE.id_for_label }}">
-                                                        Eliminar
-                                                    </label>
-                                                    {{ form.id }}
-                                                </div>
-                                            </div>
-                                            {% else %}
-                                                {{ form.DELETE.as_hidden }}
-                                                {{ form.id }}
-                                            {% endif %}
+                                            {{ form.DELETE.as_hidden }}
                                         {% endif %}
                                     </div>
                                     {% endfor %}
                                 </div>
-                                <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="add-parte">
+                                <button type="button" class="btn btn-outline-primary" id="add-parte" data-bs-toggle="modal" data-bs-target="#partesModal">
                                     <i class="fas fa-plus"></i> Agregar Parte
                                 </button>
                             </div>
@@ -134,6 +172,48 @@
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
 
+<!-- Modal para seleccionar partes -->
+<div class="modal fade" id="partesModal" tabindex="-1" aria-labelledby="partesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="partesModalLabel">Seleccionar Parte</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="buscarParte" placeholder="Buscar por nombre, apellido o DNI...">
+                        <button class="btn btn-outline-primary" type="button" id="btnBuscarParte">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover" id="tablaPartes">
+                        <thead>
+                            <tr>
+                                <th>Sel</th>
+                                <th>Apellido</th>
+                                <th>Nombre</th>
+                                <th>DNI</th>
+                                <th>Vínculo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Partes por JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" id="confirmarPartes">Confirmar selección</button>
+            </div>
+        </div>
+    </div>
+    </div>
+
 <script>
 $(document).ready(function() {
     // Inicializar select2 para los selects
@@ -154,18 +234,18 @@ $(document).ready(function() {
         document.querySelector('.select2-search__field').focus();
     });
 
-    // Función para actualizar los totales de los formularios
-    function updateFormsetCounts() {
-        $('#id_ninos-TOTAL_FORMS').val($('.nino-form').length);
+    // Función para actualizar el contador de formularios de partes
+    function updatePartesFormsetCount() {
+        // IMPORTANTe: TOTAL_FORMS debe reflejar la cantidad total de formularios presentes en el DOM
+        // (incluyendo los ocultos y/o marcados para eliminar). No debemos descontar los eliminados.
         $('#id_partes-TOTAL_FORMS').val($('.parte-form').length);
     }
 
-    // Manejar clic en checkboxes de eliminar
+    // Manejar clic en checkboxes de eliminar partes
     function setupDeleteHandlers() {
         $('input[id$="-DELETE"]').off('change').on('change', function() {
-            const formRow = $(this).closest('.nino-form, .parte-form');
-            const formType = formRow.hasClass('nino-form') ? 'nino' : 'parte';
-            const visibleForms = $('.' + formType + '-form:visible').length;
+            const formRow = $(this).closest('.parte-form');
+            const visibleForms = $('.parte-form:visible').length;
             
             // Si solo queda un formulario visible, no permitir eliminarlo
             if (visibleForms <= 1 && $(this).is(':checked')) {
@@ -183,160 +263,545 @@ $(document).ready(function() {
                 formRow.slideDown(200);
                 formRow.show();
             }
-        });
-    }
-
-    // Función para manejar la adición de nuevos formularios
-    function setupNewForm(formRow, formType) {
-        // Configurar manejador de eliminación para el nuevo formulario
-        formRow.find('input[id$="-DELETE"]').on('change', function() {
-            if ($(this).is(':checked')) {
-                formRow.slideUp(200, function() {
-                    formRow.hide();
-                });
-            } else {
-                formRow.slideDown(200);
-                formRow.show();
-            }
+            
+            updatePartesFormsetCount();
+            actualizarPartesResumen();
         });
     }
 
     // Configurar manejadores iniciales
     setupDeleteHandlers();
 
-    // Agregar formulario de niño
-    $('#add-nino').on('click', function(e) {
-        e.preventDefault();
-        
-        // Obtener el número total de formularios actual
-        const totalForms = $('#id_ninos-TOTAL_FORMS');
-        const formIdx = parseInt(totalForms.val());
-        
-        // Clonar el primer formulario
-        const newForm = $('.nino-form').first().clone();
-        
-        // Limpiar valores del formulario clonado
-        newForm.find('input, select').val('');
-        newForm.find('input[type="checkbox"]').prop('checked', false);
-        
-        // Actualizar los IDs y names de los campos
-        newForm.find('[id]').each(function() {
-            const $this = $(this);
-            $this.attr('id', $this.attr('id').replace(/ninos-\d+-/g, 'ninos-' + formIdx + '-'));
+    // Variables globales
+    let ninosDisponibles = [];
+    let ninosSeleccionados = new Set();
+
+    // Función para cargar la lista de niños
+    function cargarNinos(busqueda = '') {
+        $.ajax({
+            url: '{% url "personas:api_ninos" %}',
+            method: 'GET',
+            data: { 'search': busqueda },
+            success: function(response) {
+                console.log('API niños respuesta:', response);
+                ninosDisponibles = Array.isArray(response) ? response : [];
+                actualizarTablaNinos();
+            },
+            error: function(xhr, status, error) {
+                console.error('Error al cargar los niños:', error, 'status:', status, 'response:', xhr && xhr.responseText);
+                // Mostrar mensaje de error en la interfaz
+                const tbody = $('#tablaNinos tbody');
+                tbody.html(`
+                    <tr>
+                        <td colspan="4" class="text-center text-danger">
+                            Error al cargar los niños. Por favor, intente nuevamente.
+                        </td>
+                    </tr>
+                `);
+            }
         });
-        
-        newForm.find('[name]').each(function() {
-            const $this = $(this);
-            $this.attr('name', $this.attr('name').replace(/ninos-\d+-/g, 'ninos-' + formIdx + '-'));
-        });
-        
-        // Actualizar el ID del formulario
-        newForm.attr('id', `nino-${formIdx}`);
-        
-        // Asegurarse de que el checkbox de eliminar esté desmarcado
-        const deleteCheckbox = newForm.find('input[type="checkbox"][id$="-DELETE"]');
-        deleteCheckbox.prop('checked', false);
-        
-        // Mostrar el contenedor del checkbox de eliminar
-        deleteCheckbox.closest('.form-check').show();
-        
-        // Agregar el nuevo formulario al contenedor
-        $('#nino-formset').append(newForm);
-        
-        // Incrementar el contador de formularios
-        totalForms.val(formIdx + 1);
-        
-        // Limpiar cualquier instancia de select2 existente en el nuevo formulario
-        newForm.find('.select2-container').remove();
-        
-        // Quitar la clase select2-hidden-accessible para evitar problemas de visualización
-        newForm.find('select').removeClass('select2-hidden-accessible');
-        newForm.find('select').next('.select2-container').remove();
-        
-        // Inicializar select2 para el nuevo select
-        const selectElement = newForm.find('select');
-        if (selectElement.length) {
-            select2Instance = selectElement.select2({
-                theme: 'bootstrap-5',
-                width: '100%',
-                placeholder: 'Seleccione un niño',
-                allowClear: true
-            });
+    }
+
+    // Función para actualizar la tabla de niños
+    function actualizarTablaNinos() {
+        const tbody = $('#tablaNinos tbody');
+        tbody.empty();
+
+        if (ninosDisponibles.length === 0) {
+            tbody.html(`
+                <tr>
+                    <td colspan="4" class="text-center">
+                        No se encontraron niños que coincidan con la búsqueda.
+                    </td>
+                </tr>
+            `);
+            return;
+        }
+
+        ninosDisponibles.forEach(nino => {
+            const tr = $('<tr>');
+            const estaSeleccionado = ninosSeleccionados.has(nino.id);
             
-            // Forzar la actualización del select2
-            selectElement.trigger('change.select2');
+            tr.append(`
+                <td class="align-middle">
+                    <input type="checkbox" class="form-check-input nino-checkbox" 
+                           value="${nino.id}" ${estaSeleccionado ? 'checked' : ''}>
+                </td>
+                <td class="align-middle">${nino.apellido || 'N/A'}</td>
+                <td class="align-middle">${nino.nombre || 'N/A'}</td>
+                <td class="align-middle">${nino.dni || 'N/A'}</td>
+            `);
+            
+            tbody.append(tr);
+        });
+    }
+
+    // Función para actualizar la lista de niños seleccionados
+    function actualizarNinosSeleccionados() {
+        const container = $('#ninos-seleccionados');
+        container.empty();
+        
+        if (ninosSeleccionados.size === 0) {
+            container.append('<div class="alert alert-info mb-0">No hay niños seleccionados</div>');
+            return;
         }
         
-        // Configurar manejador de eliminación
-        setupDeleteHandlers();
+        const lista = $('<div class="list-group">');
+        
+        // Si estamos en modo edición, los niños disponibles podrían no estar cargados
+        if (ninosDisponibles.length === 0) {
+            // Mostrar solo los IDs si no tenemos los datos completos
+            Array.from(ninosSeleccionados).forEach(id => {
+                const item = $(`
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        ID: ${id}
+                        <button type="button" class="btn btn-sm btn-outline-danger btn-quitar-nino" 
+                                data-nino-id="${id}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `);
+                lista.append(item);
+            });
+        } else {
+            // Mostrar la información completa de los niños
+            ninosDisponibles
+                .filter(nino => ninosSeleccionados.has(nino.id))
+                .forEach(nino => {
+                    const item = $(`
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            ${nino.apellido || ''}, ${nino.nombre || ''} ${nino.dni ? '(DNI: ' + nino.dni + ')' : ''}
+                            <button type="button" class="btn btn-sm btn-outline-danger btn-quitar-nino" 
+                                    data-nino-id="${nino.id}">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    `);
+                    lista.append(item);
+                });
+        }
+        
+        container.append(lista);
+        
+        // Agregar manejador de eventos para los botones de quitar
+        $('.btn-quitar-nino').on('click', function() {
+            const ninoId = parseInt($(this).data('nino-id'));
+            ninosSeleccionados.delete(ninoId);
+            actualizarNinosSeleccionados();
+            actualizarTablaNinos();
+        });
+    }
+
+    // Manejar búsqueda de niños con debounce (delegado) para evitar múltiples peticiones
+    let searchTimeout;
+    $(document).on('input', '#buscarNino', function() {
+        clearTimeout(searchTimeout);
+        const busqueda = $(this).val();
+        console.log('buscarNino input:', busqueda);
+        searchTimeout = setTimeout(() => {
+            cargarNinos(busqueda);
+        }, 300);
     });
 
-    // Agregar formulario de parte
-    $('#add-parte').on('click', function(e) {
-        e.preventDefault();
-        
-        // Obtener el número total de formularios actual
-        const totalForms = $('#id_partes-TOTAL_FORMS');
-        const formIdx = parseInt(totalForms.val());
-        
-        // Clonar el primer formulario
-        const newForm = $('.parte-form').first().clone();
-        
-        // Limpiar valores del formulario clonado
-        newForm.find('input, select').val('');
-        newForm.find('input[type="checkbox"]').prop('checked', false);
-        
-        // Actualizar los IDs y names de los campos
-        newForm.find('[id]').each(function() {
-            const $this = $(this);
-            $this.attr('id', $this.attr('id').replace(/partes-\d+-/g, 'partes-' + formIdx + '-'));
-        });
-        
-        newForm.find('[name]').each(function() {
-            const $this = $(this);
-            $this.attr('name', $this.attr('name').replace(/partes-\d+-/g, 'partes-' + formIdx + '-'));
-        });
-        
-        // Actualizar el ID del formulario
-        newForm.attr('id', `parte-${formIdx}`);
-        
-        // Asegurarse de que el checkbox de eliminar esté desmarcado
-        const deleteCheckbox = newForm.find('input[type="checkbox"][id$="-DELETE"]');
-        deleteCheckbox.prop('checked', false);
-        
-        // Mostrar el contenedor del checkbox de eliminar
-        deleteCheckbox.closest('.form-check').show();
-        
-        // Agregar el nuevo formulario al contenedor
-        $('#parte-formset').append(newForm);
-        
-        // Incrementar el contador de formularios
-        totalForms.val(formIdx + 1);
-        
-        // Limpiar cualquier instancia de select2 existente en el nuevo formulario
-        newForm.find('.select2-container').remove();
-        
-        // Quitar la clase select2-hidden-accessible para evitar problemas de visualización
-        newForm.find('select').removeClass('select2-hidden-accessible');
-        newForm.find('select').next('.select2-container').remove();
-        
-        // Inicializar select2 para el nuevo select
-        const selectElement = newForm.find('select');
-        if (selectElement.length) {
-            select2Instance = selectElement.select2({
-                theme: 'bootstrap-5',
-                width: '100%',
-                placeholder: 'Seleccione una parte',
-                allowClear: true
-            });
-            
-            // Forzar la actualización del select2
-            selectElement.trigger('change.select2');
-        }
-        
-        // Configurar manejador de eliminación
-        setupDeleteHandlers();
+    // Fallback adicional por si algunos navegadores no disparan input como esperamos
+    $(document).on('keyup', '#buscarNino', function() {
+        clearTimeout(searchTimeout);
+        const busqueda = $(this).val();
+        console.log('buscarNino keyup:', busqueda);
+        searchTimeout = setTimeout(() => {
+            cargarNinos(busqueda);
+        }, 300);
     });
+
+    // Botón de búsqueda explícita
+    $(document).on('click', '#btnBuscarNino', function() {
+        const busqueda = $('#buscarNino').val() || '';
+        console.log('btnBuscarNino click:', busqueda);
+        cargarNinos(busqueda);
+    });
+
+    // Presionar Enter en el campo de búsqueda ejecuta la búsqueda
+    $(document).on('keypress', '#buscarNino', function(e) {
+        if (e.which === 13) { // Enter
+            e.preventDefault();
+            $('#btnBuscarNino').trigger('click');
+        }
+    });
+
+    // Cargar niños al abrir el modal y enfocar el cuadro de búsqueda
+    $('#ninosModal').on('shown.bs.modal', function () {
+        const busqueda = $('#buscarNino').val() || '';
+        cargarNinos(busqueda);
+        $('#buscarNino').trigger('focus');
+    });
+
+    // Manejar clic en los checkboxes de la tabla
+    $(document).on('change', '.nino-checkbox', function() {
+        const ninoId = parseInt($(this).val());
+        
+        if ($(this).is(':checked')) {
+            ninosSeleccionados.add(ninoId);
+        } else {
+            ninosSeleccionados.delete(ninoId);
+        }
+    });
+
+    // Manejar clic en el botón de confirmar selección
+    $('#confirmarNinos').on('click', function() {
+        // Cerrar el modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('ninosModal'));
+        modal.hide();
+        
+        // Actualizar la lista de niños seleccionados
+        actualizarNinosSeleccionados();
+        
+        // Actualizar el campo oculto con los IDs de los niños
+        const ninosIds = Array.from(ninosSeleccionados).join(',');
+        $('input[name="ninos_seleccionados"]').remove();
+        $('<input>').attr({
+            type: 'hidden',
+            name: 'ninos_seleccionados',
+            value: ninosIds
+        }).appendTo('form');
+    });
+
+    // Cargar los niños seleccionados al cargar la página (para edición)
+    $(document).ready(function() {
+        // Si hay niños ya seleccionados (en caso de edición), cargarlos
+        const ninosIniciales = '{{ ninos_seleccionados|default:'' }}';
+        if (ninosIniciales) {
+            ninosSeleccionados = new Set(ninosIniciales.split(',').filter(id => id).map(Number));
+            if (ninosSeleccionados.size > 0) {
+                cargarNinos();
+            }
+        }
+    });
+
+    // Gestión de Partes vía Modal
+    let partesDisponibles = [];
+    let partesSeleccionadas = new Map(); // id -> vinculo
+    let partesInfo = new Map(); // id -> {apellido, nombre, dni}
+
+    function cargarPartes(busqueda = '') {
+        $.ajax({
+            url: '{% url "personas:api_partes" %}',
+            method: 'GET',
+            data: { 'search': busqueda },
+            success: function(response) {
+                partesDisponibles = Array.isArray(response) ? response : [];
+                // Actualizar mapa de info
+                partesInfo.clear();
+                partesDisponibles.forEach(p => {
+                    partesInfo.set(p.id, { apellido: p.apellido || '', nombre: p.nombre || '', dni: p.dni || '' });
+                });
+                actualizarTablaPartes();
+            },
+            error: function(xhr, status, error) {
+                const tbody = $('#tablaPartes tbody');
+                tbody.html(`
+                    <tr>
+                        <td colspan="5" class="text-center text-danger">
+                            Error al cargar las partes. Intente nuevamente.
+                        </td>
+                    </tr>
+                `);
+            }
+        });
+    }
+
+    function actualizarTablaPartes() {
+        const tbody = $('#tablaPartes tbody');
+        tbody.empty();
+
+        if (partesDisponibles.length === 0) {
+            tbody.html(`
+                <tr>
+                    <td colspan="5" class="text-center">No se encontraron partes</td>
+                </tr>
+            `);
+            return;
+        }
+
+        partesDisponibles.forEach(p => {
+            const checked = partesSeleccionadas.has(p.id) ? 'checked' : '';
+            const vinculoVal = partesSeleccionadas.get(p.id) || '';
+            const tr = $('<tr>');
+            tr.append(`
+                <td class="align-middle">
+                    <input type="checkbox" class="form-check-input parte-checkbox" value="${p.id}" ${checked}>
+                </td>
+                <td class="align-middle">${p.apellido || 'N/A'}</td>
+                <td class="align-middle">${p.nombre || 'N/A'}</td>
+                <td class="align-middle">${p.dni || 'N/A'}</td>
+                <td class="align-middle" style="min-width: 180px;">
+                    <input type="text" class="form-control form-control-sm input-vinculo" placeholder="Ej: Padre" value="${vinculoVal}">
+                </td>
+            `);
+            // Guardar vínculo al tipear
+            tr.find('.input-vinculo').on('input', function() {
+                const val = $(this).val();
+                if (partesSeleccionadas.has(p.id)) {
+                    partesSeleccionadas.set(p.id, val);
+                }
+                // Limpiar estado inválido al escribir
+                if ((val || '').trim()) {
+                    $(this).removeClass('is-invalid');
+                    $tr = $(this).closest('tr');
+                    $tr.find('.invalid-feedback').remove();
+                }
+            });
+            // Checkbox change
+            tr.find('.parte-checkbox').on('change', function() {
+                const id = p.id;
+                if ($(this).is(':checked')) {
+                    const vinc = tr.find('.input-vinculo').val() || '';
+                    partesSeleccionadas.set(id, vinc);
+                } else {
+                    partesSeleccionadas.delete(id);
+                }
+            });
+            tbody.append(tr);
+        });
+    }
+
+    // Búsqueda Partes
+    let searchParteTimeout;
+    $(document).on('input', '#buscarParte', function() {
+        clearTimeout(searchParteTimeout);
+        const busqueda = $(this).val();
+        searchParteTimeout = setTimeout(() => cargarPartes(busqueda), 300);
+    });
+    $(document).on('click', '#btnBuscarParte', function() {
+        const busqueda = $('#buscarParte').val() || '';
+        cargarPartes(busqueda);
+    });
+    $('#partesModal').on('shown.bs.modal', function () {
+        const busqueda = $('#buscarParte').val() || '';
+        cargarPartes(busqueda);
+        $('#buscarParte').trigger('focus');
+    });
+
+    // Confirmar selección de Partes -> volcar al formset
+    $('#confirmarPartes').on('click', function() {
+        console.log('confirmarPartes clicked. Seleccionadas:', Array.from(partesSeleccionadas.entries()));
+        if (partesSeleccionadas.size === 0) {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('partesModal'));
+            modal.hide();
+            return;
+        }
+
+        // Validar que cada parte seleccionada tenga vínculo
+        let faltanVinculos = false;
+        $('#tablaPartes tbody tr').each(function() {
+            const $tr = $(this);
+            const chk = $tr.find('.parte-checkbox');
+            if (chk.is(':checked')) {
+                const vincInp = $tr.find('.input-vinculo');
+                const val = (vincInp.val() || '').trim();
+                if (!val) {
+                    faltanVinculos = true;
+                    vincInp.addClass('is-invalid');
+                    if ($tr.find('.invalid-feedback').length === 0) {
+                        $('<div class="invalid-feedback">Ingrese el vínculo</div>').insertAfter(vincInp);
+                    }
+                }
+            }
+        });
+        if (faltanVinculos) {
+            // Mensaje simple; se resalta cada fila con error
+            return;
+        }
+
+        const totalForms = $('#id_partes-TOTAL_FORMS');
+        let formIdx = parseInt(totalForms.val());
+
+        // Obtener IDs de partes ya en el formset (solo las NO marcadas para eliminar) para evitar duplicados
+        const existentes = new Set();
+        $('#parte-formset .parte-form').each(function() {
+            const delHidden = $(this).find('input[type="hidden"][name$="-DELETE"]').val() === 'on';
+            const delChk = $(this).find('input[type="checkbox"][id$="-DELETE"]').is(':checked');
+            const del = delHidden || delChk;
+            if (del) return; // ignorar eliminadas
+            const sel = $(this).find('select[name$="-parte"]');
+            const val = sel.val();
+            if (val) existentes.add(parseInt(val));
+        });
+
+        // Plantilla: usar primera fila como base
+        let baseForm = $('.parte-form:first');
+        if (baseForm.length === 0) {
+            // Si por alguna razón no hay fila base (no debería suceder), crear una estructura mínima
+            baseForm = $('<div class="parte-form row mb-3 border-bottom pb-3">');
+            baseForm.append('<div class="col-md-4"><select name="partes-0-parte" class="form-select select2"></select></div>');
+            baseForm.append('<div class="col-md-4"><input type="text" name="partes-0-tipo_relacion" class="form-control" /></div>');
+            baseForm.append('<div class="col-md-4"><div class="form-check form-switch"><input type="checkbox" name="partes-0-DELETE" id="id_partes-0-DELETE" class="form-check-input" /><label class="form-check-label ms-2" for="id_partes-0-DELETE">Eliminar</label></div></div>');
+            $('#parte-formset').append(baseForm);
+            if (isNaN(formIdx)) formIdx = 1; else formIdx = Math.max(formIdx, 1);
+        }
+
+        partesSeleccionadas.forEach((vinculo, parteId) => {
+            if (existentes.has(parseInt(parteId))) {
+                return; // evitar duplicados
+            }
+            const newForm = baseForm.clone(true);
+
+            // Reset valores
+            newForm.find(':input').each(function() {
+                const oldName = $(this).attr('name');
+                if (!oldName) return;
+                const name = oldName.replace(/partes-\d+-/g, 'partes-' + formIdx + '-');
+                const id = 'id_' + name.replace(/-/g, '_');
+                $(this).attr({ 'name': name, 'id': id });
+
+                if ($(this).is('select')) {
+                    $(this).val('');
+                } else if ($(this).is(':checkbox')) {
+                    $(this).prop('checked', false);
+                } else {
+                    $(this).val('');
+                }
+            });
+
+            // Asignar parte y vínculo
+            const selectParte = newForm.find('select[name$="-parte"]');
+            // Asegurar que exista la opción en el select
+            if (selectParte.find('option[value="' + String(parteId) + '"]').length === 0) {
+                const info = partesInfo.get(parseInt(parteId));
+                const label = info ? `${info.apellido}, ${info.nombre}${info.dni ? ' (DNI: ' + info.dni + ')' : ''}` : ('Parte #' + String(parteId));
+                const opt = $('<option>').attr('value', String(parteId)).text(label);
+                selectParte.append(opt);
+            }
+            selectParte.val(String(parteId));
+            // Reinit select2
+            selectParte.removeClass('select2-hidden-accessible');
+            selectParte.next('.select2-container').remove();
+            selectParte.select2({ theme:'bootstrap-5', width:'100%', allowClear:true, placeholder:'Seleccione una parte' });
+            selectParte.trigger('change.select2');
+
+            const inputVinculo = newForm.find('input[name$="-tipo_relacion"]');
+            inputVinculo.val(vinculo || '');
+
+            // Asegurar DELETE desmarcado y visible
+            const deleteCheckbox = newForm.find('input[type="checkbox"][id$="-DELETE"]');
+            deleteCheckbox.prop('checked', false);
+            deleteCheckbox.closest('.form-check').show();
+
+            // Añadir al contenedor
+            $('#parte-formset').append(newForm);
+
+            formIdx += 1;
+        });
+
+        totalForms.val(formIdx);
+        updatePartesFormsetCount();
+        setupDeleteHandlers();
+        actualizarPartesResumen();
+
+        const modal = bootstrap.Modal.getInstance(document.getElementById('partesModal'));
+        modal.hide();
+        // Limpiar selección del modal para próxima vez
+        partesSeleccionadas.clear();
+        $('#tablaPartes tbody').empty();
+    });
+
+    // Antes de enviar el formulario, asegurar management_form y TOTAL_FORMS correcto
+    $('#oficio-form').on('submit', function() {
+        updatePartesFormsetCount();
+        ensurePartesManagementForm();
+    });
+
+    // Render de resumen de Partes seleccionadas (similar a Niños)
+    function actualizarPartesResumen() {
+        const container = $('#partes-seleccionadas');
+        container.empty();
+
+        // Filtrar formularios no eliminados y con parte seleccionada (evitar la fila extra vacía)
+        const forms = $('#parte-formset .parte-form').filter(function() {
+            const delHidden = $(this).find('input[type="hidden"][name$="-DELETE"]').val() === 'on';
+            const delChk = $(this).find('input[type="checkbox"][id$="-DELETE"]').is(':checked');
+            const del = delHidden || delChk;
+            const selectParte = $(this).find('select[name$="-parte"]');
+            const tieneParte = (selectParte.val() || '').toString().length > 0;
+            return !del && tieneParte;
+        });
+
+        if (forms.length === 0) {
+            container.append('<div class="alert alert-info mb-0">No hay partes seleccionadas</div>');
+            return;
+        }
+
+        const lista = $('<div class="list-group">');
+        forms.each(function(idx) {
+            const row = $(this);
+            const selectParte = row.find('select[name$="-parte"]');
+            const parteTxt = selectParte.find('option:selected').text() || 'Parte sin nombre';
+            const vinculo = row.find('input[name$="-tipo_relacion"]').val() || '';
+            const parteId = (selectParte.val() || '').toString();
+
+            const item = $(`
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        ${parteTxt}
+                        ${vinculo ? '<span class="text-muted">— Vínculo: ' + $('<div>').text(vinculo).html() + '</span>' : ''}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-danger btn-quitar-parte" data-index="${idx}" data-parte-id="${parteId}">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `);
+            lista.append(item);
+        });
+        container.append(lista);
+
+        // Quitar parte desde el resumen
+        $('.btn-quitar-parte').on('click', function() {
+            const parteId = ($(this).data('parte-id') || '').toString();
+            let targetRow = null;
+            // Buscar por parteId explícito
+            $('#parte-formset .parte-form').each(function() {
+                const delHidden = $(this).find('input[type="hidden"][name$="-DELETE"]').val() === 'on';
+                const delChk = $(this).find('input[type="checkbox"][id$="-DELETE"]').is(':checked');
+                const del = delHidden || delChk;
+                const selectParte = $(this).find('select[name$="-parte"]');
+                const val = (selectParte.val() || '').toString();
+                if (!del && val === parteId) {
+                    targetRow = $(this);
+                    return false; // break
+                }
+            });
+            // Si no se encontró por parteId (fallback al índice visible)
+            if (!targetRow) {
+                const idx = parseInt($(this).data('index'));
+                targetRow = $('#parte-formset .parte-form').filter(function() {
+                    const delHidden = $(this).find('input[type="hidden"][name$="-DELETE"]').val() === 'on';
+                    const delChk = $(this).find('input[type="checkbox"][id$="-DELETE"]').is(':checked');
+                    const del = delHidden || delChk;
+                    const selectParte = $(this).find('select[name$="-parte"]');
+                    const tieneParte = (selectParte.val() || '').toString().length > 0;
+                    return !del && tieneParte;
+                }).eq(idx);
+            }
+            // Marcar DELETE según el tipo de input presente (hidden o checkbox)
+            if (targetRow && targetRow.length) {
+                const delHidden = targetRow.find('input[type="hidden"][name$="-DELETE"]');
+                if (delHidden.length) {
+                    delHidden.val('on');
+                } else {
+                    targetRow.find('input[type="checkbox"][id$="-DELETE"]').prop('checked', true);
+                }
+                targetRow.slideUp(200, function(){ targetRow.hide(); });
+            }
+            updatePartesFormsetCount();
+            actualizarPartesResumen();
+        });
+    }
+
+    // Actualizar resumen cuando cambian selects o vínculos en el formset
+    $(document).on('change', '#parte-formset select[name$="-parte"]', actualizarPartesResumen);
+    $(document).on('input', '#parte-formset input[name$="-tipo_relacion"]', actualizarPartesResumen);
+
+    // Render inicial
+    actualizarPartesResumen();
 });
 </script>
 {% endblock %}
