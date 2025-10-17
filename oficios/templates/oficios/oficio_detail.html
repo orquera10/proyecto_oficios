@@ -66,9 +66,6 @@
                         <dd class="col-sm-8">
                             {% if oficio.fecha_vencimiento %}
                                 {{ oficio.fecha_vencimiento|date:"d/m/Y H:i" }}
-                                {% if oficio.fecha_vencimiento < now %}
-                                    <span class="badge bg-danger">Vencido</span>
-                                {% endif %}
                             {% else %}
                                 -
                             {% endif %}
@@ -238,6 +235,17 @@
         </a>
         <div>
             <a href="{% url 'oficios:update' oficio.pk %}" class="btn btn-warning">
+                <i class="fas fa-edit me-1"></i> Editar
+            </a>
+            <a href="{% url 'oficios:delete' oficio.pk %}" class="btn btn-danger"
+               onclick="return confirm('¿Está seguro que desea eliminar este oficio?')">
+                <i class="fas fa-trash me-1"></i> Eliminar
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+cio.pk %}" class="btn btn-warning">
                 <i class="fas fa-edit me-1"></i> Editar
             </a>
             <a href="{% url 'oficios:delete' oficio.pk %}" class="btn btn-danger"
