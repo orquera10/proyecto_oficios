@@ -122,25 +122,13 @@
     
     <!-- Script para cerrar automáticamente los mensajes después de 5 segundos -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Cerrar automáticamente los mensajes después de 5 segundos
+        document.addEventListener('DOMContentLoaded', () => {
+            const alerts = document.querySelectorAll('.alert.alert-dismissible');
             setTimeout(function() {
-                var alerts = document.querySelectorAll('.alert');
-                alerts.forEach(function(alert) {
-                    var bsAlert = new bootstrap.Alert(alert);
-                    bsAlert.close();
-                });
+                alerts.forEach(alertNode => {
+                    new bootstrap.Alert(alertNode).close();
+                })
             }, 5000);
-            
-            // Cerrar mensajes al hacer clic en el botón de cierre
-            var closeButtons = document.querySelectorAll('.btn-close');
-            closeButtons.forEach(function(button) {
-                button.addEventListener('click', function() {
-                    var alert = this.closest('.alert');
-                    var bsAlert = new bootstrap.Alert(alert);
-                    bsAlert.close();
-                });
-            });
         });
     </script>
     
