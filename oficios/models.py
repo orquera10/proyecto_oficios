@@ -164,6 +164,13 @@ class Oficio(models.Model):
         choices=TIPO_CHOICES,
         verbose_name='Tipo de Oficio'
     )
+    nro_oficio = models.CharField(
+        max_length=50,
+        verbose_name='Número de Oficio',
+        unique=True,
+        blank=True,
+        null=True
+    )
     expte = models.CharField(
         max_length=50,
         verbose_name='Expediente',

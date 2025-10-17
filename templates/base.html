@@ -11,6 +11,7 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
+    {% if not hide_navbar %}
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
@@ -174,6 +175,7 @@
             </div>
         </div>
     </nav>
+    {% endif %}
 
     <!-- Contenido principal -->
     <main class="container py-4">

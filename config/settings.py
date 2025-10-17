@@ -30,7 +30,11 @@ SECRET_KEY = 'django-insecure-!u9pt&-6nhk-r!art411ag*fv-%#%or#pai+w9)od)ekf1#8eq
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+
+ALLOWED_HOSTS = ['*']  # Permite todas las direcciones IP (solo para desarrollo)
+
+# O si prefieres ser más específico, puedes usar:
+# ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.1.16', '192.168.5.96', '192.168.101.18']
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"

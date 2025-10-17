@@ -13,6 +13,7 @@ urlpatterns = [
     path('oficios/', include(('oficios.urls', 'oficios'), namespace='oficios')),  # Include oficios app URLs with namespace
     path('personas/', include(('personas.urls', 'personas'), namespace='personas')),  # Include personas app URLs with namespace
     # URLs de autenticación
+    path('accounts/login/', auth_views.LoginView.as_view(extra_context={'hide_navbar': True}), name='login'),
     path('accounts/', include('django.contrib.auth.urls')),
 ]
 

@@ -57,12 +57,15 @@ class OficioForm(forms.ModelForm):
     class Meta:
         model = Oficio
         fields = [
-            'tipo', 'expte', 'institucion', 'juzgado',
+            'tipo', 'nro_oficio', 'expte', 'institucion', 'juzgado',
             'plazo_horas', 'fecha_emision', 'caratula',
             'caratula_oficio', 'archivo_pdf'
         ]
         widgets = {
             'fecha_emision': forms.DateTimeInput(attrs={'type': 'datetime-local'}, format='%Y-%m-%dT%H:%M'),
+            'nro_oficio': forms.TextInput(attrs={
+                'class': 'form-control',
+            }),
             'expte': forms.TextInput(attrs={'class': 'form-control'}),
             'plazo_horas': forms.NumberInput(attrs={'class': 'form-control'}),
             'juzgado': forms.Select(attrs={'class': 'form-control'}),
@@ -73,10 +76,11 @@ class OficioForm(forms.ModelForm):
         }
         labels = {
             'juzgado': 'Agente',
-            'archivo_pdf': 'Archivo PDF del Oficio'
+            'archivo_pdf': 'Archivo PDF del Oficio',
+            'nro_oficio': 'Número de Oficio'
         }
         help_texts = {
-            'archivo_pdf': 'Sube el archivo PDF del oficio. Tamaño máximo: 10MB.'
+            'archivo_pdf': 'Sube el archivo PDF del oficio. Tamaño máximo: 10MB.',
         }
 
     def clean_archivo_pdf(self):
