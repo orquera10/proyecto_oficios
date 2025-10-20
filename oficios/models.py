@@ -4,7 +4,7 @@ from django.utils import timezone
 from django.core.validators import MinValueValidator, FileExtensionValidator
 from django.contrib.auth import get_user_model
 from django.conf import settings
-from personas.models import Nino, Parte
+from casos.models import Caso
 
 def oficio_upload_path(instance, filename):
     # Guarda el archivo en: MEDIA_ROOT/oficios/oficio_<id>/<filename>
@@ -12,80 +12,8 @@ def oficio_upload_path(instance, filename):
 
 User = get_user_model()
 
-class OficioParte(models.Model):
-    """
-    Modelo intermedio para la relación muchos a muchos entre Oficio y Parte.
-    Permite agregar campos adicionales a la relación.
-    """
-    oficio = models.ForeignKey(
-        'Oficio',
-        on_delete=models.CASCADE,
-        related_name='oficio_partes',
-        verbose_name='Oficio'
-    )
-    parte = models.ForeignKey(
-        Parte,
-        on_delete=models.CASCADE,
-        related_name='oficio_partes',
-        verbose_name='Parte'
-    )
-    fecha_relacion = models.DateField(
-        auto_now_add=True,
-        verbose_name='Fecha de relación'
-    )
-    tipo_relacion = models.CharField(
-        max_length=100,
-        verbose_name='Tipo de relación',
-        help_text='Ej: Padre, Madre, Tutor, Representante Legal, etc.'
-    )
-    observaciones = models.TextField(
-        verbose_name='Observaciones',
-        blank=True,
-        null=True
-    )
-
-    class Meta:
-        verbose_name = 'Relación Oficio-Parte'
-        verbose_name_plural = 'Relaciones Oficio-Parte'
-        unique_together = ('oficio', 'parte', 'tipo_relacion')  # Evita duplicados con el mismo tipo
-
-    def __str__(self):
-        return f"{self.oficio} - {self.parte} ({self.tipo_relacion})"
-
-class OficioNino(models.Model):
-    """
-    Modelo intermedio para la relación muchos a muchos entre Oficio y Nino.
-    Permite agregar campos adicionales a la relación.
-    """
-    oficio = models.ForeignKey(
-        'Oficio',
-        on_delete=models.CASCADE,
-        related_name='oficio_ninos',
-        verbose_name='Oficio'
-    )
-    nino = models.ForeignKey(
-        Nino,
-        on_delete=models.CASCADE,
-        related_name='oficio_ninos',
-        verbose_name='Niño'
-    )
-    fecha_relacion = models.DateField(
-        auto_now_add=True,
-        verbose_name='Fecha de relación'
-    )
-    observaciones = models.TextField(
-        verbose_name='Observaciones',
-        blank=True,
-        null=True
-    )
-
-    class Meta:
-        verbose_name = 'Relación Oficio-Niño'
-        verbose_name_plural = 'Relaciones Oficio-Niño'
-        unique_together = ('oficio', 'nino')  # Evita duplicados
-
-    def __str__(self):
-        return f"{self.oficio} - {self.nino}"
+# Se han eliminado los modelos intermedios OficioParte y OficioNino
+# ya que la relación ahora se manejará a través del modelo Caso
 
 class Institucion(models.Model):
     nombre = models.CharField(max_length=100, verbose_name='Nombre de la Institución')
@@ -245,24 +173,15 @@ class Oficio(models.Model):
         verbose_name='Última actualización'
     )
     
-    # Relación muchos a muchos con Nino a través del modelo intermedio OficioNino
-    ninos = models.ManyToManyField(
-        Nino,
-        through='OficioNino',
-        through_fields=('oficio', 'nino'),
+    # Relación con Caso
+    caso = models.ForeignKey(
+        Caso,
+        on_delete=models.SET_NULL,
         related_name='oficios',
-        verbose_name='Niños relacionados',
-        blank=True
-    )
-    
-    # Relación muchos a muchos con Parte a través del modelo intermedio OficioParte
-    partes = models.ManyToManyField(
-        Parte,
-        through='OficioParte',
-        through_fields=('oficio', 'parte'),
-        related_name='oficios',
-        verbose_name='Partes relacionadas',
-        blank=True
+        verbose_name='Caso relacionado',
+        null=True,
+        blank=True,
+        help_text='Caso al que pertenece este oficio'
     )
 
     class Meta:

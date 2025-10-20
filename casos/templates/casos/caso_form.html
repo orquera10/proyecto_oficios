@@ -211,7 +211,28 @@ $(document).ready(function() {
         });
     }
 
-    $('#ninosModal').on('shown.bs.modal', () => { cargarNinos(); $('#buscarNino').trigger('focus'); });
+    function initNinosModal() {
+        cargarNinos();
+        $('#buscarNino').trigger('focus');
+    }
+    
+    function initPartesModal() {
+        cargarPartes();
+        $('#buscarParte').trigger('focus');
+    }
+    
+    // Initialize modals
+    const ninosModal = document.getElementById('ninosModal');
+    if (ninosModal) {
+        ninosModal.addEventListener('shown.bs.modal', initNinosModal);
+    }
+    
+    const partesModal = document.getElementById('partesModal');
+    if (partesModal) {
+        partesModal.addEventListener('shown.bs.modal', initPartesModal);
+    }
+    
+    // Search handlers
     $('#btnBuscarNino').on('click', () => cargarNinos($('#buscarNino').val()));
     $('#buscarNino').on('keypress', e => { if (e.which === 13) { e.preventDefault(); $('#btnBuscarNino').trigger('click'); } });
 
@@ -332,7 +353,7 @@ $(document).ready(function() {
         });
     }
 
-    $('#partesModal').on('shown.bs.modal', () => { cargarPartes(); $('#buscarParte').trigger('focus'); });
+    // Search handlers for partes
     $('#btnBuscarParte').on('click', () => cargarPartes($('#buscarParte').val()));
     $('#buscarParte').on('keypress', e => { if (e.which === 13) { e.preventDefault(); $('#btnBuscarParte').trigger('click'); } });
 
@@ -418,28 +439,37 @@ $(document).ready(function() {
     // Cargar datos iniciales si estamos en edición
     {% if object %}
     $(document).ready(function() {
+        // Limpiar arrays para evitar duplicados
+        ninosSeleccionados = [];
+        partesSeleccionadas = [];
+
         // Cargar niños existentes
-        {% for caso_nino in object.caso_ninos.all %}
-        ninosSeleccionados.push({
-            id: {{ caso_nino.nino.id }},
-            nombre: '{{ caso_nino.nino.nombre|escapejs }}',
-            apellido: '{{ caso_nino.nino.apellido|escapejs }}',
-            dni: '{{ caso_nino.nino.dni|escapejs }}'
-        });
+        {% for form in nino_formset %}
+            {% if form.instance.pk and form.instance.nino %}
+                ninosSeleccionados.push({
+                    id: {{ form.instance.nino.id_ninos }},
+                    nombre: '{{ form.instance.nino.nombre|escapejs }}',
+                    apellido: '{{ form.instance.nino.apellido|escapejs }}',
+                    dni: '{{ form.instance.nino.dni|default:""|escapejs }}',
+                    observaciones: '{{ form.instance.observaciones|default:""|escapejs }}'
+                });
+            {% endif %}
         {% endfor %}
-        
+
         // Cargar partes existentes
-        {% for caso_parte in object.caso_partes.all %}
-        partesSeleccionadas.push({
-            id: {{ caso_parte.parte.id }},
-            nombre: '{{ caso_parte.parte.nombre|escapejs }}',
-            apellido: '{{ caso_parte.parte.apellido|escapejs }}',
-            dni: '{{ caso_parte.parte.dni|escapejs }}',
-            vinculo: '{{ caso_parte.tipo_relacion|escapejs }}'
-        });
+        {% for form in parte_formset %}
+            {% if form.instance.pk and form.instance.parte %}
+                partesSeleccionadas.push({
+                    id: {{ form.instance.parte.id_partes }},
+                    nombre: '{{ form.instance.parte.nombre|escapejs }}',
+                    apellido: '{{ form.instance.parte.apellido|escapejs }}',
+                    dni: '{{ form.instance.parte.dni|default:""|escapejs }}',
+                    vinculo: '{{ form.instance.tipo_relacion|default:""|escapejs }}'
+                });
+            {% endif %}
         {% endfor %}
-        
-        // Actualizar las vistas
+
+        // Actualizar la interfaz
         actualizarNinosDisplay();
         actualizarNinoFormset();
         actualizarPartesDisplay();

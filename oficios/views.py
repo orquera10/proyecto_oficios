@@ -4,15 +4,14 @@ from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.utils import timezone
-from django.forms import inlineformset_factory
 from django.http import JsonResponse
 from django.db.models import Q, F
 
 from .models import (
-    Oficio, Institucion, Caratula, Juzgado,
-    OficioNino, OficioParte, Nino
+    Oficio, Institucion, Caratula, Juzgado
 )
-from .forms import OficioForm, OficioNinoFormSet, OficioParteFormSet
+from personas.models import Nino
+from .forms import OficioForm
 from .filters import OficioFilter
 
 
@@ -100,55 +99,15 @@ class OficioCreateView(LoginRequiredMixin, CreateView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if self.request.POST:
-            context['parte_formset'] = OficioParteFormSet(self.request.POST, prefix='partes')
-        else:
-            context['parte_formset'] = OficioParteFormSet(prefix='partes')
         return context
     
     def form_valid(self, form):
-        context = self.get_context_data()
-        parte_formset_post = context['parte_formset']
-
-        # Validar formulario principal por las dudas
-        if not form.is_valid():
-            return self.form_invalid(form)
-
-        # Guardar el oficio primero para tener instancia
+        # Guardar el oficio
         self.object = form.save(commit=False)
         self.object.usuario = self.request.user
         self.object.save()
-
-        # Re-instanciar formset con la instancia recién creada
-        parte_formset = OficioParteFormSet(self.request.POST, instance=self.object, prefix='partes')
-
-        if parte_formset.is_valid():
-            parte_formset.save()
-
-            # Manejar niños seleccionados desde el campo oculto
-            ninos_ids_str = self.request.POST.get('ninos_seleccionados', '').strip()
-            if ninos_ids_str:
-                try:
-                    ninos_ids = [int(x) for x in ninos_ids_str.split(',') if x]
-                except ValueError:
-                    ninos_ids = []
-                for nino_id in ninos_ids:
-                    try:
-                        nino_obj = Nino.objects.get(pk=nino_id)
-                        OficioNino.objects.get_or_create(oficio=self.object, nino=nino_obj)
-                    except Nino.DoesNotExist:
-                        continue
-
-            messages.success(self.request, 'El oficio se ha creado exitosamente.')
-            return super().form_valid(form)
-        else:
-            # Mostrar errores de partes
-            for i, error in enumerate(parte_formset.errors):
-                if error:
-                    for field, errors in error.items():
-                        for error_msg in errors:
-                            messages.error(self.request, f'Error en parte {i+1} - {field}: {error_msg}')
-            return self.form_invalid(form)
+        messages.success(self.request, 'El oficio se ha creado correctamente.')
+        return super().form_valid(form)
 
 
 class OficioDetailView(LoginRequiredMixin, DetailView):
@@ -161,14 +120,6 @@ class OficioDetailView(LoginRequiredMixin, DetailView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        oficio = self.get_object()
-        
-        # Obtener los niños relacionados con sus observaciones
-        context['ninos'] = oficio.oficio_ninos.select_related('nino').all()
-        
-        # Obtener las partes relacionadas con sus observaciones
-        context['partes'] = oficio.oficio_partes.select_related('parte').all()
-        
         # Agregar la fecha actual para comparar con la fecha de vencimiento
         from django.utils import timezone
         context['now'] = timezone.now()
@@ -184,48 +135,13 @@ class OficioUpdateView(LoginRequiredMixin, UpdateView):
     def get_success_url(self):
         return reverse_lazy('oficios:detail', kwargs={'pk': self.object.pk})
     
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        if self.request.POST:
-            context['parte_formset'] = OficioParteFormSet(self.request.POST, instance=self.object, prefix='partes')
-        else:
-            context['parte_formset'] = OficioParteFormSet(instance=self.object, prefix='partes')
-        # Proveer IDs de niños seleccionados para prellenar en el front (usar pk para soportar id_ninos)
-        context['ninos_seleccionados'] = ','.join(str(i) for i in self.object.ninos.values_list('pk', flat=True))
-        return context
-    
     def form_valid(self, form):
-        context = self.get_context_data()
-        parte_formset = context['parte_formset']
+        self.object = form.save()
+        messages.success(self.request, 'El oficio se ha guardado correctamente.')
+        return super().form_valid(form)
 
-        if parte_formset.is_valid():
-            self.object = form.save()
-
-            # Actualizar niños desde el campo oculto
-            ninos_ids_str = self.request.POST.get('ninos_seleccionados', '').strip()
-            nuevos_ids = []
-            if ninos_ids_str:
-                try:
-                    nuevos_ids = [int(x) for x in ninos_ids_str.split(',') if x]
-                except ValueError:
-                    nuevos_ids = []
-
-            # Sincronizar relaciones OficioNino
-            OficioNino.objects.filter(oficio=self.object).exclude(nino_id__in=nuevos_ids).delete()
-            for nino_id in nuevos_ids:
-                try:
-                    nino_obj = Nino.objects.get(pk=nino_id)
-                    OficioNino.objects.get_or_create(oficio=self.object, nino=nino_obj)
-                except Nino.DoesNotExist:
-                    continue
-
-            # Guardar partes
-            parte_formset.save()
-
-            messages.success(self.request, 'El oficio se ha actualizado exitosamente.')
-            return super().form_valid(form)
-        else:
-            return self.render_to_response(self.get_context_data(form=form))
+        messages.success(self.request, 'El oficio se ha actualizado correctamente.')
+        return super().form_valid(form)
 
 
 class OficioDeleteView(LoginRequiredMixin, DeleteView):
