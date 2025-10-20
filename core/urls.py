@@ -8,6 +8,7 @@ urlpatterns = [
     path('', RedirectView.as_view(pattern_name='oficios:list', permanent=False)),
     path('accounts/', include('django.contrib.auth.urls')),  # Authentication URLs
     path('oficios/', include('oficios.urls')),  # Include oficios URLs
+    path('casos/', include('casos.urls', namespace='casos')),  # Añade esta línea
 ]
 
 # Add this to set the default login redirect URL

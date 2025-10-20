@@ -9,10 +9,10 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('core.urls')),  # Include core app URLs
-    path('oficios/', include(('oficios.urls', 'oficios'), namespace='oficios')),  # Include oficios app URLs with namespace
-    path('personas/', include(('personas.urls', 'personas'), namespace='personas')),  # Include personas app URLs with namespace
-    # URLs de autenticación
+    path('', include('core.urls')),
+    path('oficios/', include(('oficios.urls', 'oficios'), namespace='oficios')),
+    path('personas/', include(('personas.urls', 'personas'), namespace='personas')),
+    path('casos/', include(('casos.urls', 'casos'), namespace='casos')),  # Añade esta línea
     path('accounts/login/', auth_views.LoginView.as_view(extra_context={'hide_navbar': True}), name='login'),
     path('accounts/', include('django.contrib.auth.urls')),
 ]

@@ -1,0 +1,39 @@
+{% extends 'casos/base_casos.html' %}
+
+{% block page_title %}Eliminar Caso{% endblock %}
+
+{% block casos_content %}
+<div class="card">
+    <div class="card-body">
+        <h2 class="mb-4">¿Está seguro que desea eliminar este caso?</h2>
+        
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">{{ object.expte }}</h5>
+                <p class="card-text">
+                    <strong>Tipo:</strong> {{ object.get_tipo_display }}<br>
+                    <strong>Estado:</strong> {{ object.get_estado_display }}<br>
+                    <strong>Creado:</strong> {{ object.creado|date:"d/m/Y H:i" }}
+                </p>
+                
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    Esta acción no se puede deshacer. Se eliminarán todos los datos asociados a este caso.
+                </div>
+            </div>
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="d-flex justify-content-between">
+                <a href="{% url 'casos:detail' object.pk %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-danger">
+                    <i class="bi bi-trash"></i> Confirmar eliminación
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

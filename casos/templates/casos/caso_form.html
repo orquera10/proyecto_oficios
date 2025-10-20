@@ -1,0 +1,129 @@
+{% extends 'casos/base_casos.html' %}
+
+{% block page_title %}{% if object %}Editar{% else %}Nuevo{% endif %} Caso{% endblock %}
+
+{% block casos_content %}
+<div class="card">
+    <div class="card-body">
+        <form method="post" id="caso-form">
+            {% csrf_token %}
+            
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Datos del Caso</h5>
+                        </div>
+                        <div class="card-body">
+                            {{ form.as_p }}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Niños Relacionados</h5>
+                        </div>
+                        <div class="card-body">
+                            {{ nino_formset.management_form }}
+                            <div id="ninos-formset">
+                                {% for form in nino_formset %}
+                                <div class="nino-form mb-3 p-2 border rounded">
+                                    {{ form.as_p }}
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-secondary mt-2" id="add-nino">
+                                <i class="bi bi-plus-circle"></i> Agregar Niño
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Partes Relacionadas</h5>
+                        </div>
+                        <div class="card-body">
+                            {{ parte_formset.management_form }}
+                            <div id="partes-formset">
+                                {% for form in parte_formset %}
+                                <div class="parte-form mb-3 p-2 border rounded">
+                                    {{ form.as_p }}
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-secondary mt-2" id="add-parte">
+                                <i class="bi bi-plus-circle"></i> Agregar Parte
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-flex justify-content-between">
+                <a href="{% if object %}{% url 'casos:detail' object.pk %}{% else %}{% url 'casos:list' %}{% endif %}" 
+                   class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Guardar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add new child form
+    document.getElementById('add-nino').addEventListener('click', function() {
+        const formCount = document.getElementById('id_ninos-TOTAL_FORMS');
+        const formNum = parseInt(formCount.value);
+        const formHtml = document.querySelector('.nino-form').outerHTML
+            .replace(/__prefix__/g, formNum)
+            .replace(/ninos-\d+-/g, `ninos-${formNum}-`);
+        
+        const container = document.getElementById('ninos-formset');
+        const div = document.createElement('div');
+        div.className = 'nino-form mb-3 p-2 border rounded';
+        div.innerHTML = formHtml;
+        container.appendChild(div);
+        formCount.value = formNum + 1;
+    });
+
+    // Add new part form
+    document.getElementById('add-parte').addEventListener('click', function() {
+        const formCount = document.getElementById('id_partes-TOTAL_FORMS');
+        const formNum = parseInt(formCount.value);
+        const formHtml = document.querySelector('.parte-form').outerHTML
+            .replace(/__prefix__/g, formNum)
+            .replace(/partes-\d+-/g, `partes-${formNum}-`);
+        
+        const container = document.getElementById('partes-formset');
+        const div = document.createElement('div');
+        div.className = 'parte-form mb-3 p-2 border rounded';
+        div.innerHTML = formHtml;
+        container.appendChild(div);
+        formCount.value = formNum + 1;
+    });
+
+    // Delete form button handler
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('delete-form')) {
+            e.preventDefault();
+            const form = e.target.closest('.nino-form, .parte-form');
+            const deleteCheckbox = form.querySelector('input[type="checkbox"][id$="-DELETE"]');
+            if (deleteCheckbox) {
+                deleteCheckbox.checked = true;
+                form.style.display = 'none';
+            } else {
+                form.remove();
+            }
+        }
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}

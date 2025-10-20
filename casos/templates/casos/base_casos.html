@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestión de Casos{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>{% block page_title %}Gestión de Casos{% endblock %}</h1>
+        <div>
+            {% block page_actions %}
+            <a href="{% url 'casos:create' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Nuevo Caso
+            </a>
+            {% endblock %}
+        </div>
+    </div>
+    
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    {% block casos_content %}{% endblock %}
+</div>
+{% endblock %}
