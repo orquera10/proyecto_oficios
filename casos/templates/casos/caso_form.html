@@ -8,6 +8,14 @@
         <form method="post" id="caso-form">
             {% csrf_token %}
             
+            <!-- Campos ocultos para los formsets -->
+            <div id="hidden-forms" style="display: none;">
+                {{ nino_formset.management_form }}
+                {{ parte_formset.management_form }}
+                <div id="nino-forms"></div>
+                <div id="parte-forms"></div>
+            </div>
+            
             <div class="row mb-4">
                 <div class="col-md-6">
                     <div class="card">
@@ -33,16 +41,6 @@
                             <div id="ninos-seleccionados-display" class="mt-3">
                                 <!-- Aquí se agregarán los niños seleccionados -->
                             </div>
-                            <div id="ninos-formset-container" style="display: none;">
-                                {{ nino_formset.management_form }}
-                                <div id="ninos-formset">
-                                    {% for form in nino_formset %}
-                                    <div class="nino-form mb-3 p-2 border rounded">
-                                        {{ form.as_p }}
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                            </div>
                         </div>
                     </div>
                     
@@ -56,16 +54,6 @@
                             </button>
                             <div id="partes-seleccionadas-display" class="mt-3">
                                 <!-- Aquí se agregarán las partes seleccionadas -->
-                            </div>
-                            <div id="partes-formset-container" style="display: none;">
-                                {{ parte_formset.management_form }}
-                                <div id="partes-formset">
-                                    {% for form in parte_formset %}
-                                    <div class="parte-form mb-3 p-2 border rounded">
-                                        {{ form.as_p }}
-                                    </div>
-                                    {% endfor %}
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -182,7 +170,8 @@
 $(document).ready(function() {
     // NIÑOS
     let ninosDisponibles = [];
-    let ninosSeleccionados = new Set();
+    let ninosSeleccionados = [];
+    let ninoFormIndex = 0;
 
     function cargarNinos(busqueda = '') {
         $.ajax({
@@ -207,15 +196,18 @@ $(document).ready(function() {
             return;
         }
         ninosDisponibles.forEach(nino => {
-            const estaSeleccionado = ninosSeleccionados.has(nino.id);
-            tbody.append(`
+            const isSelected = ninosSeleccionados.some(n => n.id === nino.id);
+            const tr = $(`
                 <tr>
-                    <td class="align-middle"><input type="checkbox" class="form-check-input nino-checkbox" value="${nino.id}" ${estaSeleccionado ? 'checked' : ''}></td>
-                    <td class="align-middle">${nino.apellido || 'N/A'}</td>
-                    <td class="align-middle">${nino.nombre || 'N/A'}</td>
-                    <td class="align-middle">${nino.dni || 'N/A'}</td>
+                    <td>
+                        <input type="checkbox" name="seleccionNino" value="${nino.id}" ${isSelected ? 'checked' : ''}>
+                    </td>
+                    <td>${nino.apellido}</td>
+                    <td>${nino.nombre}</td>
+                    <td>${nino.dni}</td>
                 </tr>
             `);
+            tbody.append(tr);
         });
     }
 
@@ -224,57 +216,75 @@ $(document).ready(function() {
     $('#buscarNino').on('keypress', e => { if (e.which === 13) { e.preventDefault(); $('#btnBuscarNino').trigger('click'); } });
 
     $('#confirmarNinos').on('click', function() {
-        ninosSeleccionados.clear();
-        $('.nino-checkbox:checked').each(function() {
-            ninosSeleccionados.add(parseInt($(this).val()));
+        $('input[name="seleccionNino"]:checked').each(function() {
+            const ninoId = parseInt($(this).val());
+            const nino = ninosDisponibles.find(n => n.id === ninoId);
+            
+            if (nino && !ninosSeleccionados.some(n => n.id === ninoId)) {
+                ninosSeleccionados.push(nino);
+            }
         });
+        
         actualizarNinosDisplay();
         actualizarNinoFormset();
-        bootstrap.Modal.getInstance(document.getElementById('ninosModal')).hide();
+        $('#ninosModal').modal('hide');
+        
+        // Limpiar búsqueda y selección
+        $('#buscarNino').val('');
+        $('input[name="seleccionNino"]').prop('checked', false);
     });
 
     function actualizarNinosDisplay() {
         const container = $('#ninos-seleccionados-display');
         container.empty();
-        if (ninosSeleccionados.size === 0) {
-            container.append('<div class="alert alert-info mb-0">No hay niños seleccionados</div>');
+        
+        if (ninosSeleccionados.length === 0) {
+            container.html('<p class="text-muted">No hay niños seleccionados.</p>');
             return;
         }
-        const lista = $('<div class="list-group">');
-        ninosDisponibles.forEach(nino => {
-            if (ninosSeleccionados.has(nino.id)) {
-                lista.append(`<div class="list-group-item">${nino.apellido || ''}, ${nino.nombre || ''}</div>`);
-            }
+        
+        const ul = $('<ul class="list-group"></ul>');
+        
+        ninosSeleccionados.forEach(nino => {
+            const li = $(`
+                <li class="list-group-item d-flex justify-content-between align-items-center" data-nino-id="${nino.id}">
+                    ${nino.nombre} ${nino.apellido} (DNI: ${nino.dni})
+                    <button type="button" class="btn btn-sm btn-outline-danger btn-remove-nino">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </li>
+            `);
+            ul.append(li);
         });
-        container.append(lista);
+        
+        container.html(ul);
     }
 
     function actualizarNinoFormset() {
-        const formsetContainer = $('#ninos-formset');
-        const totalFormsInput = $('#id_ninos-TOTAL_FORMS');
-        const template = $('#nino-form-template').html();
-        let formNum = 0;
-        formsetContainer.empty();
-        ninosSeleccionados.forEach(ninoId => {
-            let newFormHtml = template.replace(/__prefix__/g, formNum);
-            let $newForm = $('<div class="nino-form mb-3 p-2 border rounded">' + newFormHtml + '</div>');
-            let $select = $newForm.find('select');
-            if ($select.find('option[value="' + ninoId + '"]').length === 0) {
-                let nino = ninosDisponibles.find(n => n.id === ninoId);
-                if (nino) {
-                    $select.append(new Option(`${nino.apellido}, ${nino.nombre}`, ninoId, true, true));
-                }
-            }
-            $select.val(ninoId);
-            formsetContainer.append($newForm);
-            formNum++;
+        const container = $('#nino-forms');
+        container.empty();
+        
+        ninosSeleccionados.forEach((nino, index) => {
+            const formId = `nino-form-${index}`;
+            const form = $(`
+                <div id="${formId}" class="nino-form">
+                    <input type="hidden" name="ninos-${index}-nino" value="${nino.id}">
+                    <input type="hidden" name="ninos-${index}-id" value="">
+                    <input type="hidden" name="ninos-${index}-caso" value="">
+                    <input type="hidden" name="ninos-${index}-DELETE" id="id_ninos-${index}-DELETE">
+                </div>
+            `);
+            container.append(form);
         });
-        totalFormsInput.val(formNum);
+        
+        // Actualizar el formulario de gestión
+        $('#id_ninos-TOTAL_FORMS').val(ninosSeleccionados.length);
     }
 
     // PARTES
     let partesDisponibles = [];
-    let partesSeleccionadas = new Map(); // id -> {vinculo: ''}
+    let partesSeleccionadas = [];
+    let parteFormIndex = 0;
 
     function cargarPartes(busqueda = '') {
         $.ajax({
@@ -294,23 +304,31 @@ $(document).ready(function() {
     function actualizarTablaPartes() {
         const tbody = $('#tablaPartes tbody');
         tbody.empty();
+        
         if (partesDisponibles.length === 0) {
             tbody.html('<tr><td colspan="5" class="text-center">No se encontraron partes.</td></tr>');
             return;
         }
+        
         partesDisponibles.forEach(parte => {
-            const seleccion = partesSeleccionadas.get(parte.id);
-            const checked = seleccion ? 'checked' : '';
-            const vinculo = seleccion ? seleccion.vinculo : '';
-            tbody.append(`
+            const isSelected = partesSeleccionadas.some(p => p.id === parte.id);
+            const selectedParte = isSelected ? partesSeleccionadas.find(p => p.id === parte.id) : null;
+            
+            const tr = $(`
                 <tr>
-                    <td class="align-middle"><input type="checkbox" class="form-check-input parte-checkbox" value="${parte.id}" ${checked}></td>
-                    <td class="align-middle">${parte.apellido || 'N/A'}</td>
-                    <td class="align-middle">${parte.nombre || 'N/A'}</td>
-                    <td class="align-middle">${parte.dni || 'N/A'}</td>
-                    <td class="align-middle"><input type="text" class="form-control form-control-sm input-vinculo" value="${vinculo}" placeholder="Ej: Padre"></td>
+                    <td>
+                        <input type="checkbox" name="seleccionParte" value="${parte.id}" ${isSelected ? 'checked' : ''}>
+                    </td>
+                    <td>${parte.apellido}</td>
+                    <td>${parte.nombre}</td>
+                    <td>${parte.dni}</td>
+                    <td>
+                        <input type="text" class="form-control form-control-sm" id="vinculo-${parte.id}" 
+                               placeholder="Vínculo" value="${selectedParte ? selectedParte.vinculo : ''}">
+                    </td>
                 </tr>
             `);
+            tbody.append(tr);
         });
     }
 
@@ -319,67 +337,115 @@ $(document).ready(function() {
     $('#buscarParte').on('keypress', e => { if (e.which === 13) { e.preventDefault(); $('#btnBuscarParte').trigger('click'); } });
 
     $('#confirmarPartes').on('click', function() {
-        partesSeleccionadas.clear();
-        $('#tablaPartes tbody tr').each(function() {
-            const $row = $(this);
-            const checkbox = $row.find('.parte-checkbox');
-            if (checkbox.is(':checked')) {
-                const parteId = parseInt(checkbox.val());
-                const vinculo = $row.find('.input-vinculo').val();
-                partesSeleccionadas.set(parteId, { vinculo: vinculo });
+        $('input[name="seleccionParte"]:checked').each(function() {
+            const parteId = parseInt($(this).val());
+            const vinculo = $(`#vinculo-${parteId}`).val() || 'No especificado';
+            const parte = partesDisponibles.find(p => p.id === parteId);
+            
+            if (parte && !partesSeleccionadas.some(p => p.id === parteId)) {
+                partesSeleccionadas.push({
+                    id: parte.id,
+                    nombre: parte.nombre,
+                    apellido: parte.apellido,
+                    dni: parte.dni,
+                    vinculo: vinculo
+                });
             }
         });
+        
         actualizarPartesDisplay();
         actualizarParteFormset();
-        bootstrap.Modal.getInstance(document.getElementById('partesModal')).hide();
+        $('#partesModal').modal('hide');
+        
+        // Limpiar búsqueda y selección
+        $('#buscarParte').val('');
+        $('input[name="seleccionParte"]').prop('checked', false);
     });
 
     function actualizarPartesDisplay() {
         const container = $('#partes-seleccionadas-display');
         container.empty();
-        if (partesSeleccionadas.size === 0) {
-            container.append('<div class="alert alert-info mb-0">No hay partes seleccionadas</div>');
+        
+        if (partesSeleccionadas.length === 0) {
+            container.html('<p class="text-muted">No hay partes seleccionadas.</p>');
             return;
         }
-        const lista = $('<div class="list-group">');
-        partesDisponibles.forEach(parte => {
-            if (partesSeleccionadas.has(parte.id)) {
-                const vinculo = partesSeleccionadas.get(parte.id).vinculo;
-                lista.append(`<div class="list-group-item">${parte.apellido || ''}, ${parte.nombre || ''} (${vinculo || 'Sin vínculo'})</div>`);
-            }
+        
+        const ul = $('<ul class="list-group"></ul>');
+        
+        partesSeleccionadas.forEach(parte => {
+            const li = $(`
+                <li class="list-group-item" data-parte-id="${parte.id}">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>${parte.nombre} ${parte.apellido} (DNI: ${parte.dni})</strong><br>
+                            <small class="text-muted">Vínculo: ${parte.vinculo || 'No especificado'}</small>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-danger btn-remove-parte">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </li>
+            `);
+            ul.append(li);
         });
-        container.append(lista);
+        
+        container.html(ul);
     }
 
     function actualizarParteFormset() {
-        const formsetContainer = $('#partes-formset');
-        const totalFormsInput = $('#id_partes-TOTAL_FORMS');
-        const template = $('#parte-form-template').html();
-        let formNum = 0;
-        formsetContainer.empty();
-        partesSeleccionadas.forEach((data, parteId) => {
-            let newFormHtml = template.replace(/__prefix__/g, formNum);
-            let $newForm = $('<div class="parte-form mb-3 p-2 border rounded">' + newFormHtml + '</div>');
-            
-            let $select = $newForm.find('select[name$="-parte"]');
-            if ($select.find('option[value="' + parteId + '"]').length === 0) {
-                let parte = partesDisponibles.find(p => p.id === parteId);
-                if (parte) {
-                    $select.append(new Option(`${parte.apellido}, ${parte.nombre}`, parteId, true, true));
-                }
-            }
-            $select.val(parteId);
-
-            $newForm.find('input[name$="-tipo_relacion"]').val(data.vinculo);
-
-            formsetContainer.append($newForm);
-            formNum++;
+        const container = $('#parte-forms');
+        container.empty();
+        
+        partesSeleccionadas.forEach((parte, index) => {
+            const formId = `parte-form-${index}`;
+            const form = $(`
+                <div id="${formId}" class="parte-form">
+                    <input type="hidden" name="partes-${index}-parte" value="${parte.id}">
+                    <input type="hidden" name="partes-${index}-tipo_relacion" value="${parte.vinculo || ''}">
+                    <input type="hidden" name="partes-${index}-id" value="">
+                    <input type="hidden" name="partes-${index}-caso" value="">
+                    <input type="hidden" name="partes-${index}-DELETE" id="id_partes-${index}-DELETE">
+                </div>
+            `);
+            container.append(form);
         });
-        totalFormsInput.val(formNum);
+        
+        // Actualizar el formulario de gestión
+        $('#id_partes-TOTAL_FORMS').val(partesSeleccionadas.length);
     }
 
-    // Initial load for edit pages
-    // This part would need to be implemented if you want to load existing relations on page load
+    // Cargar datos iniciales si estamos en edición
+    {% if object %}
+    $(document).ready(function() {
+        // Cargar niños existentes
+        {% for caso_nino in object.caso_ninos.all %}
+        ninosSeleccionados.push({
+            id: {{ caso_nino.nino.id }},
+            nombre: '{{ caso_nino.nino.nombre|escapejs }}',
+            apellido: '{{ caso_nino.nino.apellido|escapejs }}',
+            dni: '{{ caso_nino.nino.dni|escapejs }}'
+        });
+        {% endfor %}
+        
+        // Cargar partes existentes
+        {% for caso_parte in object.caso_partes.all %}
+        partesSeleccionadas.push({
+            id: {{ caso_parte.parte.id }},
+            nombre: '{{ caso_parte.parte.nombre|escapejs }}',
+            apellido: '{{ caso_parte.parte.apellido|escapejs }}',
+            dni: '{{ caso_parte.parte.dni|escapejs }}',
+            vinculo: '{{ caso_parte.tipo_relacion|escapejs }}'
+        });
+        {% endfor %}
+        
+        // Actualizar las vistas
+        actualizarNinosDisplay();
+        actualizarNinoFormset();
+        actualizarPartesDisplay();
+        actualizarParteFormset();
+    });
+    {% endif %}
 
 });
 </script>
