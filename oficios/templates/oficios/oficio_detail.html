@@ -1,16 +1,65 @@
 {% extends 'base.html' %}
+{% load oficio_filters %}
 
 {% block content %}
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Detalle del Oficio #{{ oficio.id }}</h2>
         <div class="btn-group">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#movimientoModal">
+                <i class="fas fa-exchange-alt me-1"></i> Mover
+            </button>
             <a href="{% url 'oficios:update' oficio.pk %}" class="btn btn-warning">
                 <i class="fas fa-edit me-1"></i> Editar
             </a>
             <a href="{% url 'oficios:list' %}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left me-1"></i> Volver
             </a>
+        </div>
+
+        <!-- Modal para mover el oficio -->
+        <div class="modal fade" id="movimientoModal" tabindex="-1" aria-labelledby="movimientoModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="movimientoModalLabel">Mover Oficio #{{ oficio.id }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form method="post" action="{% url 'oficios:enviar' oficio.pk %}">
+                        {% csrf_token %}
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="nuevo_estado" class="form-label">Nuevo Estado</label>
+                                <select class="form-select" id="nuevo_estado" name="nuevo_estado" required>
+                                    {% for value, label in oficio.ESTADO_CHOICES %}
+                                        {% if value != oficio.estado %}
+                                            <option value="{{ value }}">{{ label }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="institucion" class="form-label">Institución</label>
+                                <select class="form-select" id="institucion" name="institucion" required>
+                                    {% for institucion in instituciones %}
+                                        <option value="{{ institucion.id }}" {% if institucion.id == oficio.institucion.id %}selected{% endif %}>
+                                            {{ institucion.nombre }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="detalle" class="form-label">Detalle del movimiento</label>
+                                <textarea class="form-control" id="detalle" name="detalle" rows="3" required></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Guardar Movimiento</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -193,6 +242,67 @@
         </div>
     </div>
     {% endif %}
+
+    <!-- Sección de Historial de Movimientos -->
+    <div class="card mt-4">
+        <div class="card-header bg-dark text-white">
+            <h4 class="mb-0">
+                <i class="fas fa-history me-2"></i>Historial de Movimientos
+            </h4>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Fecha y Hora</th>
+                            <th>Usuario</th>
+                            <th>Estado Anterior</th>
+                            <th>Nuevo Estado</th>
+                            <th>Institución</th>
+                            <th>Detalles</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for movimiento in oficio.movimientos.all %}
+                        <tr>
+                            <td>{{ movimiento.fecha_creacion|date:"d/m/Y H:i" }}</td>
+                            <td>
+                                {% if movimiento.usuario %}
+                                    {{ movimiento.usuario.get_full_name|default:movimiento.usuario.username }}
+                                {% else %}
+                                    Sistema
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if movimiento.estado_anterior %}
+                                <span class="badge bg-{{ movimiento.estado_anterior|estado_badge_class }}">
+                                    {{ movimiento.get_estado_anterior_display }}
+                                </span>
+                                {% else %}
+                                <span class="badge bg-light text-dark">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge bg-{{ movimiento.estado_nuevo|estado_badge_class }}">
+                                    {{ movimiento.get_estado_nuevo_display }}
+                                </span>
+                            </td>
+                            <td>{{ movimiento.institucion.nombre|default:"-" }}</td>
+                            <td>{{ movimiento.detalle|truncatechars:50 }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-3">
+                                <i class="fas fa-info-circle me-1"></i> No hay movimientos registrados.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
     <!-- Sección de Documento Adjunto -->
     <div class="card mt-4">

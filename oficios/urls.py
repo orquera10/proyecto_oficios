@@ -14,4 +14,7 @@ urlpatterns = [
     
     # API para búsqueda de niños
     path('api/ninos/buscar/', views.buscar_ninos, name='buscar_ninos'),
+    
+    # Acción para marcar oficio como enviado
+    path('<int:pk>/enviar/', views.OficioEnviarView.as_view(), name='enviar'),
 ]

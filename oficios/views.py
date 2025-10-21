@@ -1,14 +1,17 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
-from django.urls import reverse_lazy
+from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView, View
+from django.urls import reverse_lazy, reverse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.utils import timezone
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect
 from django.db.models import Q, F
+from django.views.decorators.http import require_http_methods
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 
 from .models import (
-    Oficio, Institucion, Caratula, Juzgado
+    Oficio, Institucion, Caratula, Juzgado, MovimientoOficio
 )
 from personas.models import Nino
 from .forms import OficioForm
@@ -129,8 +132,12 @@ class OficioDetailView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         # Agregar la fecha actual para comparar con la fecha de vencimiento
         from django.utils import timezone
-        context['now'] = timezone.now()
+        from .models import Institucion
         
+        context.update({
+            'now': timezone.now(),
+            'instituciones': Institucion.objects.all().order_by('nombre'),
+        })
         return context
 
 
@@ -144,11 +151,58 @@ class OficioUpdateView(LoginRequiredMixin, UpdateView):
     
     def form_valid(self, form):
         self.object = form.save()
-        messages.success(self.request, 'El oficio se ha guardado correctamente.')
-        return super().form_valid(form)
-
         messages.success(self.request, 'El oficio se ha actualizado correctamente.')
         return super().form_valid(form)
+
+
+class OficioEnviarView(LoginRequiredMixin, View):
+    """
+    Vista para manejar el movimiento de un oficio a un nuevo estado.
+    """
+    @method_decorator(login_required)
+    def post(self, request, *args, **kwargs):
+        oficio = get_object_or_404(Oficio, pk=kwargs['pk'])
+        nuevo_estado = request.POST.get('nuevo_estado')
+        institucion_id = request.POST.get('institucion')
+        detalle = request.POST.get('detalle', '').strip()
+        
+        # Validar que el nuevo estado sea válido
+        if nuevo_estado not in dict(oficio.ESTADO_CHOICES):
+            messages.error(request, 'El estado seleccionado no es válido.')
+            return redirect('oficios:detail', pk=oficio.pk)
+            
+        # Validar que el estado sea diferente al actual
+        if nuevo_estado == oficio.estado:
+            messages.warning(request, 'El oficio ya se encuentra en el estado seleccionado.')
+            return redirect('oficios:detail', pk=oficio.pk)
+        
+        try:
+            # Obtener la institución
+            institucion = Institucion.objects.get(pk=institucion_id)
+            
+            # Crear registro del movimiento
+            MovimientoOficio.objects.create(
+                oficio=oficio,
+                usuario=request.user,
+                estado_anterior=oficio.estado,
+                estado_nuevo=nuevo_estado,
+                institucion=institucion,
+                detalle=detalle or f'Cambio de estado de {oficio.get_estado_display()} a {dict(oficio.ESTADO_CHOICES).get(nuevo_estado, nuevo_estado)} por {request.user.get_full_name() or request.user.username}'
+            )
+            
+            # Actualizar estado del oficio
+            oficio.estado = nuevo_estado
+            oficio.institucion = institucion
+            oficio.save(update_fields=['estado', 'institucion'])
+            
+            messages.success(request, f'El oficio ha sido movido a "{dict(oficio.ESTADO_CHOICES).get(nuevo_estado, nuevo_estado)}" correctamente.')
+            
+        except Institucion.DoesNotExist:
+            messages.error(request, 'La institución seleccionada no es válida.')
+        except Exception as e:
+            messages.error(request, f'Ocurrió un error al procesar el movimiento: {str(e)}')
+        
+        return redirect('oficios:detail', pk=oficio.pk)
 
 
 class OficioDeleteView(LoginRequiredMixin, DeleteView):
@@ -157,5 +211,5 @@ class OficioDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('oficios:list')
     
     def delete(self, request, *args, **kwargs):
-        messages.success(request, 'El oficio se ha eliminado exitosamente.')
+        messages.success(self.request, 'El oficio ha sido eliminado correctamente.')
         return super().delete(request, *args, **kwargs)

@@ -263,3 +263,86 @@ class Oficio(models.Model):
                 if os.path.exists(directory) and not os.listdir(directory):
                     os.rmdir(directory)
         super().delete(*args, **kwargs)
+
+
+class MovimientoOficio(models.Model):
+    """
+    Modelo para rastrear los movimientos y cambios de estado de los oficios.
+    """
+    # Usando los mismos estados que el modelo Oficio para mantener consistencia
+    ESTADO_CHOICES = [
+        ('cargado', 'Cargado'),
+        ('asignado', 'Asignado'),
+        ('respondido', 'Respondido'),
+        ('enviado', 'Enviado'),
+        ('devuelto', 'Devuelto'),
+    ]
+    
+    oficio = models.ForeignKey(
+        'Oficio',
+        on_delete=models.CASCADE,
+        related_name='movimientos',
+        verbose_name='Oficio'
+    )
+    
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name='Usuario',
+        related_name='movimientos_oficios'
+    )
+    
+    estado_anterior = models.CharField(
+        max_length=20,
+        choices=ESTADO_CHOICES,
+        null=True,
+        blank=True,
+        verbose_name='Estado Anterior'
+    )
+    
+    estado_nuevo = models.CharField(
+        max_length=20,
+        choices=ESTADO_CHOICES,
+        verbose_name='Nuevo Estado'
+    )
+    
+    detalle = models.TextField(
+        verbose_name='Detalle del movimiento',
+        help_text='Descripción detallada del movimiento o cambio realizado',
+        blank=True
+    )
+    
+    fecha_creacion = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Fecha de creación'
+    )
+    
+    institucion = models.ForeignKey(
+        'Institucion',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name='Institución',
+        related_name='movimientos_oficios'
+    )
+    
+    class Meta:
+        verbose_name = 'Movimiento de Oficio'
+        verbose_name_plural = 'Movimientos de Oficios'
+        ordering = ['-fecha_creacion']
+    
+    def __str__(self):
+        return f"Movimiento {self.id} - {self.get_estado_nuevo_display()} - {self.fecha_creacion.strftime('%d/%m/%Y %H:%M')}"
+    
+    def save(self, *args, **kwargs):
+        # Si es un movimiento nuevo y no tiene estado_anterior, usar el estado actual del oficio
+        if not self.pk and not self.estado_anterior and self.oficio:
+            self.estado_anterior = self.oficio.estado
+        
+        # Si se proporciona una institución, usarla, de lo contrario usar la del oficio
+        if not self.institucion and self.oficio and self.oficio.institucion:
+            self.institucion = self.oficio.institucion
+            
+        super().save(*args, **kwargs)
