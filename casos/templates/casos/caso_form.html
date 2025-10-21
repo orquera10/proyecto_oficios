@@ -259,23 +259,26 @@ $(document).ready(function() {
         const container = $('#ninos-seleccionados-display');
         container.empty();
         
-        if (ninosSeleccionados.length === 0) {
+        // Filtrar solo los niños que no están marcados como eliminados
+        const ninosActivos = ninosSeleccionados.filter(nino => !nino.deleted);
+        
+        if (ninosActivos.length === 0) {
             container.html('<p class="text-muted">No hay niños seleccionados.</p>');
             return;
         }
         
         const ul = $('<ul class="list-group"></ul>');
         
-        ninosSeleccionados.forEach(nino => {
-            const li = $(`
+        ninosActivos.forEach(nino => {
+            const item = $(`
                 <li class="list-group-item d-flex justify-content-between align-items-center" data-nino-id="${nino.id}">
-                    ${nino.nombre} ${nino.apellido} (DNI: ${nino.dni})
+                    ${nino.apellido}, ${nino.nombre} (DNI: ${nino.dni || 'Sin DNI'})
                     <button type="button" class="btn btn-sm btn-outline-danger btn-remove-nino">
                         <i class="fas fa-times"></i>
                     </button>
                 </li>
             `);
-            ul.append(li);
+            ul.append(item);
         });
         
         container.html(ul);
@@ -286,13 +289,13 @@ $(document).ready(function() {
         container.empty();
         
         ninosSeleccionados.forEach((nino, index) => {
-            const formId = `nino-form-${index}`;
             const form = $(`
-                <div id="${formId}" class="nino-form">
-                    <input type="hidden" name="ninos-${index}-nino" value="${nino.id}">
-                    <input type="hidden" name="ninos-${index}-id" value="">
-                    <input type="hidden" name="ninos-${index}-caso" value="">
-                    <input type="hidden" name="ninos-${index}-DELETE" id="id_ninos-${index}-DELETE">
+                <div class="nino-form">
+                    <input type="hidden" name="ninos-${index}-id" id="id_ninos-${index}-id" value="${nino.caso_nino_id || ''}">
+                    <input type="hidden" name="ninos-${index}-caso" id="id_ninos-${index}-caso" value="{{ object.id|default:'' }}">
+                    <input type="hidden" name="ninos-${index}-nino" id="id_ninos-${index}-nino" value="${nino.id}">
+                    <input type="hidden" name="ninos-${index}-observaciones" id="id_ninos-${index}-observaciones" value="${nino.observaciones || ''}">
+                    <input type="hidden" name="ninos-${index}-DELETE" id="id_ninos-${index}-DELETE" value="${nino.deleted ? 'on' : ''}">
                 </div>
             `);
             container.append(form);
@@ -300,6 +303,9 @@ $(document).ready(function() {
         
         // Actualizar el formulario de gestión
         $('#id_ninos-TOTAL_FORMS').val(ninosSeleccionados.length);
+        
+        // Actualizar el contador de formularios para el formset
+        $('input[name$="-TOTAL_FORMS"]').val(ninosSeleccionados.length);
     }
 
     // PARTES
@@ -387,14 +393,16 @@ $(document).ready(function() {
         const container = $('#partes-seleccionadas-display');
         container.empty();
         
-        if (partesSeleccionadas.length === 0) {
+        const partesActivas = partesSeleccionadas.filter(parte => !parte.deleted);
+
+        if (partesActivas.length === 0) {
             container.html('<p class="text-muted">No hay partes seleccionadas.</p>');
             return;
         }
         
         const ul = $('<ul class="list-group"></ul>');
         
-        partesSeleccionadas.forEach(parte => {
+        partesActivas.forEach(parte => {
             const li = $(`
                 <li class="list-group-item" data-parte-id="${parte.id}">
                     <div class="d-flex justify-content-between align-items-center">
@@ -419,14 +427,14 @@ $(document).ready(function() {
         container.empty();
         
         partesSeleccionadas.forEach((parte, index) => {
-            const formId = `parte-form-${index}`;
             const form = $(`
-                <div id="${formId}" class="parte-form">
-                    <input type="hidden" name="partes-${index}-parte" value="${parte.id}">
-                    <input type="hidden" name="partes-${index}-tipo_relacion" value="${parte.vinculo || ''}">
-                    <input type="hidden" name="partes-${index}-id" value="">
-                    <input type="hidden" name="partes-${index}-caso" value="">
-                    <input type="hidden" name="partes-${index}-DELETE" id="id_partes-${index}-DELETE">
+                <div class="parte-form">
+                    <input type="hidden" name="partes-${index}-id" id="id_partes-${index}-id" value="${parte.caso_parte_id || ''}">
+                    <input type="hidden" name="partes-${index}-caso" id="id_partes-${index}-caso" value="{{ object.id|default:'' }}">
+                    <input type="hidden" name="partes-${index}-parte" id="id_partes-${index}-parte" value="${parte.id}">
+                    <input type="hidden" name="partes-${index}-tipo_relacion" id="id_partes-${index}-tipo_relacion" value="${parte.vinculo || ''}">
+                    <input type="hidden" name="partes-${index}-observaciones" id="id_partes-${index}-observaciones" value="">
+                    <input type="hidden" name="partes-${index}-DELETE" id="id_partes-${index}-DELETE" value="${parte.deleted ? 'on' : ''}">
                 </div>
             `);
             container.append(form);
@@ -434,7 +442,44 @@ $(document).ready(function() {
         
         // Actualizar el formulario de gestión
         $('#id_partes-TOTAL_FORMS').val(partesSeleccionadas.length);
+        
+        // Actualizar el contador de formularios para el formset
+        $('input[name$="-TOTAL_FORMS"]').val(partesSeleccionadas.length);
     }
+
+    // Delegación de eventos para eliminar niños
+    $('#ninos-seleccionados-display').on('click', '.btn-remove-nino', function(e) {
+        e.preventDefault(); // Prevenir el comportamiento por defecto
+        e.stopPropagation(); // Detener la propagación del evento
+        const ninoId = $(this).closest('li').data('nino-id');
+        
+        // Marcar como eliminado en lugar de quitarlo del array
+        const nino = ninosSeleccionados.find(n => n.id === ninoId);
+        if (nino) {
+            nino.deleted = true;
+            actualizarNinosDisplay();
+            actualizarNinoFormset();
+        }
+        
+        return false; // Prevenir cualquier otro comportamiento
+    });
+
+    // Delegación de eventos para eliminar partes
+    $('#partes-seleccionadas-display').on('click', '.btn-remove-parte', function(e) {
+        e.preventDefault(); // Prevenir el comportamiento por defecto
+        e.stopPropagation(); // Detener la propagación del evento
+        const parteId = $(this).closest('li').data('parte-id');
+        
+        // Marcar como eliminado en lugar de quitarlo del array
+        const parte = partesSeleccionadas.find(p => p.id === parteId);
+        if (parte) {
+            parte.deleted = true;
+            actualizarPartesDisplay();
+            actualizarParteFormset();
+        }
+        
+        return false; // Prevenir cualquier otro comportamiento
+    });
 
     // Cargar datos iniciales si estamos en edición
     {% if object %}
@@ -451,7 +496,9 @@ $(document).ready(function() {
                     nombre: '{{ form.instance.nino.nombre|escapejs }}',
                     apellido: '{{ form.instance.nino.apellido|escapejs }}',
                     dni: '{{ form.instance.nino.dni|default:""|escapejs }}',
-                    observaciones: '{{ form.instance.observaciones|default:""|escapejs }}'
+                    observaciones: '{{ form.instance.observaciones|default:""|escapejs }}',
+                    caso_nino_id: '{{ form.instance.pk|default:""|escapejs }}',
+                    deleted: false
                 });
             {% endif %}
         {% endfor %}
@@ -464,7 +511,9 @@ $(document).ready(function() {
                     nombre: '{{ form.instance.parte.nombre|escapejs }}',
                     apellido: '{{ form.instance.parte.apellido|escapejs }}',
                     dni: '{{ form.instance.parte.dni|default:""|escapejs }}',
-                    vinculo: '{{ form.instance.tipo_relacion|default:""|escapejs }}'
+                    vinculo: '{{ form.instance.tipo_relacion|default:""|escapejs }}',
+                    caso_parte_id: '{{ form.instance.pk|default:""|escapejs }}',
+                    deleted: false
                 });
             {% endif %}
         {% endfor %}

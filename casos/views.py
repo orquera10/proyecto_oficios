@@ -25,7 +25,9 @@ class CasoCreateView(LoginRequiredMixin, CreateView):
     model = Caso
     form_class = CasoForm
     template_name = 'casos/caso_form.html'
-    success_url = reverse_lazy('casos:list')
+
+    def get_success_url(self):
+        return reverse_lazy('casos:detail', kwargs={'pk': self.object.pk})
     
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -76,7 +78,9 @@ class CasoUpdateView(LoginRequiredMixin, UpdateView):
     model = Caso
     form_class = CasoForm
     template_name = 'casos/caso_form.html'
-    success_url = reverse_lazy('casos:list')
+
+    def get_success_url(self):
+        return reverse_lazy('casos:detail', kwargs={'pk': self.object.pk})
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
