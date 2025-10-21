@@ -10,7 +10,7 @@ class OficioForm(forms.ModelForm):
         fields = [
             'tipo', 'nro_oficio', 'expte', 'institucion', 'juzgado',
             'plazo_horas', 'fecha_emision', 'caratula',
-            'caratula_oficio', 'archivo_pdf'
+            'caratula_oficio', 'archivo_pdf', 'caso'
         ]
         widgets = {
             'fecha_emision': forms.DateTimeInput(attrs={'type': 'datetime-local'}, format='%Y-%m-%dT%H:%M'),
@@ -24,6 +24,7 @@ class OficioForm(forms.ModelForm):
                 'class': 'form-control',
                 'accept': '.pdf',
             }),
+            'caso': forms.HiddenInput(),
         }
         labels = {
             'juzgado': 'Agente',

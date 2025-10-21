@@ -94,6 +94,13 @@ class OficioCreateView(LoginRequiredMixin, CreateView):
     form_class = OficioForm
     template_name = 'oficios/oficio_form.html'
     
+    def get_initial(self):
+        initial = super().get_initial()
+        caso_id = self.request.GET.get('caso')
+        if caso_id:
+            initial['caso'] = caso_id
+        return initial
+    
     def get_success_url(self):
         return reverse_lazy('oficios:detail', kwargs={'pk': self.object.pk})
     
