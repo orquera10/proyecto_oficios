@@ -146,3 +146,15 @@ class Caso(models.Model):
     
     def __str__(self):
         return f"{self.get_tipo_display()} - {self.expte}"
+        
+    def get_all_movimientos(self):
+        """
+        Obtiene todos los movimientos de los oficios relacionados con este caso.
+        Retorna un queryset ordenado por fecha de creación descendente.
+        """
+        from oficios.models import MovimientoOficio
+        return MovimientoOficio.objects.filter(
+            oficio__caso=self
+        ).select_related(
+            'oficio', 'usuario', 'institucion'
+        ).order_by('-fecha_creacion')

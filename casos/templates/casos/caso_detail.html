@@ -1,4 +1,5 @@
 {% extends 'casos/base_casos.html' %}
+{% load oficio_filters %}
 
 {% block page_title %}Detalle del Caso {{ object.expte }}{% endblock %}
 
@@ -136,18 +137,20 @@
             <table class="table table-sm">
                 <thead class="table-light">
                     <tr>
+                        <th>ID Oficio</th>
                         <th>Nro. Oficio</th>
                         <th>Tipo</th>
                         <th>Estado</th>
                         <th>Fecha Emisión</th>
-                        <th>Fecha Vencimiento</th>
+                        <th>Vencimiento</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for oficio in object.oficios.all %}
                     <tr>
-                        <td>{{ oficio.nro_oficio }}</td>
+                        <td>{{ oficio.id }}</td>
+                        <td>{{ oficio.nro_oficio|default:"-" }}</td>
                         <td>{{ oficio.get_tipo_display }}</td>
                         <td><span class="badge bg-{{ oficio.get_estado_badge_class }}">{{ oficio.get_estado_display }}</span></td>
                         <td>{{ oficio.fecha_emision|date:"d/m/Y" }}</td>
@@ -169,6 +172,71 @@
         {% endif %}
     </div>
 </div>
+
+{% with movimientos=object.get_all_movimientos %}
+    {% if movimientos %}
+    <!-- Sección de Movimientos de Oficios -->
+    <div class="card mt-4">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-history me-2"></i>Historial de Movimientos
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Fecha y Hora</th>
+                            <th>Oficio</th>
+                            <th>Usuario</th>
+                            <th>Estado Anterior</th>
+                            <th>Nuevo Estado</th>
+                            <th>Institución</th>
+                            <th>Detalles</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for movimiento in movimientos %}
+                        <tr>
+                            <td>{{ movimiento.fecha_creacion|date:"d/m/Y H:i" }}</td>
+                            <td>
+                                <a href="{% url 'oficios:detail' movimiento.oficio.pk %}" class="text-decoration-none">
+                                    {{ movimiento.oficio.nro_oficio|default:movimiento.oficio.id }}
+                                </a>
+                            </td>
+                            <td>
+                                {% if movimiento.usuario %}
+                                    {{ movimiento.usuario.get_full_name|default:movimiento.usuario.username }}
+                                {% else %}
+                                    Sistema
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if movimiento.estado_anterior %}
+                                <span class="badge bg-{{ movimiento.estado_anterior|estado_badge_class }}">
+                                    {{ movimiento.get_estado_anterior_display }}
+                                </span>
+                                {% else %}
+                                <span class="badge bg-light text-dark">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge bg-{{ movimiento.estado_nuevo|estado_badge_class }}">
+                                    {{ movimiento.get_estado_nuevo_display }}
+                                </span>
+                            </td>
+                            <td>{{ movimiento.institucion.nombre|default:"-" }}</td>
+                            <td>{{ movimiento.detalle|truncatechars:30 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+{% endwith %}
 
 <div class="d-flex justify-content-between mt-4">
     <a href="{% url 'casos:list' %}" class="btn btn-secondary">
