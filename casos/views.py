@@ -15,12 +15,28 @@ class CasoListView(LoginRequiredMixin, ListView):
     paginate_by = 10
     
     def get_queryset(self):
+        from .filters import CasoFilter
+        
+        # Obtener el queryset base
         queryset = super().get_queryset()
+        
         # Filtrar por usuario a menos que sea superusuario
         if not self.request.user.is_superuser:
             queryset = queryset.filter(usuario=self.request.user)
-        return queryset.order_by('-creado')
-
+        
+        # Aplicar filtros
+        self.filterset = CasoFilter(self.request.GET, queryset=queryset)
+        
+        # Ordenar por defecto por fecha de creación descendente
+        return self.filterset.qs.order_by('-creado')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Agregar el filtro al contexto
+        context['filter'] = getattr(self, 'filterset', None) or \
+                          CasoFilter(queryset=self.get_queryset())
+        return context
+    
 class CasoCreateView(LoginRequiredMixin, CreateView):
     model = Caso
     form_class = CasoForm
