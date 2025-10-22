@@ -164,6 +164,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+# Configuración de sesión (24 horas)
+SESSION_COOKIE_AGE = 86400  # 24 horas en segundos
+SESSION_SAVE_EVERY_REQUEST = True  # Renovar la sesión con cada solicitud
+SESSION_COOKIE_SECURE = False  # Cambiar a True en producción con HTTPS
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # La sesión no expira al cerrar el navegador
+
 # Tamaño máximo de archivo para cargar (10MB)
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB en bytes
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB en bytes
