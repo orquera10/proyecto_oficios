@@ -16,6 +16,13 @@ class CasoForm(ModelForm):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
+        
+        # Configurar clases de error para los campos
+        for field_name, field in self.fields.items():
+            # Agregar clase de error si el campo tiene errores
+            if field_name in self.errors:
+                field.widget.attrs['class'] = field.widget.attrs.get('class', '') + ' is-invalid'
+                field.widget.attrs['style'] = 'border-color: #dc3545;'
     
     def save(self, commit=True):
         instance = super().save(commit=False)

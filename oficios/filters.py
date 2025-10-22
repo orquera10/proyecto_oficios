@@ -4,12 +4,6 @@ from django.db.models import Q
 from .models import Oficio, Institucion, Juzgado, Caratula
 
 class OficioFilter(django_filters.FilterSet):
-    TIPO_CHOICES = [
-        ('', 'Todos'),
-        ('MPA', 'MPA'),
-        ('Judicial', 'Judicial'),
-    ]
-    
     ESTADO_CHOICES = [
         ('', 'Todos'),
         ('cargado', 'Cargado'),
@@ -29,14 +23,6 @@ class OficioFilter(django_filters.FilterSet):
     )
     
     # Filtros básicos
-    tipo = django_filters.ChoiceFilter(
-        field_name='tipo',
-        label='Tipo de oficio',
-        choices=TIPO_CHOICES,
-        empty_label='Todos los tipos',
-        widget=forms.Select(attrs={'class': 'form-select form-select-sm'})
-    )
-    
     estado = django_filters.ChoiceFilter(
         field_name='estado',
         label='Estado',
@@ -96,7 +82,6 @@ class OficioFilter(django_filters.FilterSet):
         model = Oficio
         fields = [
             'busqueda',
-            'tipo',
             'estado',
             'fecha_desde',
             'fecha_hasta',
@@ -110,9 +95,11 @@ class OficioFilter(django_filters.FilterSet):
         """
         if value:
             return queryset.filter(
-                Q(expte__icontains=value) |
+                Q(denuncia__icontains=value) |
+                Q(legajo__icontains=value) |
                 Q(institucion__nombre__icontains=value) |
-                Q(juzgado__nombre__icontains=value)
+                Q(juzgado__nombre__icontains=value) |
+                Q(nro_oficio__icontains=value)
             ).distinct()
         return queryset
     

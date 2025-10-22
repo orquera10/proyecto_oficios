@@ -102,7 +102,7 @@ class Caso(models.Model):
         default='MPA'
     )
     
-    expte = models.CharField('Expediente', max_length=50, unique=True)
+    expte = models.CharField('Expediente', max_length=50, unique=True, blank=True, null=True)
     
     estado = models.CharField(
         'Estado',

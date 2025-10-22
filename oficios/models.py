@@ -1,5 +1,6 @@
 import os
 from django.db import models
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.core.validators import MinValueValidator, FileExtensionValidator
 from django.contrib.auth import get_user_model
@@ -74,11 +75,6 @@ class Juzgado(models.Model):
         return self.nombre
 
 class Oficio(models.Model):
-    TIPO_CHOICES = [
-        ('MPA', 'MPA'),
-        ('Judicial', 'Judicial'),
-    ]
-    
     ESTADO_CHOICES = [
         ('cargado', 'Cargado'),
         ('asignado', 'Asignado'),
@@ -86,12 +82,6 @@ class Oficio(models.Model):
         ('enviado', 'Enviado'),
         ('devuelto', 'Devuelto'),
     ]
-    
-    tipo = models.CharField(
-        max_length=20,
-        choices=TIPO_CHOICES,
-        verbose_name='Tipo de Oficio'
-    )
     nro_oficio = models.CharField(
         max_length=50,
         verbose_name='Número de Oficio',
@@ -99,11 +89,19 @@ class Oficio(models.Model):
         blank=True,
         null=True
     )
-    expte = models.CharField(
+    denuncia = models.CharField(
         max_length=50,
-        verbose_name='Expediente',
+        verbose_name='Número de Denuncia',
         blank=True,
-        null=True
+        null=True,
+        help_text='Número de denuncia relacionada al oficio'
+    )
+    legajo = models.CharField(
+        max_length=50,
+        verbose_name='Número de Legajo',
+        blank=True,
+        null=True,
+        help_text='Número de legajo relacionado al oficio'
     )
     institucion = models.ForeignKey(
         Institucion,
@@ -189,39 +187,63 @@ class Oficio(models.Model):
         verbose_name_plural = 'Oficios'
         ordering = ['-fecha_emision']
 
-    def save(self, *args, **kwargs):
-        """Guardar Oficio calculando fecha_vencimiento y gestionando archivo_pdf correctamente."""
-        # Calcular fecha de vencimiento según plazo_horas y fecha_emision
-        if self.plazo_horas and self.fecha_emision:
-            # Si es actualización, solo recalcular si cambió plazo o fecha_emision
-            if self.pk:
-                try:
-                    old = Oficio.objects.get(pk=self.pk)
-                except Oficio.DoesNotExist:
-                    old = None
-                if (not old or self.plazo_horas != getattr(old, 'plazo_horas', None) or self.fecha_emision != getattr(old, 'fecha_emision', None)):
-                    self.fecha_vencimiento = self.fecha_emision + timezone.timedelta(hours=self.plazo_horas)
-            else:
-                self.fecha_vencimiento = self.fecha_emision + timezone.timedelta(hours=self.plazo_horas)
+    def clean(self):
+        super().clean()
+        # Validar que si se proporciona un número de denuncia, no exista otro con el mismo número
+        if self.denuncia:
+            # Buscar si existe otro oficio con la misma denuncia (excluyendo el actual)
+            queryset = Oficio.objects.filter(denuncia=self.denuncia)
+            if self.pk:  # Si es una actualización, excluir el registro actual
+                queryset = queryset.exclude(pk=self.pk)
+            if queryset.exists():
+                raise ValidationError({
+                    'denuncia': 'Ya existe un oficio con este número de denuncia.'
+                })
+                
+        # Validar que si se proporciona un número de legajo, no exista otro con el mismo número
+        if self.legajo:
+            # Buscar si existe otro oficio con el mismo legajo (excluyendo el actual)
+            queryset = Oficio.objects.filter(legajo=self.legajo)
+            if self.pk:  # Si es una actualización, excluir el registro actual
+                queryset = queryset.exclude(pk=self.pk)
+            if queryset.exists():
+                raise ValidationError({
+                    'legajo': 'Ya existe un oficio con este número de legajo.'
+                })
 
-        # Manejo especial de archivo_pdf para ubicarlo en carpeta con ID
-        pdf_file = getattr(self, 'archivo_pdf', None)
-        if not self.pk:
-            if pdf_file:
-                # Guardar primero sin archivo para obtener PK
-                self.archivo_pdf = None
-                super().save(*args, **kwargs)
-                # Ahora guardar el archivo asignándolo tras tener PK
-                self.archivo_pdf = pdf_file
-                super().save(update_fields=['archivo_pdf'])
-                return
-            else:
-                # No hay archivo, guardado normal
-                super().save(*args, **kwargs)
-                return
-        else:
-            # Actualización normal (con o sin cambio de archivo)
-            super().save(*args, **kwargs)
+    def save(self, *args, **kwargs):
+        # Validar el modelo antes de guardar
+        self.full_clean()
+        
+        # Si es un oficio nuevo (no tiene ID) y tiene plazo_horas, calcula la fecha de vencimiento
+        if not self.id and self.plazo_horas:
+            self.fecha_vencimiento = timezone.now() + timezone.timedelta(hours=self.plazo_horas)
+        
+        # Si el oficio ya existe, verifica si se modificó el plazo_horas
+        elif self.id and self.plazo_horas:
+            # Obtener el oficio actual de la base de datos
+            old_instance = Oficio.objects.get(pk=self.id)
+            if old_instance.plazo_horas != self.plazo_horas:
+                self.fecha_vencimiento = timezone.now() + timezone.timedelta(hours=self.plazo_horas)
+        
+        # Si no se especifica un usuario, usar el usuario actual
+        if not self.usuario_id and hasattr(self, '_current_user'):
+            self.usuario = self._current_user
+        
+        # Si el oficio ya existe y tiene un archivo PDF, verificar si se está actualizando
+        if self.id and self.archivo_pdf:
+            try:
+                # Obtener el oficio actual de la base de datos
+                old_instance = Oficio.objects.get(pk=self.id)
+                # Si el archivo ha cambiado, eliminar el archivo anterior
+                if old_instance.archivo_pdf and old_instance.archivo_pdf != self.archivo_pdf:
+                    # Eliminar el archivo anterior del sistema de archivos
+                    if os.path.isfile(old_instance.archivo_pdf.path):
+                        os.remove(old_instance.archivo_pdf.path)
+            except Oficio.DoesNotExist:
+                pass  # Es un nuevo oficio, no hay archivo anterior que eliminar
+        
+        super().save(*args, **kwargs)
 
     def get_estado_badge_class(self):
         """Devuelve la clase de Bootstrap para el badge de estado."""
@@ -249,7 +271,7 @@ class Oficio(models.Model):
     )
 
     def __str__(self):
-        return f"Oficio {self.id} - {self.get_tipo_display()}"
+        return f"Oficio {self.id}"
 
     # Nota: Se removió el segundo save duplicado que sobrescribía el cálculo de fecha_vencimiento
 

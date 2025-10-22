@@ -8,7 +8,7 @@ class OficioForm(forms.ModelForm):
     class Meta:
         model = Oficio
         fields = [
-            'tipo', 'nro_oficio', 'expte', 'institucion', 'juzgado',
+            'nro_oficio', 'denuncia', 'legajo', 'institucion', 'juzgado',
             'plazo_horas', 'fecha_emision', 'caratula',
             'caratula_oficio', 'archivo_pdf', 'caso'
         ]
@@ -17,7 +17,8 @@ class OficioForm(forms.ModelForm):
             'nro_oficio': forms.TextInput(attrs={
                 'class': 'form-control',
             }),
-            'expte': forms.TextInput(attrs={'class': 'form-control'}),
+            'denuncia': forms.TextInput(attrs={'class': 'form-control'}),
+            'legajo': forms.TextInput(attrs={'class': 'form-control'}),
             'plazo_horas': forms.NumberInput(attrs={'class': 'form-control'}),
             'juzgado': forms.Select(attrs={'class': 'form-control'}),
             'archivo_pdf': forms.FileInput(attrs={
@@ -50,7 +51,18 @@ class OficioForm(forms.ModelForm):
         if not self.instance.pk:
             self.initial['fecha_emision'] = timezone.now().strftime('%Y-%m-%dT%H:%M')
         
-        # Add Bootstrap classes to all fields
+        # Configurar campos opcionales
+        self.fields['nro_oficio'].required = False
+        self.fields['denuncia'].required = False
+        self.fields['legajo'].required = False
+        self.fields['institucion'].required = False
+        self.fields['juzgado'].required = False
+        self.fields['plazo_horas'].required = False
+        self.fields['caratula'].required = False
+        self.fields['caratula_oficio'].required = False
+        self.fields['archivo_pdf'].required = False
+        
+        # Agregar clases de Bootstrap a todos los campos
         for field_name, field in self.fields.items():
-            if field_name != 'fecha_emision':  # Already handled
+            if field_name != 'fecha_emision':  # Ya está manejado
                 field.widget.attrs.update({'class': 'form-control'})

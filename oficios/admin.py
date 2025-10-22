@@ -103,9 +103,9 @@ class JuzgadoAdmin(admin.ModelAdmin):
 
 @admin.register(Oficio)
 class OficioAdmin(admin.ModelAdmin):
-    list_display = ('id', 'tipo', 'expte', 'institucion', 'juzgado', 'estado_badge', 'fecha_emision', 'fecha_vencimiento', 'usuario', 'creado')
-    list_filter = ('tipo', 'estado', 'institucion', 'juzgado', 'usuario', 'fecha_emision', 'fecha_vencimiento')
-    search_fields = ('expte', 'institucion__nombre', 'juzgado__nombre', 'usuario__username')
+    list_display = ('id', 'denuncia', 'legajo', 'institucion', 'juzgado', 'estado_badge', 'fecha_emision', 'fecha_vencimiento', 'usuario', 'creado')
+    list_filter = ('estado', 'institucion', 'juzgado', 'usuario', 'fecha_emision', 'fecha_vencimiento')
+    search_fields = ('denuncia', 'legajo', 'institucion__nombre', 'juzgado__nombre', 'usuario__username')
     list_select_related = ('institucion', 'juzgado', 'usuario')
     readonly_fields = ('creado', 'actualizado', 'estado_badge')
     date_hierarchy = 'fecha_emision'
