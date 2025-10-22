@@ -1,7 +1,7 @@
 {% extends 'casos/base_casos.html' %}
 {% load oficio_filters %}
 
-{% block page_title %}Detalle del Caso {{ object.expte }}{% endblock %}
+{% block page_title %}Detalle del Caso #{{ object.id }}{% endblock %}
 
 {% block page_actions %}
 <a href="{% url 'casos:update' object.pk %}" class="btn btn-warning me-2">
@@ -134,13 +134,13 @@
     <div class="card-body">
         {% if object.oficios.all %}
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table class="table table-sm table-hover">
                 <thead class="table-light">
                     <tr>
                         <th>ID Oficio</th>
                         <th>Nro. Oficio</th>
-                        <th>Tipo</th>
-                        <th>Estado</th>
+                        <th>Denuncia</th>
+                        <th>Legajo</th>
                         <th>Fecha Emisión</th>
                         <th>Vencimiento</th>
                         <th>Acciones</th>
@@ -151,14 +151,19 @@
                     <tr>
                         <td>{{ oficio.id }}</td>
                         <td>{{ oficio.nro_oficio|default:"-" }}</td>
-                        <td>{{ oficio.get_tipo_display }}</td>
-                        <td><span class="badge bg-{{ oficio.get_estado_badge_class }}">{{ oficio.get_estado_display }}</span></td>
-                        <td>{{ oficio.fecha_emision|date:"d/m/Y" }}</td>
-                        <td>{{ oficio.fecha_vencimiento|date:"d/m/Y"|default:"-" }}</td>
+                        <td>{{ oficio.denuncia|default:"-" }}</td>
+                        <td>{{ oficio.legajo|default:"-" }}</td>
+                        <td>{{ oficio.fecha_emision|date:"d/m/Y H:i" }}</td>
+                        <td>{% if oficio.fecha_vencimiento %}{{ oficio.fecha_vencimiento|date:"d/m/Y H:i" }}{% else %}-{% endif %}</td>
                         <td>
-                            <a href="{% url 'oficios:detail' oficio.pk %}" class="btn btn-sm btn-info">
-                                <i class="bi bi-eye"></i>
-                            </a>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a href="{% url 'oficios:detail' oficio.pk %}" class="btn btn-info" title="Ver detalles">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{% url 'oficios:update' oficio.pk %}" class="btn btn-warning" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}

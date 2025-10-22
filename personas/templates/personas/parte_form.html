@@ -33,12 +33,23 @@
                     </div>
                 </div>
                 
-                <div class="mb-3">
-                    <div class="form-group">
-                        <label for="id_dni" class="form-label">DNI</label>
-                        {{ form.dni }}
-                        <div class="invalid-feedback">
-                            Por favor ingrese el DNI.
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="id_dni" class="form-label">DNI</label>
+                            {{ form.dni }}
+                            <div class="invalid-feedback">
+                                Por favor ingrese un DNI válido.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="id_telefono" class="form-label">Teléfono</label>
+                            {{ form.telefono }}
+                            <div class="invalid-feedback">
+                                Por favor ingrese un teléfono válido.
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -33,7 +33,8 @@ class Parte(models.Model):
     nombre = models.CharField(max_length=100)
     apellido = models.CharField(max_length=100)
     dni = models.CharField(max_length=20, unique=True)
-    direccion = models.CharField(max_length=200)
+    direccion = models.CharField(max_length=200, blank=True, null=True)
+    telefono = models.CharField('Teléfono', max_length=20, blank=True, null=True)
 
     class Meta:
         verbose_name = 'Parte'

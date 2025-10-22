@@ -32,13 +32,18 @@
                             <td>{{ parte.nombre }}</td>
                             <td>{{ parte.direccion|truncatechars:30 }}</td>
                             <td>
-                                <a href="{% url 'personas:parte_update' parte.pk %}" class="btn btn-sm btn-warning" title="Editar">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <a href="{% url 'personas:parte_delete' parte.pk %}" class="btn btn-sm btn-danger" title="Eliminar"
-                                   onclick="return confirm('¿Está seguro que desea eliminar esta parte?')">
-                                    <i class="fas fa-trash"></i>
-                                </a>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="{% url 'personas:parte_detail' parte.pk %}" class="btn btn-info" title="Ver detalles">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'personas:parte_update' parte.pk %}" class="btn btn-warning" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'personas:parte_delete' parte.pk %}" class="btn btn-danger" title="Eliminar"
+                                       onclick="return confirm('¿Está seguro que desea eliminar esta parte?')">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                         {% empty %}

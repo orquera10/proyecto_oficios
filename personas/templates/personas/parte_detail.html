@@ -7,33 +7,26 @@
         <div class="col-md-8 offset-md-2">
             <div class="card">
                 <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">Detalles del Niño</h4>
+                    <h4 class="mb-0">Detalles de la Parte</h4>
                 </div>
                 <div class="card-body">
                     <div class="row mb-4">
                         <div class="col-md-4 text-center">
                             <div class="bg-light p-4 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 150px; height: 150px;">
-                                <i class="fas fa-child fa-4x text-primary"></i>
+                                <i class="fas fa-user fa-4x text-primary"></i>
                             </div>
                         </div>
                         <div class="col-md-8">
-                            <h2>{{ nino.nombre }} {{ nino.apellido }}</h2>
+                            <h2>{{ parte.nombre }} {{ parte.apellido }}</h2>
                             <p class="text-muted">Información personal</p>
                             <hr>
                             <div class="row">
                                 <div class="col-md-6">
-                                    <p><strong>DNI:</strong> {{ nino.dni|default:"-" }}</p>
-                                    <p><strong>Fecha de Nacimiento:</strong> {{ nino.fecha_nac|date:"d/m/Y"|default:"-" }}</p>
+                                    <p><strong>DNI:</strong> {{ parte.dni|default:"-" }}</p>
+                                    <p><strong>Teléfono:</strong> {{ parte.telefono|default:"-" }}</p>
                                 </div>
                                 <div class="col-md-6">
-                                    <p><strong>Dirección:</strong> {{ nino.direccion|default:"-" }}</p>
-                                    <p><strong>Edad:</strong> 
-                                        {% if nino.edad_calculada is not None %}
-                                            {{ nino.edad_calculada }} años
-                                        {% else %}
-                                            -
-                                        {% endif %}
-                                    </p>
+                                    <p><strong>Dirección:</strong> {{ parte.direccion|default:"-" }}</p>
                                 </div>
                             </div>
                         </div>
@@ -81,21 +74,21 @@
                                 </div>
                             {% else %}
                                 <div class="alert alert-info mb-0">
-                                    No hay casos relacionados con este niño.
+                                    No hay casos relacionados con esta parte.
                                 </div>
                             {% endif %}
                         </div>
                     </div>
 
                     <div class="d-flex justify-content-between">
-                        <a href="{% url 'personas:nino_list' %}" class="btn btn-secondary">
+                        <a href="{% url 'personas:parte_list' %}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> Volver al listado
                         </a>
                         <div>
-                            <a href="{% url 'personas:nino_update' nino.pk %}" class="btn btn-warning">
+                            <a href="{% url 'personas:parte_update' parte.pk %}" class="btn btn-primary">
                                 <i class="fas fa-edit"></i> Editar
                             </a>
-                            <a href="{% url 'personas:nino_delete' nino.pk %}" class="btn btn-danger">
+                            <a href="{% url 'personas:parte_delete' parte.pk %}" class="btn btn-danger">
                                 <i class="fas fa-trash"></i> Eliminar
                             </a>
                         </div>
@@ -110,18 +103,19 @@
 {% block extra_css %}
 <style>
     .card {
-        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-        border: none;
-        border-radius: 0.5rem;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
     }
     .card-header {
-        border-radius: 0.5rem 0.5rem 0 0 !important;
+        font-weight: 600;
     }
-    .bg-primary {
-        background-color: #4e73df !important;
+    .table th {
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        color: #6c757d;
     }
     .badge {
-        font-size: 0.8rem;
+        font-weight: 500;
         padding: 0.35em 0.65em;
     }
 </style>

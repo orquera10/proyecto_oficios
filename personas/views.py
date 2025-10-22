@@ -48,27 +48,17 @@ class NinoDetailView(DetailView):
     context_object_name = 'nino'
     
     def get_queryset(self):
-        return super().get_queryset().prefetch_related('oficios')
+        return super().get_queryset().prefetch_related('casos')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        # Obtener los oficios relacionados con el niño
-        oficios = self.object.oficios.select_related(
-            'institucion', 'juzgado', 'caratula'
-        ).order_by('-fecha_emision')
+        # Obtener los casos relacionados con el niño
+        casos = self.object.casos.all().select_related('usuario').order_by('-creado')
         
-        # Aplicar filtros
-        oficio_filter = OficioFilter(
-            self.request.GET,
-            queryset=oficios,
-            request=self.request
-        )
+        context['casos'] = casos
         
-        context['filter'] = oficio_filter
-        context['oficios'] = oficio_filter.qs
-        
-        # Agregar parámetros de filtro para la paginación
+        # Agregar parámetros para la paginación si es necesario
         get_copy = self.request.GET.copy()
         if 'page' in get_copy:
             del get_copy['page']
@@ -107,6 +97,30 @@ class ParteUpdateView(SuccessMessageMixin, UpdateView):
     template_name = 'personas/parte_form.html'
     success_url = reverse_lazy('personas:parte_list')
     success_message = _("La parte ha sido actualizada exitosamente.")
+
+class ParteDetailView(DetailView):
+    model = Parte
+    template_name = 'personas/parte_detail.html'
+    context_object_name = 'parte'
+    
+    def get_queryset(self):
+        return super().get_queryset().prefetch_related('casos')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Obtener los casos relacionados con la parte
+        casos = self.object.casos.all().select_related('usuario').order_by('-creado')
+        
+        context['casos'] = casos
+        
+        # Agregar parámetros para la paginación si es necesario
+        get_copy = self.request.GET.copy()
+        if 'page' in get_copy:
+            del get_copy['page']
+        context['get_copy'] = get_copy
+        
+        return context
 
 class ParteDeleteView(DeleteView):
     model = Parte

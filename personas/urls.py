@@ -25,6 +25,7 @@ urlpatterns = [
     
     # URLs para Partes
     path('partes/', views.ParteListView.as_view(), name='parte_list'),
+    path('partes/ver/<int:pk>/', views.ParteDetailView.as_view(), name='parte_detail'),
     path('partes/nuevo/', views.ParteCreateView.as_view(), name='parte_create'),
     path('partes/editar/<int:pk>/', views.ParteUpdateView.as_view(), name='parte_update'),
     path('partes/eliminar/<int:pk>/', views.ParteDeleteView.as_view(), name='parte_delete'),

@@ -69,7 +69,7 @@ class NinoForm(forms.ModelForm):
 class ParteForm(forms.ModelForm):
     class Meta:
         model = Parte
-        fields = ['nombre', 'apellido', 'dni', 'direccion']
+        fields = ['nombre', 'apellido', 'dni', 'telefono', 'direccion']
         widgets = {
             'nombre': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -85,6 +85,10 @@ class ParteForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': _('Ingrese el DNI (opcional)')
             }),
+            'telefono': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': _('Ingrese el teléfono (opcional)')
+            }),
             'direccion': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 3,
@@ -95,6 +99,7 @@ class ParteForm(forms.ModelForm):
             'nombre': _('Nombre *'),
             'apellido': _('Apellido *'),
             'dni': _('DNI (opcional)'),
+            'telefono': _('Teléfono (opcional)'),
             'direccion': _('Dirección (opcional)'),
         }
 
@@ -114,4 +119,5 @@ class ParteForm(forms.ModelForm):
         self.fields['nombre'].required = True
         self.fields['apellido'].required = True
         self.fields['dni'].required = False
+        self.fields['telefono'].required = False
         self.fields['direccion'].required = False
