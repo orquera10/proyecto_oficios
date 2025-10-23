@@ -86,11 +86,7 @@
                                     <span class="badge bg-violet me-2">Devuelto</span> Devueltos
                                 </a>
                             </li>
-                            <li>
-                                <a class="dropdown-item" href="#">
-                                    <i class="fas fa-search me-2"></i>Buscar Oficios
-                                </a>
-                            </li>
+                            
                         </ul>
                     </li>
 
@@ -101,6 +97,12 @@
                             <i class="fas fa-users me-1"></i> Personas
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="personasDropdown">
+                            <li>
+                                <a class="dropdown-item" href="{% url 'personas:home' %}">
+                                    <i class="fas fa-home me-2"></i> Inicio de Personas
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
                             <!-- Submenú de Niños -->
                             <li class="dropdown-submenu">
                                 <a class="dropdown-item dropdown-toggle" href="#">
@@ -117,12 +119,7 @@
                                             <i class="fas fa-plus-circle me-2"></i>Nuevo Niño
                                         </a>
                                     </li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li>
-                                        <a class="dropdown-item" href="#">
-                                            <i class="fas fa-search me-2"></i>Buscar Niños
-                                        </a>
-                                    </li>
+                                    
                                 </ul>
                             </li>
 
@@ -142,12 +139,7 @@
                                             <i class="fas fa-plus-circle me-2"></i>Nueva Parte
                                         </a>
                                     </li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li>
-                                        <a class="dropdown-item" href="#">
-                                            <i class="fas fa-search me-2"></i>Buscar Partes
-                                        </a>
-                                    </li>
+                                    
                                 </ul>
                             </li>
                         </ul>

@@ -5,27 +5,40 @@
 {% block content %}
 <div class="container mt-5">
     <h2 class="mb-4">Gestión de Personas</h2>
-    
-    <div class="row">
-        <div class="col-md-6 mb-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Niños</h5>
-                    <p class="card-text">Administre la información de los niños.</p>
-                    <a href="{{ ninos_url }}" class="btn btn-primary">Ver Niños</a>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <a href="{% url 'personas:nino_list' %}" class="text-decoration-none text-reset">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="me-3 text-primary" style="font-size: 2rem;">
+                            <i class="fas fa-child"></i>
+                        </div>
+                        <div>
+                            <h5 class="card-title mb-1">Niños</h5>
+                            <p class="card-text text-muted mb-0">Administrá la información de los niños.</p>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </a>
         </div>
-        
-        <div class="col-md-6 mb-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Partes</h5>
-                    <p class="card-text">Gestione los partes de los niños.</p>
-                    <a href="{{ partes_url }}" class="btn btn-primary">Ver Partes</a>
+
+        <div class="col-md-6">
+            <a href="{% url 'personas:parte_list' %}" class="text-decoration-none text-reset">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="me-3 text-success" style="font-size: 2rem;">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <div>
+                            <h5 class="card-title mb-1">Partes</h5>
+                            <p class="card-text text-muted mb-0">Gestioná las partes vinculadas.</p>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </a>
         </div>
     </div>
 </div>
 {% endblock %}
+

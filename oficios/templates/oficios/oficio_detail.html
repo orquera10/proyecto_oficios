@@ -9,6 +9,11 @@
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#movimientoModal">
                 <i class="fas fa-exchange-alt me-1"></i> Mover
             </button>
+            {% if oficio.estado == 'asignado' %}
+            <button type="button" class="btn btn-success" id="btnResponder" data-bs-toggle="modal" data-bs-target="#movimientoModal">
+                <i class="fas fa-reply me-1"></i> Responder
+            </button>
+            {% endif %}
             <a href="{% url 'oficios:update' oficio.pk %}" class="btn btn-warning">
                 <i class="fas fa-edit me-1"></i> Editar
             </a>
@@ -358,4 +363,27 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var btnResponder = document.getElementById('btnResponder');
+  if (btnResponder) {
+    btnResponder.addEventListener('click', function() {
+      try {
+        var estadoSel = document.getElementById('nuevo_estado');
+        if (estadoSel) {
+          estadoSel.value = 'respondido';
+        }
+        var modalTitle = document.getElementById('movimientoModalLabel');
+        if (modalTitle) {
+          modalTitle.textContent = 'Responder Oficio #' + ("{{ oficio.id }}");
+        }
+      } catch (e) { /* no-op */ }
+    });
+  }
+});
+</script>
 {% endblock %}
