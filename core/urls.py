@@ -5,7 +5,7 @@ from django.contrib.auth import views as auth_views
 app_name = 'core'
 
 urlpatterns = [
-    path('', RedirectView.as_view(pattern_name='oficios:list', permanent=False)),
+    path('', RedirectView.as_view(pattern_name='casos:list', permanent=False)),
     path('accounts/', include('django.contrib.auth.urls')),  # Authentication URLs
     path('oficios/', include('oficios.urls')),  # Include oficios URLs
     path('casos/', include('casos.urls', namespace='casos')),  # Añade esta línea

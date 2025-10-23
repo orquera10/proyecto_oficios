@@ -116,6 +116,17 @@ class OficioCreateView(LoginRequiredMixin, CreateView):
         self.object = form.save(commit=False)
         self.object.usuario = self.request.user
         self.object.save()
+        
+        # Registrar el movimiento de creación
+        MovimientoOficio.objects.create(
+            oficio=self.object,
+            usuario=self.request.user,
+            estado_anterior=None,
+            estado_nuevo='cargado',
+            detalle='Oficio creado',
+            institucion=self.object.institucion
+        )
+        
         messages.success(self.request, 'El oficio se ha creado correctamente.')
         return super().form_valid(form)
 

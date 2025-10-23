@@ -359,8 +359,8 @@ class MovimientoOficio(models.Model):
         return f"Movimiento {self.id} - {self.get_estado_nuevo_display()} - {self.fecha_creacion.strftime('%d/%m/%Y %H:%M')}"
     
     def save(self, *args, **kwargs):
-        # Si es un movimiento nuevo y no tiene estado_anterior, usar el estado actual del oficio
-        if not self.pk and not self.estado_anterior and self.oficio:
+        # Si es un movimiento nuevo y no tiene estado_anterior, solo asignar si no es el estado inicial 'cargado'
+        if not self.pk and not self.estado_anterior and self.oficio and self.estado_nuevo != 'cargado':
             self.estado_anterior = self.oficio.estado
         
         # Si se proporciona una institución, usarla, de lo contrario usar la del oficio
