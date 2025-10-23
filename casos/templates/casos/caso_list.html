@@ -1,5 +1,6 @@
 {% extends 'casos/base_casos.html' %}
 {% load widget_tweaks %}
+{% load caso_filters %}
 
 {% block extra_css %}
 {{ block.super }}
@@ -105,7 +106,7 @@
                         <td>{{ caso.expte }}</td>
                         <td>{{ caso.get_tipo_display }}</td>
                         <td>
-                            <span class="badge bg-{{ caso.estado|lower }}">
+                            <span class="badge bg-{{ caso.estado|estado_badge_class }}">
                                 {{ caso.get_estado_display }}
                             </span>
                         </td>

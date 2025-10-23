@@ -1,5 +1,6 @@
 {% extends 'casos/base_casos.html' %}
 {% load oficio_filters %}
+{% load caso_filters %}
 
 {% block page_title %}Detalle del Caso #{{ object.id }}{% endblock %}
 
@@ -29,7 +30,7 @@
                     
                     <dt class="col-sm-4">Estado:</dt>
                     <dd class="col-sm-8">
-                        <span class="badge bg-{{ object.estado|lower }}">
+                        <span class="badge bg-{{ object.estado|estado_badge_class }}">
                             {{ object.get_estado_display }}
                         </span>
                     </dd>
