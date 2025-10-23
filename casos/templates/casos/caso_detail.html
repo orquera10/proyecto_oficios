@@ -193,7 +193,7 @@
                     <thead class="table-light">
                         <tr>
                             <th>Fecha y Hora</th>
-                            <th>Oficio</th>
+                            <th>ID Oficio</th>
                             <th>Usuario</th>
                             <th>Estado Anterior</th>
                             <th>Nuevo Estado</th>
@@ -207,7 +207,7 @@
                             <td>{{ movimiento.fecha_creacion|date:"d/m/Y H:i" }}</td>
                             <td>
                                 <a href="{% url 'oficios:detail' movimiento.oficio.pk %}" class="text-decoration-none">
-                                    {{ movimiento.oficio.nro_oficio|default:movimiento.oficio.id }}
+                                    #{{ movimiento.oficio.id }}
                                 </a>
                             </td>
                             <td>

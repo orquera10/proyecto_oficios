@@ -6,11 +6,10 @@ from personas.models import Nino, Parte
 class CasoForm(ModelForm):
     class Meta:
         model = Caso
-        fields = ['tipo', 'expte', 'estado']
+        fields = ['tipo', 'expte']
         widgets = {
             'tipo': forms.Select(attrs={'class': 'form-select'}),
             'expte': forms.TextInput(attrs={'class': 'form-control'}),
-            'estado': forms.Select(attrs={'class': 'form-select'}),
         }
     
     def __init__(self, *args, **kwargs):

@@ -127,6 +127,12 @@ class OficioCreateView(LoginRequiredMixin, CreateView):
             institucion=self.object.institucion
         )
         
+        # Si el oficio está asociado a un caso, actualizar su estado a 'EN_PROCESO'
+        if self.object.caso and self.object.caso.estado == 'ABIERTO':
+            from casos.models import Caso
+            self.object.caso.estado = 'EN_PROCESO'
+            self.object.caso.save()
+        
         messages.success(self.request, 'El oficio se ha creado correctamente.')
         return super().form_valid(form)
 
