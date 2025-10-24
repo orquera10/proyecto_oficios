@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, get_object_or_404
+﻿from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView, View
 from django.urls import reverse_lazy, reverse
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -13,7 +13,6 @@ from django.utils.decorators import method_decorator
 from .models import (
     Oficio, Institucion, Caratula, Juzgado, MovimientoOficio, Respuesta
 )
-from personas.models import Nino
 from .forms import OficioForm
 from .forms_respuesta import RespuestaForm
 from .filters import OficioFilter
@@ -21,7 +20,7 @@ from .filters import OficioFilter
 
 def buscar_ninos(request):
     """
-    Vista para buscar niños por nombre, apellido o documento.
+    Vista para buscar niÃƒÂ±os por nombre, apellido o documento.
     Devuelve resultados en formato JSON para ser usados en autocompletado.
     """
     query = request.GET.get('q', '').strip()
@@ -57,7 +56,7 @@ class OficioListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         queryset = super().get_queryset()
         self.filterset = OficioFilter(self.request.GET, queryset=queryset)
-        # Orden por fecha de vencimiento ascendente (nulos al final), luego por emisión desc
+        # Orden por fecha de vencimiento ascendente (nulos al final), luego por emisiÃƒÂ³n desc
         return (
             self.filterset.qs
             .select_related('institucion', 'juzgado', 'usuario')
@@ -118,7 +117,7 @@ class OficioCreateView(LoginRequiredMixin, CreateView):
         self.object.usuario = self.request.user
         self.object.save()
         
-        # Registrar el movimiento de creación
+        # Registrar el movimiento de creaciÃƒÂ³n
         MovimientoOficio.objects.create(
             oficio=self.object,
             usuario=self.request.user,
@@ -128,7 +127,7 @@ class OficioCreateView(LoginRequiredMixin, CreateView):
             institucion=self.object.institucion
         )
         
-        # Si el oficio está asociado a un caso, actualizar su estado a 'EN_PROCESO'
+        # Si el oficio estÃƒÂ¡ asociado a un caso, actualizar su estado a 'EN_PROCESO'
         if self.object.caso and self.object.caso.estado == 'ABIERTO':
             from casos.models import Caso
             self.object.caso.estado = 'EN_PROCESO'
@@ -183,10 +182,11 @@ class OficioEnviarView(LoginRequiredMixin, View):
         nuevo_estado = request.POST.get('nuevo_estado')
         institucion_id = request.POST.get('institucion')
         detalle = request.POST.get('detalle', '').strip()
+        archivo_pdf = request.FILES.get('archivo_pdf')
         
-        # Validar que el nuevo estado sea válido
+        # Validar que el nuevo estado sea vÃƒÂ¡lido
         if nuevo_estado not in dict(oficio.ESTADO_CHOICES):
-            messages.error(request, 'El estado seleccionado no es válido.')
+            messages.error(request, 'El estado seleccionado no es valido.')
             return redirect('oficios:detail', pk=oficio.pk)
             
         # Validar que el estado sea diferente al actual
@@ -195,30 +195,31 @@ class OficioEnviarView(LoginRequiredMixin, View):
             return redirect('oficios:detail', pk=oficio.pk)
         
         try:
-            # Obtener la institución
+            # Obtener la institucion
             institucion = Institucion.objects.get(pk=institucion_id)
             
-            # Crear registro del movimiento
+            # Crear registro del movimiento (guardar PDF si se adjunta)
             MovimientoOficio.objects.create(
                 oficio=oficio,
                 usuario=request.user,
                 estado_anterior=oficio.estado,
                 estado_nuevo=nuevo_estado,
                 institucion=institucion,
-                detalle=detalle or f'Cambio de estado de {oficio.get_estado_display()} a {dict(oficio.ESTADO_CHOICES).get(nuevo_estado, nuevo_estado)} por {request.user.get_full_name() or request.user.username}'
+                detalle=detalle or f'Cambio de estado de {oficio.get_estado_display()} a {dict(oficio.ESTADO_CHOICES).get(nuevo_estado, nuevo_estado)} por {request.user.get_full_name() or request.user.username}',
+                archivo_pdf=archivo_pdf if archivo_pdf else None,
             )
             
-            # Actualizar estado del oficio
+            # Actualizar estado del oficio (sin tocar el PDF del oficio)
             oficio.estado = nuevo_estado
             oficio.institucion = institucion
             oficio.save(update_fields=['estado', 'institucion'])
             
             messages.success(request, f'El oficio ha sido movido a "{dict(oficio.ESTADO_CHOICES).get(nuevo_estado, nuevo_estado)}" correctamente.')
             
-        except Institucion.DoesNotExist:
-            messages.error(request, 'La institución seleccionada no es válida.')
+        except institucion.DoesNotExist:
+            messages.error(request, 'la institucion seleccionada no es vÃƒÂ¡lida.')
         except Exception as e:
-            messages.error(request, f'Ocurrió un error al procesar el movimiento: {str(e)}')
+            messages.error(request, f'Ocurrio Â³ un error al procesar el movimiento: {str(e)}')
         
         return redirect('oficios:detail', pk=oficio.pk)
 
@@ -245,7 +246,7 @@ class RespuestaCreateView(LoginRequiredMixin, CreateView):
 
     def get_initial(self):
         initial = super().get_initial()
-        # Preseleccionar institución del oficio si está disponible
+        # Preseleccionar instituciÃƒÂ³n del oficio si estÃƒÂ¡ disponible
         if self.oficio and self.oficio.institucion_id:
             initial['id_institucion'] = self.oficio.institucion_id
         return initial
@@ -259,17 +260,17 @@ class RespuestaCreateView(LoginRequiredMixin, CreateView):
         obj = form.save(commit=False)
         obj.id_oficio = self.oficio
         obj.id_usuario = self.request.user
-        # Si no se envía institución, usar la del oficio por conveniencia
+        # Si no se envÃƒÂ­a instituciÃƒÂ³n, usar la del oficio por conveniencia
         if not obj.id_institucion and self.oficio.institucion:
             obj.id_institucion = self.oficio.institucion
         obj.save()
 
-        # Registrar movimiento y actualizar estado a 'respondido'
+        # Registrar movimiento y, segÃƒÂºn opciÃƒÂ³n, mantener estado en 'asignado' o pasar a 'devuelto'
         try:
             institucion_mov = obj.id_institucion or self.oficio.institucion
-            detalle_mov = obj.respuesta.strip()[:200] if obj.respuesta else 'Se registró una respuesta.'
-            # Elegir el nuevo estado según el formulario (checkbox devolver)
-            nuevo_estado = 'devuelto' if form.cleaned_data.get('devolver') else 'respondido'
+            detalle_mov = obj.respuesta.strip()[:200] if obj.respuesta else 'Se registrÃƒÂ³ una respuesta.'
+            devolver = form.cleaned_data.get('devolver')
+            nuevo_estado = 'devuelto' if devolver else 'asignado'
 
             MovimientoOficio.objects.create(
                 oficio=self.oficio,
@@ -280,17 +281,26 @@ class RespuestaCreateView(LoginRequiredMixin, CreateView):
                 detalle=detalle_mov,
             )
 
-            # Actualizar estado e institución del Oficio
-            self.oficio.estado = nuevo_estado
-            if institucion_mov:
+            # Actualizar estado solo si se devuelve; si no, mantener asignado
+            update_fields = []
+            if devolver:
+                self.oficio.estado = 'devuelto'
+                update_fields.append('estado')
+            if institucion_mov and (self.oficio.institucion_id != getattr(institucion_mov, 'id', None)):
                 self.oficio.institucion = institucion_mov
-            self.oficio.save(update_fields=['estado', 'institucion'])
+                update_fields.append('institucion')
+            if update_fields:
+                self.oficio.save(update_fields=update_fields)
         except Exception:
             # No bloquear el flujo por un error en el movimiento
             pass
 
         if form.cleaned_data.get('devolver'):
-            messages.success(self.request, 'La respuesta se registró y el oficio pasó a Devuelto.')
+            messages.success(self.request, 'La respuesta se registrÃƒÂ³ y el oficio pasÃƒÂ³ a Devuelto.')
         else:
-            messages.success(self.request, 'La respuesta se registró y el oficio pasó a Respondido.')
+            messages.success(self.request, 'La respuesta se registrÃƒÂ³. El oficio permanece Asignado para revisiÃƒÂ³n.')
         return HttpResponseRedirect(reverse('oficios:detail', kwargs={'pk': self.oficio.pk}))
+
+
+
+

@@ -6,7 +6,11 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Detalle del Oficio #{{ oficio.id }}</h2>
         <div class="btn-group">
-            {% if oficio.estado != 'respondido' and oficio.estado != 'enviado' %}
+            {% if oficio.estado == 'cargado' %}
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#asignarModal">
+                <i class="fas fa-user-check me-1"></i> Asignar
+            </button>
+            {% elif oficio.estado != 'respondido' and oficio.estado != 'enviado' %}
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#movimientoModal">
                 <i class="fas fa-exchange-alt me-1"></i> Mover
             </button>
@@ -37,12 +41,13 @@
                         <h5 class="modal-title" id="movimientoModalLabel">Mover Oficio #{{ oficio.id }}</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <form method="post" action="{% url 'oficios:enviar' oficio.pk %}">
+                    <form method="post" action="{% url 'oficios:enviar' oficio.pk %}" enctype="multipart/form-data">
                         {% csrf_token %}
                         <div class="modal-body">
+                            <input type="hidden" name="nuevo_estado" value="respondido">
                             <div class="mb-3">
                                 <label for="nuevo_estado" class="form-label">Nuevo Estado</label>
-                                <select class="form-select" id="nuevo_estado" name="nuevo_estado" required>
+                                <select class="form-select" id="nuevo_estado" name="nuevo_estado" required disabled style="display:none;">
                                     {% for value, label in oficio.ESTADO_CHOICES %}
                                         {% if value != oficio.estado %}
                                             <option value="{{ value }}">{{ label }}</option>
@@ -52,17 +57,22 @@
                             </div>
                             <div class="mb-3">
                                 <label for="institucion" class="form-label">Institución</label>
-                                <select class="form-select" id="institucion" name="institucion" required>
+                                <select class="form-select" id="institucion" name="institucion" required disabled>
                                     {% for institucion in instituciones %}
                                         <option value="{{ institucion.id }}" {% if institucion.id == oficio.institucion.id %}selected{% endif %}>
                                             {{ institucion.nombre }}
                                         </option>
                                     {% endfor %}
                                 </select>
+                                <input type="hidden" name="institucion" value="{{ oficio.institucion.id }}">
                             </div>
                             <div class="mb-3">
                                 <label for="detalle" class="form-label">Detalle del movimiento</label>
                                 <textarea class="form-control" id="detalle" name="detalle" rows="3" required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="archivo_pdf_mover" class="form-label">Adjuntar PDF (opcional)</label>
+                                <input type="file" class="form-control" id="archivo_pdf_mover" name="archivo_pdf" accept=".pdf">
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -260,7 +270,7 @@
                         <h5 class="modal-title" id="enviarModalLabel">Enviar Oficio #{{ oficio.id }}</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <form method="post" action="{% url 'oficios:enviar' oficio.pk %}">
+                    <form method="post" action="{% url 'oficios:enviar' oficio.pk %}" enctype="multipart/form-data">
                         {% csrf_token %}
                         <input type="hidden" name="nuevo_estado" value="enviado">
                         {% if oficio.institucion %}
@@ -279,6 +289,7 @@
                                         <option value="{{ institucion.id }}">{{ institucion.nombre }}</option>
                                     {% endfor %}
                                 </select>
+                                <input type="hidden" name="institucion" value="{{ oficio.institucion.id }}">
                             </div>
                             {% endif %}
                             <div class="mb-3">
@@ -289,6 +300,43 @@
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                             <button type="submit" class="btn btn-success">Confirmar Envío</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {# Modal para asignar (solo cuando estado es cargado) #}
+        <div class="modal fade" id="asignarModal" tabindex="-1" aria-labelledby="asignarModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="asignarModalLabel">Asignar Oficio #{{ oficio.id }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form method="post" action="{% url 'oficios:enviar' oficio.pk %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <input type="hidden" name="nuevo_estado" value="asignado">
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="institucion_asignar" class="form-label">Institución</label>
+                                <select class="form-select" id="institucion_asignar" name="institucion" required>
+                                    {% for institucion in instituciones %}
+                                        <option value="{{ institucion.id }}" {% if oficio.institucion and institucion.id == oficio.institucion.id %}selected{% endif %}>{{ institucion.nombre }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="detalle_asignar" class="form-label">Detalle</label>
+                                <textarea class="form-control" id="detalle_asignar" name="detalle" rows="3" required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="archivo_pdf_asignar" class="form-label">Adjuntar PDF (opcional)</label>
+                                <input type="file" class="form-control" id="archivo_pdf_asignar" name="archivo_pdf" accept=".pdf">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Confirmar Asignación</button>
                         </div>
                     </form>
                 </div>
@@ -326,6 +374,7 @@
                             <th>Estado Anterior</th>
                             <th>Nuevo Estado</th>
                             <th>Institución</th>
+                            <th>Documento</th>
                             <th>Detalles</th>
                         </tr>
                     </thead>
@@ -355,11 +404,20 @@
                                 </span>
                             </td>
                             <td>{{ movimiento.institucion.nombre|default:"-" }}</td>
+                            <td>
+                                {% if movimiento.archivo_pdf %}
+                                    <a class="btn btn-sm btn-outline-primary" href="{{ movimiento.archivo_pdf.url }}" target="_blank">
+                                        <i class="fas fa-file-pdf me-1"></i>Ver
+                                    </a>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
                             <td>{{ movimiento.detalle|truncatechars:50 }}</td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="6" class="text-center text-muted py-3">
+                            <td colspan="7" class="text-center text-muted py-3">
                                 <i class="fas fa-info-circle me-1"></i> No hay movimientos registrados.
                             </td>
                         </tr>
@@ -464,6 +522,44 @@
             {% endif %}
         </div>
     </div>
+
+        {# Modal para asignar (solo cuando estado es cargado) #}
+        <div class="modal fade" id="asignarModal" tabindex="-1" aria-labelledby="asignarModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="asignarModalLabel">Asignar Oficio #{{ oficio.id }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form method="post" action="{% url 'oficios:enviar' oficio.pk %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <input type="hidden" name="nuevo_estado" value="asignado">
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="institucion_asignar" class="form-label">Institución</label>
+                                <select class="form-select" id="institucion_asignar" name="institucion" required>
+                                    {% for institucion in instituciones %}
+                                        <option value="{{ institucion.id }}" {% if oficio.institucion and institucion.id == oficio.institucion.id %}selected{% endif %}>{{ institucion.nombre }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="detalle_asignar" class="form-label">Detalle</label>
+                                <textarea class="form-control" id="detalle_asignar" name="detalle" rows="3" required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="archivo_pdf_asignar" class="form-label">Adjuntar PDF (opcional)</label>
+                                <input type="file" class="form-control" id="archivo_pdf_asignar" name="archivo_pdf" accept=".pdf">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Confirmar Asignación</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
 
     <div class="mt-4 d-flex justify-content-between">
         <a href="{% url 'oficios:list' %}" class="btn btn-secondary">

@@ -21,6 +21,11 @@ def respuesta_upload_path(instance, filename):
     )
     return f'respuestas/oficio_{oficio_id}/{filename}'
 
+def movimiento_upload_path(instance, filename):
+    # Guarda el archivo en: MEDIA_ROOT/movimientos/oficio_<oficio_id>/<filename>
+    oficio_id = instance.oficio_id or (instance.oficio.id if getattr(instance, 'oficio', None) else 'sin_oficio')
+    return f'movimientos/oficio_{oficio_id}/{filename}'
+
 User = get_user_model()
 
 # Se han eliminado los modelos intermedios OficioParte y OficioNino
@@ -358,6 +363,19 @@ class MovimientoOficio(models.Model):
         blank=True,
         verbose_name='Institución',
         related_name='movimientos_oficios'
+    )
+    
+    archivo_pdf = models.FileField(
+        upload_to=movimiento_upload_path,
+        verbose_name='Archivo PDF del movimiento',
+        null=True,
+        blank=True,
+        validators=[
+            FileExtensionValidator(
+                allowed_extensions=['pdf'],
+                message='Solo se permiten archivos PDF.'
+            )
+        ]
     )
     
     class Meta:
