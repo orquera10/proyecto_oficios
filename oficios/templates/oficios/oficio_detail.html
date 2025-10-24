@@ -6,13 +6,20 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Detalle del Oficio #{{ oficio.id }}</h2>
         <div class="btn-group">
+            {% if oficio.estado != 'respondido' and oficio.estado != 'enviado' %}
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#movimientoModal">
                 <i class="fas fa-exchange-alt me-1"></i> Mover
             </button>
+            {% endif %}
             {% if oficio.estado == 'asignado' %}
             <a href="{% url 'oficios:responder' oficio.pk %}" class="btn btn-success" id="btnResponder">
                 <i class="fas fa-reply me-1"></i> Responder
             </a>
+            {% endif %}
+            {% if oficio.estado == 'respondido' %}
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#enviarModal">
+                <i class="fas fa-paper-plane me-1"></i> Enviar
+            </button>
             {% endif %}
             <a href="{% url 'oficios:update' oficio.pk %}" class="btn btn-warning">
                 <i class="fas fa-edit me-1"></i> Editar
@@ -242,6 +249,48 @@
                     {% else %}
                         <p class="text-muted">No hay partes relacionadas con este caso.</p>
                     {% endif %}
+                </div>
+            </div>
+        </div>
+        {# Modal para enviar (solo estado respondido) #}
+        <div class="modal fade" id="enviarModal" tabindex="-1" aria-labelledby="enviarModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="enviarModalLabel">Enviar Oficio #{{ oficio.id }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form method="post" action="{% url 'oficios:enviar' oficio.pk %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="nuevo_estado" value="enviado">
+                        {% if oficio.institucion %}
+                        <input type="hidden" name="institucion" value="{{ oficio.institucion.id }}">
+                        {% endif %}
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label">Agente/Juzgado</label>
+                                <input type="text" class="form-control" value="{{ oficio.juzgado.nombre|default:'-' }}" disabled>
+                            </div>
+                            {% if not oficio.institucion %}
+                            <div class="mb-3">
+                                <label for="institucion_enviar" class="form-label">Institución</label>
+                                <select class="form-select" id="institucion_enviar" name="institucion" required>
+                                    {% for institucion in instituciones %}
+                                        <option value="{{ institucion.id }}">{{ institucion.nombre }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            {% endif %}
+                            <div class="mb-3">
+                                <label for="detalle_enviar" class="form-label">Detalle</label>
+                                <textarea class="form-control" id="detalle_enviar" name="detalle" rows="3" required></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-success">Confirmar Envío</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
