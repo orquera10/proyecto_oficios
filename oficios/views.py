@@ -11,10 +11,11 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 
 from .models import (
-    Oficio, Institucion, Caratula, Juzgado, MovimientoOficio
+    Oficio, Institucion, Caratula, Juzgado, MovimientoOficio, Respuesta
 )
 from personas.models import Nino
 from .forms import OficioForm
+from .forms_respuesta import RespuestaForm
 from .filters import OficioFilter
 
 
@@ -230,3 +231,37 @@ class OficioDeleteView(LoginRequiredMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         messages.success(self.request, 'El oficio ha sido eliminado correctamente.')
         return super().delete(request, *args, **kwargs)
+
+
+class RespuestaCreateView(LoginRequiredMixin, CreateView):
+    model = Respuesta
+    form_class = RespuestaForm
+    template_name = 'oficios/respuesta_form.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        # Validar que el oficio exista
+        self.oficio = get_object_or_404(Oficio, pk=kwargs['pk'])
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_initial(self):
+        initial = super().get_initial()
+        # Preseleccionar institución del oficio si está disponible
+        if self.oficio and self.oficio.institucion_id:
+            initial['id_institucion'] = self.oficio.institucion_id
+        return initial
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['oficio'] = self.oficio
+        return context
+
+    def form_valid(self, form):
+        obj = form.save(commit=False)
+        obj.id_oficio = self.oficio
+        obj.id_usuario = self.request.user
+        # Si no se envía institución, usar la del oficio por conveniencia
+        if not obj.id_institucion and self.oficio.institucion:
+            obj.id_institucion = self.oficio.institucion
+        obj.save()
+        messages.success(self.request, 'La respuesta se registró correctamente.')
+        return HttpResponseRedirect(reverse('oficios:detail', kwargs={'pk': self.oficio.pk}))

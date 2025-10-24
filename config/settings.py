@@ -131,20 +131,6 @@ LOGOUT_REDIRECT_URL = 'login'
 WSGI_APPLICATION = 'core.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'oficios',
-        'USER': 'postgres',
-        'PASSWORD': 'tuxx6393',
-        'HOST': 'localhost',
-        'PORT': '5433',
-    }
-}
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators

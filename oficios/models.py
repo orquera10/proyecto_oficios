@@ -11,6 +11,16 @@ def oficio_upload_path(instance, filename):
     # Guarda el archivo en: MEDIA_ROOT/oficios/oficio_<id>/<filename>
     return f'oficios/oficio_{instance.id}/{filename}'
 
+def respuesta_upload_path(instance, filename):
+    # Guarda el archivo en: MEDIA_ROOT/respuestas/oficio_<oficio_id>/<filename>
+    oficio_id = (
+        instance.id_oficio_id
+        if hasattr(instance, 'id_oficio_id') else (
+            instance.id_oficio.id if getattr(instance, 'id_oficio', None) else 'sin_oficio'
+        )
+    )
+    return f'respuestas/oficio_{oficio_id}/{filename}'
+
 User = get_user_model()
 
 # Se han eliminado los modelos intermedios OficioParte y OficioNino
@@ -368,3 +378,82 @@ class MovimientoOficio(models.Model):
             self.institucion = self.oficio.institucion
             
         super().save(*args, **kwargs)
+
+
+class Respuesta(models.Model):
+    """
+    Modelo para registrar respuestas a un Oficio.
+    Campos: id, id_oficio, id_usuario, id_institucion, respuesta, respuesta_pdf, fecha_hora, creacion, modificacion.
+    """
+    id_oficio = models.ForeignKey(
+        'Oficio',
+        on_delete=models.CASCADE,
+        related_name='respuestas',
+        verbose_name='Oficio'
+    )
+    id_usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name='Usuario',
+        related_name='respuestas'
+    )
+    id_institucion = models.ForeignKey(
+        'Institucion',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name='Institución',
+        related_name='respuestas'
+    )
+    respuesta = models.TextField(
+        verbose_name='Respuesta',
+        blank=True
+    )
+    respuesta_pdf = models.FileField(
+        upload_to=respuesta_upload_path,
+        verbose_name='Archivo PDF de la respuesta',
+        null=True,
+        blank=True,
+        validators=[
+            FileExtensionValidator(
+                allowed_extensions=['pdf'],
+                message='Solo se permiten archivos PDF.'
+            )
+        ],
+        help_text='Sube el archivo PDF de la respuesta. Tamaño máximo: 10MB.'
+    )
+    fecha_hora = models.DateTimeField(
+        default=timezone.now,
+        verbose_name='Fecha y hora de la respuesta'
+    )
+    creacion = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Creación'
+    )
+    modificacion = models.DateTimeField(
+        auto_now=True,
+        verbose_name='Modificación'
+    )
+
+    class Meta:
+        verbose_name = 'Respuesta'
+        verbose_name_plural = 'Respuestas'
+        ordering = ['-fecha_hora', '-creacion']
+
+    def __str__(self):
+        return f"Respuesta {self.id} de Oficio {self.id_oficio_id}"
+
+    def delete(self, *args, **kwargs):
+        # Eliminar el archivo físico si existe
+        if self.respuesta_pdf and hasattr(self.respuesta_pdf, 'path'):
+            try:
+                if os.path.isfile(self.respuesta_pdf.path):
+                    os.remove(self.respuesta_pdf.path)
+                    directory = os.path.dirname(self.respuesta_pdf.path)
+                    if os.path.exists(directory) and not os.listdir(directory):
+                        os.rmdir(directory)
+            except Exception:
+                pass
+        super().delete(*args, **kwargs)

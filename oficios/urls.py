@@ -9,6 +9,7 @@ urlpatterns = [
     path('<int:pk>/', views.OficioDetailView.as_view(), name='detail'),
     path('<int:pk>/editar/', views.OficioUpdateView.as_view(), name='update'),
     path('<int:pk>/eliminar/', views.OficioDeleteView.as_view(), name='delete'),
+    path('<int:pk>/responder/', views.RespuestaCreateView.as_view(), name='responder'),
     # Listados por estado
     path('estado/<str:estado>/', views.OficioEstadoListView.as_view(), name='list_by_estado'),
     

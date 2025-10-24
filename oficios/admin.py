@@ -7,8 +7,8 @@ from django.contrib import messages
 from django.utils.html import format_html
 
 from .models import (
-    Institucion, Caratula, 
-    Juzgado, Oficio, CaratulaOficio
+    Institucion, Caratula,
+    Juzgado, Oficio, CaratulaOficio, Respuesta
 )
 
 User = get_user_model()
@@ -103,6 +103,12 @@ class JuzgadoAdmin(admin.ModelAdmin):
 
 @admin.register(Oficio)
 class OficioAdmin(admin.ModelAdmin):
+    class RespuestaInline(admin.TabularInline):
+        model = Respuesta
+        extra = 0
+        fields = ('id_usuario', 'id_institucion', 'respuesta', 'respuesta_pdf', 'fecha_hora', 'creacion')
+        readonly_fields = ('creacion', 'modificacion')
+
     list_display = ('id', 'denuncia', 'legajo', 'institucion', 'juzgado', 'estado_badge', 'fecha_emision', 'fecha_vencimiento', 'usuario', 'creado')
     list_filter = ('estado', 'institucion', 'juzgado', 'usuario', 'fecha_emision', 'fecha_vencimiento')
     search_fields = ('denuncia', 'legajo', 'institucion__nombre', 'juzgado__nombre', 'usuario__username')
@@ -110,6 +116,7 @@ class OficioAdmin(admin.ModelAdmin):
     readonly_fields = ('creado', 'actualizado', 'estado_badge')
     date_hierarchy = 'fecha_emision'
     ordering = ('-fecha_emision',)
+    inlines = [RespuestaInline]
 
     def estado_badge(self, obj):
         return format_html(
@@ -122,3 +129,11 @@ class OficioAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('juzgado')
+
+
+@admin.register(Respuesta)
+class RespuestaAdmin(admin.ModelAdmin):
+    list_display = ('id', 'id_oficio', 'id_usuario', 'id_institucion', 'fecha_hora', 'creacion')
+    list_filter = ('fecha_hora', 'creacion', 'id_usuario', 'id_institucion')
+    search_fields = ('id_oficio__denuncia', 'id_oficio__legajo', 'id_usuario__username')
+    readonly_fields = ('creacion', 'modificacion')

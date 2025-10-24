@@ -10,9 +10,9 @@
                 <i class="fas fa-exchange-alt me-1"></i> Mover
             </button>
             {% if oficio.estado == 'asignado' %}
-            <button type="button" class="btn btn-success" id="btnResponder" data-bs-toggle="modal" data-bs-target="#movimientoModal">
+            <a href="{% url 'oficios:responder' oficio.pk %}" class="btn btn-success" id="btnResponder">
                 <i class="fas fa-reply me-1"></i> Responder
-            </button>
+            </a>
             {% endif %}
             <a href="{% url 'oficios:update' oficio.pk %}" class="btn btn-warning">
                 <i class="fas fa-edit me-1"></i> Editar
@@ -348,6 +348,62 @@
         </div>
     </div>
 
+    <!-- Sección de Respuestas -->
+    <div class="card mt-4">
+        <div class="card-header bg-success text-white">
+            <h4 class="mb-0">
+                <i class="fas fa-reply me-2"></i>Respuestas
+            </h4>
+        </div>
+        <div class="card-body p-0">
+            {% if oficio.respuestas.all %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Usuario</th>
+                                <th>Institución</th>
+                                <th>Detalle</th>
+                                <th>Archivo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in oficio.respuestas.all %}
+                            <tr>
+                                <td>{{ r.fecha_hora|date:"d/m/Y H:i" }}</td>
+                                <td>{{ r.id_usuario.get_full_name|default:r.id_usuario.username|default:"-" }}</td>
+                                <td>{{ r.id_institucion.nombre|default:"-" }}</td>
+                                <td>{{ r.respuesta|default:"-"|truncatechars:60 }}</td>
+                                <td>
+                                    {% if r.respuesta_pdf %}
+                                        <a class="btn btn-sm btn-outline-primary" href="{{ r.respuesta_pdf.url }}" target="_blank">
+                                            <i class="fas fa-file-pdf me-1"></i>Abrir
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-3">
+                                    <i class="fas fa-info-circle me-1"></i> No hay respuestas registradas.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    No hay respuestas registradas.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
     <div class="mt-4 d-flex justify-content-between">
         <a href="{% url 'oficios:list' %}" class="btn btn-secondary">
             <i class="fas fa-arrow-left me-1"></i> Volver al listado
@@ -368,22 +424,6 @@
 {% block extra_js %}
 {{ block.super }}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  var btnResponder = document.getElementById('btnResponder');
-  if (btnResponder) {
-    btnResponder.addEventListener('click', function() {
-      try {
-        var estadoSel = document.getElementById('nuevo_estado');
-        if (estadoSel) {
-          estadoSel.value = 'respondido';
-        }
-        var modalTitle = document.getElementById('movimientoModalLabel');
-        if (modalTitle) {
-          modalTitle.textContent = 'Responder Oficio #' + ("{{ oficio.id }}");
-        }
-      } catch (e) { /* no-op */ }
-    });
-  }
-});
+// JS no necesario: al responder se navega al formulario de respuesta
 </script>
 {% endblock %}
