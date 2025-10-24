@@ -263,5 +263,34 @@ class RespuestaCreateView(LoginRequiredMixin, CreateView):
         if not obj.id_institucion and self.oficio.institucion:
             obj.id_institucion = self.oficio.institucion
         obj.save()
-        messages.success(self.request, 'La respuesta se registró correctamente.')
+
+        # Registrar movimiento y actualizar estado a 'respondido'
+        try:
+            institucion_mov = obj.id_institucion or self.oficio.institucion
+            detalle_mov = obj.respuesta.strip()[:200] if obj.respuesta else 'Se registró una respuesta.'
+            # Elegir el nuevo estado según el formulario (checkbox devolver)
+            nuevo_estado = 'devuelto' if form.cleaned_data.get('devolver') else 'respondido'
+
+            MovimientoOficio.objects.create(
+                oficio=self.oficio,
+                usuario=self.request.user,
+                estado_anterior=self.oficio.estado,
+                estado_nuevo=nuevo_estado,
+                institucion=institucion_mov,
+                detalle=detalle_mov,
+            )
+
+            # Actualizar estado e institución del Oficio
+            self.oficio.estado = nuevo_estado
+            if institucion_mov:
+                self.oficio.institucion = institucion_mov
+            self.oficio.save(update_fields=['estado', 'institucion'])
+        except Exception:
+            # No bloquear el flujo por un error en el movimiento
+            pass
+
+        if form.cleaned_data.get('devolver'):
+            messages.success(self.request, 'La respuesta se registró y el oficio pasó a Devuelto.')
+        else:
+            messages.success(self.request, 'La respuesta se registró y el oficio pasó a Respondido.')
         return HttpResponseRedirect(reverse('oficios:detail', kwargs={'pk': self.oficio.pk}))

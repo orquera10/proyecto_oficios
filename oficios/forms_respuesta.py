@@ -4,6 +4,13 @@ from .models import Respuesta
 
 
 class RespuestaForm(forms.ModelForm):
+    # Campo no-modelo para indicar si se devuelve en lugar de responder
+    devolver = forms.BooleanField(
+        required=False,
+        initial=False,
+        label='Devolver',
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
     class Meta:
         model = Respuesta
         fields = ['id_institucion', 'respuesta', 'respuesta_pdf', 'fecha_hora']
@@ -31,4 +38,3 @@ class RespuestaForm(forms.ModelForm):
         for field in self.fields.values():
             existing = field.widget.attrs.get('class', '')
             field.widget.attrs['class'] = (existing + ' form-control').strip()
-
