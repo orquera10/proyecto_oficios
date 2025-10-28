@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Perfil de Usuario</h2>
+    <form method="post" action="{% url 'logout' %}">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-outline-danger">Cerrar sesión</button>
+    </form>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+      <strong>Datos</strong>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6">
+          <dl class="row mb-0">
+            <dt class="col-sm-4">Usuario</dt>
+            <dd class="col-sm-8">{{ user_obj.username }}</dd>
+
+            <dt class="col-sm-4">Nombre</dt>
+            <dd class="col-sm-8">{{ user_obj.get_full_name|default:'-' }}</dd>
+
+            <dt class="col-sm-4">Email</dt>
+            <dd class="col-sm-8">{{ user_obj.email|default:'-' }}</dd>
+          </dl>
+        </div>
+        <div class="col-md-6">
+          <dl class="row mb-0">
+            <dt class="col-sm-4">Sector</dt>
+            <dd class="col-sm-8">{{ perfil.id_sector.nombre|default:'-' }}</dd>
+
+            <dt class="col-sm-4">Teléfono</dt>
+            <dd class="col-sm-8">{{ perfil.id_sector.telefono|default:'-' }}</dd>
+
+            <dt class="col-sm-4">Dirección</dt>
+            <dd class="col-sm-8">{{ perfil.id_sector.direccion|default:'-' }}</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header bg-secondary text-white">
+      <strong>Cambiar contraseña</strong>
+    </div>
+    <div class="card-body">
+      <p class="mb-3">Puedes actualizar tu contraseña desde aquí.</p>
+      <a href="{% url 'password_change' %}" class="btn btn-warning">
+        <i class="fas fa-key me-1"></i> Cambiar contraseña
+      </a>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

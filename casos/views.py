@@ -4,6 +4,7 @@ from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.db import transaction
+from django.db.models import Q
 
 from .models import Caso, CasoNino, CasoParte
 from .forms import CasoForm, CasoNinoFormSet, CasoParteFormSet
@@ -20,9 +21,7 @@ class CasoListView(LoginRequiredMixin, ListView):
         # Obtener el queryset base
         queryset = super().get_queryset()
         
-        # Filtrar por usuario a menos que sea superusuario
-        if not self.request.user.is_superuser:
-            queryset = queryset.filter(usuario=self.request.user)
+        # Mostrar todos los casos a cualquier usuario autenticado
         
         # Aplicar filtros
         self.filterset = CasoFilter(self.request.GET, queryset=queryset)
@@ -147,8 +146,7 @@ class CasoDetailView(LoginRequiredMixin, DetailView):
     
     def get_queryset(self):
         queryset = super().get_queryset()
-        if not self.request.user.is_superuser:
-            queryset = queryset.filter(usuario=self.request.user)
+        # Permitir ver el detalle de cualquier caso
         
         # Prefetch related data to avoid N+1 queries
         return queryset.prefetch_related(
@@ -173,8 +171,14 @@ class CasoDeleteView(LoginRequiredMixin, DeleteView):
     
     def get_queryset(self):
         queryset = super().get_queryset()
-        if not self.request.user.is_superuser:
-            queryset = queryset.filter(usuario=self.request.user)
+        if not self.request.user.is_staff:
+            sector_id = getattr(getattr(self.request.user, 'perfil', None), 'id_sector_id', None)
+            if sector_id:
+                queryset = queryset.filter(
+                    Q(usuario=self.request.user) | Q(usuario__perfil__id_sector_id=sector_id)
+                )
+            else:
+                queryset = queryset.filter(usuario=self.request.user)
         return queryset
     
     def delete(self, request, *args, **kwargs):

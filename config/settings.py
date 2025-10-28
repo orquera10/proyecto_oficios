@@ -124,7 +124,7 @@ TEMPLATES = [
 ]
 
 # Authentication settings
-LOGIN_REDIRECT_URL = 'oficios:list'
+LOGIN_REDIRECT_URL = 'casos:list'
 LOGIN_URL = 'login'
 LOGOUT_REDIRECT_URL = 'login'
 

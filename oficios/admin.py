@@ -5,6 +5,7 @@ from django.contrib.auth.models import User as DefaultUser
 from django.utils.translation import gettext_lazy as _
 from django.contrib import messages
 from django.utils.html import format_html
+from core.models import UsuarioPerfil
 
 from .models import (
     Institucion, Caratula,
@@ -20,6 +21,12 @@ if admin.site.is_registered(DefaultUser):
 # Registrar nuestro User admin personalizado
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
+    class UsuarioPerfilInline(admin.StackedInline):
+        model = UsuarioPerfil
+        can_delete = False
+        extra = 0
+        fields = ('id_sector',)
+
     list_display = ('username', 'email', 'first_name', 'last_name', 'is_active', 'is_staff', 'is_superuser', 'last_login')
     list_filter = ('is_active', 'is_staff', 'is_superuser', 'groups')
     search_fields = ('username', 'first_name', 'last_name', 'email')
@@ -67,6 +74,7 @@ class CustomUserAdmin(UserAdmin):
         return format_html('<span style="color: red;">✗ Inactivo</span>')
     user_status.short_description = 'Estado'
     user_status.admin_order_field = 'is_active'
+    inlines = [UsuarioPerfilInline]
 
 # Resto de tus modelos admin...
 @admin.register(Institucion)
