@@ -18,7 +18,7 @@
             <form method="post">
                 {% csrf_token %}
                 <div class="d-flex justify-content-between">
-                    <a href="{% url 'parte_list' %}" class="btn btn-secondary">
+                    <a href="{% url 'personas:parte_list' %}" class="btn btn-secondary">
                         <i class="fas fa-times"></i> Cancelar
                     </a>
                     <button type="submit" class="btn btn-danger">
