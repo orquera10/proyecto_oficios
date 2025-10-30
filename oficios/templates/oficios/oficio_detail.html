@@ -6,11 +6,12 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Detalle del Oficio #{{ oficio.id }}</h2>
         <div class="btn-group">
-            {% if oficio.estado == 'cargado' %}
+            {% if oficio.estado == 'cargado' or oficio.estado == 'devuelto' %}
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#asignarModal">
                 <i class="fas fa-user-check me-1"></i> Asignar
             </button>
-            {% elif oficio.estado != 'respondido' and oficio.estado != 'enviado' %}
+            {% endif %}
+            {% if oficio.estado != 'respondido' and oficio.estado != 'enviado' and oficio.estado != 'devuelto' %}
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#movimientoModal">
                 <i class="fas fa-exchange-alt me-1"></i> Mover
             </button>
@@ -140,6 +141,9 @@
                         <dd class="col-sm-8">
                             {% if oficio.fecha_vencimiento %}
                                 {{ oficio.fecha_vencimiento|date:"d/m/Y H:i" }}
+                                {% if oficio.fecha_vencimiento < now %}
+                                    <span class="badge bg-danger ms-2">Vencido</span>
+                                {% endif %}
                             {% else %}
                                 -
                             {% endif %}
