@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+venv/
+.venv/
+
+# VCS
+.git/
+.gitignore
+
+# Editors/IDE
+.vscode/
+.idea/
+
+# Local environment and logs
+.env
+server.out.log
+server.err.log
+
+# Media and static (optional: manage outside container or mount as volume)
+media/
+
+# Databases (managed externally)
+db.sqlite3
+
+# Docker artifacts
+Dockerfile*
+.dockerignore
+

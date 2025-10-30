@@ -1,0 +1,10 @@
+Django==5.2.3
+gunicorn>=21.2
+psycopg2-binary>=2.9
+python-dotenv>=1.0
+django-filter>=24.3
+django-crispy-forms>=2.1
+crispy-bootstrap5>=2024.2
+django-widget-tweaks>=1.5.0
+django-bootstrap5>=24.2
+
