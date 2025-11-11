@@ -100,7 +100,7 @@ class Oficio(models.Model):
     nro_oficio = models.CharField(
         max_length=50,
         verbose_name='Número de Oficio',
-        unique=True,
+        
         blank=True,
         null=True
     )
@@ -205,26 +205,7 @@ class Oficio(models.Model):
     def clean(self):
         super().clean()
         # Validar que si se proporciona un número de denuncia, no exista otro con el mismo número
-        if self.denuncia:
-            # Buscar si existe otro oficio con la misma denuncia (excluyendo el actual)
-            queryset = Oficio.objects.filter(denuncia=self.denuncia)
-            if self.pk:  # Si es una actualización, excluir el registro actual
-                queryset = queryset.exclude(pk=self.pk)
-            if queryset.exists():
-                raise ValidationError({
-                    'denuncia': 'Ya existe un oficio con este número de denuncia.'
-                })
-                
-        # Validar que si se proporciona un número de legajo, no exista otro con el mismo número
-        if self.legajo:
-            # Buscar si existe otro oficio con el mismo legajo (excluyendo el actual)
-            queryset = Oficio.objects.filter(legajo=self.legajo)
-            if self.pk:  # Si es una actualización, excluir el registro actual
-                queryset = queryset.exclude(pk=self.pk)
-            if queryset.exists():
-                raise ValidationError({
-                    'legajo': 'Ya existe un oficio con este número de legajo.'
-                })
+        # Validar que si se proporciona un número de legajo, no exista otro con el mismo número\r\n
 
     def save(self, *args, **kwargs):
         # Validar el modelo antes de guardar
