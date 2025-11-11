@@ -16,7 +16,7 @@
       <strong>Nueva Respuesta</strong>
     </div>
     <div class="card-body">
-      <form method="post" enctype="multipart/form-data">
+      <form method="post">
         {% csrf_token %}
 
         <div class="form-check form-switch mb-3">
@@ -36,11 +36,7 @@
           {{ form.respuesta }}
         </div>
 
-        <div class="mb-3">
-          <label class="form-label" for="id_respuesta_pdf">Archivo PDF</label>
-          {{ form.respuesta_pdf }}
-          <div class="form-text">{{ form.fields.respuesta_pdf.help_text }}</div>
-        </div>
+        
 
         <div class="mb-3">
           <label class="form-label" for="id_fecha_hora">Fecha y hora</label>

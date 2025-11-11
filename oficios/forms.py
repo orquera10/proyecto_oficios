@@ -76,9 +76,5 @@ class OficioForm(forms.ModelForm):
             field.widget.attrs['class'] = (existing + ' form-control').strip()
 
     def clean(self):
-        cleaned = super().clean()
-        insts = cleaned.get('instituciones')
-        if not insts or len(insts) == 0:
-            self.add_error('instituciones', 'Seleccione una o mas instituciones.')
-        return cleaned
-
+        # No exigir instituciones: permitir crear sin institución
+        return super().clean()

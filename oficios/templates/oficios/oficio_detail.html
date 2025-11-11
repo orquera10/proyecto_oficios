@@ -1,6 +1,4 @@
 {% extends 'base.html' %}
-{% load oficio_filters %}
-
 {% block content %}
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -22,7 +20,7 @@
             </a>
             {% endif %}
             {% if oficio.estado == 'respondido' %}
-            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#enviarModal">
+            <button type="button" id="btnEnviarOficio" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#enviarModal">
                 <i class="fas fa-paper-plane me-1"></i> Enviar
             </button>
             {% endif %}
@@ -42,7 +40,7 @@
                         <h5 class="modal-title" id="movimientoModalLabel">Mover Oficio #{{ oficio.id }}</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <form method="post" action="{% url 'oficios:enviar' oficio.pk %}" enctype="multipart/form-data">
+                    <form method="post" action="{% url 'oficios:enviar' oficio.pk %}">
                         {% csrf_token %}
                         <div class="modal-body">
                             <input type="hidden" name="nuevo_estado" value="respondido">
@@ -69,7 +67,7 @@
                             </div>
                             <div class="mb-3">
                                 <label for="detalle" class="form-label">Detalle del movimiento</label>
-                                <textarea class="form-control" id="detalle" name="detalle" rows="3" required></textarea>
+                                <textarea class="form-control" id="detalle" name="detalle" rows="3"></textarea>
                             </div>
                             <div class="mb-3">
                                 <label for="archivo_pdf_mover" class="form-label">Adjuntar PDF (opcional)</label>
@@ -298,7 +296,11 @@
                             {% endif %}
                             <div class="mb-3">
                                 <label for="detalle_enviar" class="form-label">Detalle</label>
-                                <textarea class="form-control" id="detalle_enviar" name="detalle" rows="3" required></textarea>
+                                <textarea class="form-control" id="detalle_enviar" name="detalle" rows="3"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="archivo_pdf_enviar" class="form-label">Adjuntar PDF (opcional)</label>
+                                <input type="file" class="form-control" id="archivo_pdf_enviar" name="archivo_pdf" accept=".pdf">
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -331,12 +333,9 @@
                             </div>
                             <div class="mb-3">
                                 <label for="detalle_asignar" class="form-label">Detalle</label>
-                                <textarea class="form-control" id="detalle_asignar" name="detalle" rows="3" required></textarea>
+                                <textarea class="form-control" id="detalle_asignar" name="detalle" rows="3"></textarea>
                             </div>
-                            <div class="mb-3">
-                                <label for="archivo_pdf_asignar" class="form-label">Adjuntar PDF (opcional)</label>
-                                <input type="file" class="form-control" id="archivo_pdf_asignar" name="archivo_pdf" accept=".pdf">
-                            </div>
+                            
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -395,7 +394,7 @@
                             </td>
                             <td>
                                 {% if movimiento.estado_anterior %}
-                                <span class="badge bg-{{ movimiento.estado_anterior|estado_badge_class }}">
+                                <span class="badge bg-{% if movimiento.estado_anterior == 'cargado' %}secondary{% elif movimiento.estado_anterior == 'asignado' %}warning{% elif movimiento.estado_anterior == 'respondido' %}primary{% elif movimiento.estado_anterior == 'enviado' %}success{% elif movimiento.estado_anterior == 'devuelto' %}violet{% else %}light{% endif %}">
                                     {{ movimiento.get_estado_anterior_display }}
                                 </span>
                                 {% else %}
@@ -403,7 +402,7 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <span class="badge bg-{{ movimiento.estado_nuevo|estado_badge_class }}">
+                                <span class="badge bg-{% if movimiento.estado_nuevo == 'cargado' %}secondary{% elif movimiento.estado_nuevo == 'asignado' %}warning{% elif movimiento.estado_nuevo == 'respondido' %}primary{% elif movimiento.estado_nuevo == 'enviado' %}success{% elif movimiento.estado_nuevo == 'devuelto' %}violet{% else %}light{% endif %}">
                                     {{ movimiento.get_estado_nuevo_display }}
                                 </span>
                             </td>
@@ -585,6 +584,16 @@
 {% block extra_js %}
 {{ block.super }}
 <script>
-// JS no necesario: al responder se navega al formulario de respuesta
+document.addEventListener('DOMContentLoaded', function() {
+  const btn = document.getElementById('btnEnviarOficio');
+  const modalEl = document.getElementById('enviarModal');
+  if (btn && modalEl && window.bootstrap) {
+    btn.addEventListener('click', function () {
+      try { new bootstrap.Modal(modalEl).show(); } catch (e) {}
+    });
+  }
+});
 </script>
 {% endblock %}
+
+ 

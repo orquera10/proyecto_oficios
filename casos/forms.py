@@ -15,6 +15,7 @@ class CasoForm(ModelForm):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
+        # Mantener todas las opciones de tipo (incluido 'Notas')
         
         # Configurar clases de error para los campos
         for field_name, field in self.fields.items():

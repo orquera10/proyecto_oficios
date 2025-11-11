@@ -88,7 +88,7 @@ class Caso(models.Model):
         ('MPA', 'MPA'),
         ('JUDICIAL', 'Judicial'),
         ('PROVINCIAL', 'Provincial'),
-        ('NOTAS', 'Notas'),
+        ('NOTA', 'Nota'),
     ]
     
     ESTADO_CHOICES = [

@@ -111,22 +111,16 @@ class OficioCreateView(LoginRequiredMixin, CreateView):
         context = super().get_context_data(**kwargs)
         return context
     def form_valid(self, form):
-        instituciones = form.cleaned_data.get("instituciones")
+        instituciones = list(form.cleaned_data.get("instituciones") or [])
         creados = []
         archivo = form.cleaned_data.get("archivo_pdf")
-        for inst in instituciones:
+        
+        if not instituciones:
             obj = form.save(commit=False)
-            obj.pk = None
             obj.usuario = self.request.user
-            obj.institucion = inst
             if archivo is not None:
-                try:
-                    archivo.seek(0)
-                except Exception:
-                    pass
                 obj.archivo_pdf = archivo
             obj.save()
-
             try:
                 MovimientoOficio.objects.create(
                     oficio=obj,
@@ -138,7 +132,6 @@ class OficioCreateView(LoginRequiredMixin, CreateView):
                 )
             except Exception:
                 pass
-
             try:
                 if obj.caso and getattr(obj.caso, 'estado', None) == 'ABIERTO':
                     obj.caso.estado = 'EN_PROCESO'
@@ -146,6 +139,39 @@ class OficioCreateView(LoginRequiredMixin, CreateView):
             except Exception:
                 pass
             creados.append(obj)
+        else:
+            for inst in instituciones:
+                obj = form.save(commit=False)
+                obj.pk = None
+                obj.usuario = self.request.user
+                obj.institucion = inst
+                if archivo is not None:
+                    try:
+                        archivo.seek(0)
+                    except Exception:
+                        pass
+                    obj.archivo_pdf = archivo
+                obj.save()
+
+                try:
+                    MovimientoOficio.objects.create(
+                        oficio=obj,
+                        usuario=self.request.user,
+                        estado_anterior=None,
+                        estado_nuevo='cargado',
+                        detalle='Oficio creado',
+                        institucion=obj.institucion
+                    )
+                except Exception:
+                    pass
+
+                try:
+                    if obj.caso and getattr(obj.caso, 'estado', None) == 'ABIERTO':
+                        obj.caso.estado = 'EN_PROCESO'
+                        obj.caso.save()
+                except Exception:
+                    pass
+                creados.append(obj)
 
         if len(creados) == 1:
             self.object = creados[0]
@@ -222,6 +248,21 @@ class OficioEnviarView(LoginRequiredMixin, View):
             # Obtener la institucion
             institucion = Institucion.objects.get(pk=institucion_id)
             
+            # Definir detalle por defecto si viene vacío
+            if not detalle:
+                if nuevo_estado == 'asignado':
+                    detalle_final = 'Se asignó a institución'
+                elif nuevo_estado == 'enviado':
+                    detalle_final = 'Oficio enviado a agente'
+                else:
+                    detalle_final = (
+                        f"Cambio de estado de {oficio.get_estado_display()} a "
+                        f"{dict(oficio.ESTADO_CHOICES).get(nuevo_estado, nuevo_estado)} "
+                        f"por {request.user.get_full_name() or request.user.username}"
+                    )
+            else:
+                detalle_final = detalle
+
             # Crear registro del movimiento (guardar PDF si se adjunta)
             MovimientoOficio.objects.create(
                 oficio=oficio,
@@ -229,7 +270,7 @@ class OficioEnviarView(LoginRequiredMixin, View):
                 estado_anterior=oficio.estado,
                 estado_nuevo=nuevo_estado,
                 institucion=institucion,
-                detalle=detalle or f'Cambio de estado de {oficio.get_estado_display()} a {dict(oficio.ESTADO_CHOICES).get(nuevo_estado, nuevo_estado)} por {request.user.get_full_name() or request.user.username}',
+                detalle=detalle_final,
                 archivo_pdf=archivo_pdf if archivo_pdf else None,
             )
             
@@ -283,17 +324,24 @@ class RespuestaCreateView(LoginRequiredMixin, CreateView):
         obj = form.save(commit=False)
         obj.id_oficio = self.oficio
         obj.id_usuario = self.request.user
-        # Si no se envÃ­a instituciÃ³n, usar la del oficio por conveniencia
+        # Si no se env�a instituci�n, usar la del oficio por conveniencia
         if not obj.id_institucion and self.oficio.institucion:
             obj.id_institucion = self.oficio.institucion
+        # Autocompletar respuesta si viene vacia
+        try:
+            texto = (obj.respuesta or '').strip()
+        except Exception:
+            texto = ''
+        if not texto:
+            obj.respuesta = 'Se respondio el oficio'
         obj.save()
 
         # Registrar movimiento y, segÃºn opciÃ³n, mantener estado en 'asignado' o pasar a 'devuelto'
         try:
             institucion_mov = obj.id_institucion or self.oficio.institucion
-            detalle_mov = obj.respuesta.strip()[:200] if obj.respuesta else 'Se registrÃ³ una respuesta.'
+            detalle_mov = obj.respuesta.strip()[:200] if obj.respuesta else 'Se respondio el oficio'
             devolver = form.cleaned_data.get('devolver')
-            nuevo_estado = 'devuelto' if devolver else 'asignado'
+            nuevo_estado = 'devuelto' if devolver else 'respondido'
 
             MovimientoOficio.objects.create(
                 oficio=self.oficio,
@@ -304,10 +352,13 @@ class RespuestaCreateView(LoginRequiredMixin, CreateView):
                 detalle=detalle_mov,
             )
 
-            # Actualizar estado solo si se devuelve; si no, mantener asignado
+            # Actualizar estado: devuelto si se devuelve, si no, respondido
             update_fields = []
             if devolver:
                 self.oficio.estado = 'devuelto'
+                update_fields.append('estado')
+            else:
+                self.oficio.estado = 'respondido'
                 update_fields.append('estado')
             if institucion_mov and (self.oficio.institucion_id != getattr(institucion_mov, 'id', None)):
                 self.oficio.institucion = institucion_mov
@@ -321,9 +372,8 @@ class RespuestaCreateView(LoginRequiredMixin, CreateView):
         if form.cleaned_data.get('devolver'):
             messages.success(self.request, 'La respuesta se registrÃ³ y el oficio pasÃ³ a Devuelto.')
         else:
-            messages.success(self.request, 'La respuesta se registrÃ³. El oficio permanece Asignado para revisiÃ³n.')
+            messages.success(self.request, 'Se marco el oficio como Respondido.')
         return HttpResponseRedirect(reverse('oficios:detail', kwargs={'pk': self.oficio.pk}))
-
 
 
 
