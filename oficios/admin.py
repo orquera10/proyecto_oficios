@@ -25,7 +25,8 @@ class CustomUserAdmin(UserAdmin):
         model = UsuarioPerfil
         can_delete = False
         extra = 0
-        fields = ('id_sector',)
+        fields = ('id_sector', 'id_institucion')
+        autocomplete_fields = ('id_sector', 'id_institucion')
 
     list_display = ('username', 'email', 'first_name', 'last_name', 'is_active', 'is_staff', 'is_superuser', 'last_login')
     list_filter = ('is_active', 'is_staff', 'is_superuser', 'groups')
@@ -114,7 +115,7 @@ class OficioAdmin(admin.ModelAdmin):
     class RespuestaInline(admin.TabularInline):
         model = Respuesta
         extra = 0
-        fields = ('id_usuario', 'id_institucion', 'respuesta', 'respuesta_pdf', 'fecha_hora', 'creacion')
+        fields = ('id_usuario', 'id_profesional', 'id_institucion', 'respuesta', 'respuesta_pdf', 'fecha_hora', 'creacion')
         readonly_fields = ('creacion', 'modificacion')
 
     list_display = ('id', 'denuncia', 'legajo', 'institucion', 'juzgado', 'estado_badge', 'fecha_emision', 'fecha_vencimiento', 'usuario', 'creado')
@@ -141,7 +142,7 @@ class OficioAdmin(admin.ModelAdmin):
 
 @admin.register(Respuesta)
 class RespuestaAdmin(admin.ModelAdmin):
-    list_display = ('id', 'id_oficio', 'id_usuario', 'id_institucion', 'fecha_hora', 'creacion')
-    list_filter = ('fecha_hora', 'creacion', 'id_usuario', 'id_institucion')
-    search_fields = ('id_oficio__denuncia', 'id_oficio__legajo', 'id_usuario__username')
+    list_display = ('id', 'id_oficio', 'id_usuario', 'id_profesional', 'id_institucion', 'fecha_hora', 'creacion')
+    list_filter = ('fecha_hora', 'creacion', 'id_usuario', 'id_profesional', 'id_institucion')
+    search_fields = ('id_oficio__denuncia', 'id_oficio__legajo', 'id_usuario__username', 'id_profesional__username')
     readonly_fields = ('creacion', 'modificacion')

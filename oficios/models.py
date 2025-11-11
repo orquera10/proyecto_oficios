@@ -456,6 +456,15 @@ class Respuesta(models.Model):
         verbose_name='Modificación'
     )
 
+    id_profesional = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name='Profesional',
+        related_name='respuestas_como_profesional'
+    )
+
     class Meta:
         verbose_name = 'Respuesta'
         verbose_name_plural = 'Respuestas'
