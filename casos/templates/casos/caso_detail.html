@@ -5,14 +5,15 @@
 {% block page_title %}Detalle del Caso #{{ object.id }}{% endblock %}
 
 {% block page_actions %}
-<a href="{% url 'casos:update' object.pk %}" class="btn btn-warning me-2">
-    <i class="bi bi-pencil"></i> Editar
-</a>
-<a href="{% url 'casos:list' %}" class="btn btn-secondary">
-    <i class="bi bi-arrow-left"></i> Volver al listado
-</a>
+    {% if user.perfil.id_sector and user.perfil.id_sector.nombre|lower == 'informatica' %}
+    <a href="{% url 'casos:update' object.pk %}" class="btn btn-warning me-2">
+        <i class="bi bi-pencil"></i> Editar
+    </a>
+    {% endif %}
+    <a href="{% url 'casos:list' %}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Volver al listado
+    </a>
 {% endblock %}
-
 {% block casos_content %}
 <div class="row">
     <div class="col-md-6">
@@ -129,10 +130,12 @@
 <div class="card mt-4">
     <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
         <h5 class="card-title mb-0">Oficios Relacionados</h5>
+        {% if user.perfil.id_sector and 'despacho' in user.perfil.id_sector.nombre|lower %}
         <a href="{% url 'oficios:create' %}?caso={{ object.pk }}" class="btn btn-sm btn-outline-light d-flex align-items-center">
             <i class="fas fa-plus-circle me-1"></i>
             <span class="fw-semibold">Nuevo Oficio</span>
         </a>
+        {% endif %}
     </div>
     <div class="card-body">
         {% if object.oficios.all %}
@@ -163,9 +166,11 @@
                                 <a href="{% url 'oficios:detail' oficio.pk %}" class="btn btn-info" title="Ver detalles">
                                     <i class="bi bi-eye"></i>
                                 </a>
+                                {% if user.perfil.id_sector and user.perfil.id_sector.nombre|lower == 'informatica' %}
                                 <a href="{% url 'oficios:update' oficio.pk %}" class="btn btn-warning" title="Editar">
                                     <i class="bi bi-pencil"></i>
                                 </a>
+                                {% endif %}
                             </div>
                         </td>
                     </tr>
@@ -255,12 +260,14 @@
         <i class="bi bi-arrow-left"></i> Volver al listado
     </a>
     <div>
+        {% if user.perfil.id_sector and user.perfil.id_sector.nombre|lower == 'informatica' %}
         <a href="{% url 'casos:update' object.pk %}" class="btn btn-warning me-2">
             <i class="bi bi-pencil"></i> Editar
         </a>
         <a href="{% url 'casos:delete' object.pk %}" class="btn btn-danger">
             <i class="bi bi-trash"></i> Eliminar
-        </a>
+        </a>{% endif %}
+        
     </div>
 </div>
 {% endblock %}

@@ -117,13 +117,15 @@
                                 <a href="{% url 'casos:detail' caso.pk %}" class="btn btn-sm btn-info" title="Ver">
                                     <i class="bi bi-eye"></i>
                                 </a>
+                                {% if user.perfil.id_sector and user.perfil.id_sector.nombre|lower == 'informatica' %}
                                 <a href="{% url 'casos:update' caso.pk %}" class="btn btn-sm btn-warning" title="Editar">
                                     <i class="bi bi-pencil"></i>
                                 </a>
                                 <a href="{% url 'casos:delete' caso.pk %}" class="btn btn-sm btn-danger" title="Eliminar">
+                                <a href="{% url 'casos:delete' caso.pk %}" class="btn btn-sm btn-danger" title="Eliminar">
                                     <i class="bi bi-trash"></i>
                                 </a>
-                            </div>
+                                {% endif %}
                         </td>
                     </tr>
                     {% empty %}
