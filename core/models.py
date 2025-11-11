@@ -31,6 +31,14 @@ class UsuarioPerfil(models.Model):
         related_name='usuarios',
         verbose_name='Sector'
     )
+    id_institucion = models.ForeignKey(
+        'oficios.Institucion',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='perfiles',
+        verbose_name='Institucion'
+    )
 
     class Meta:
         verbose_name = 'Perfil de Usuario'
