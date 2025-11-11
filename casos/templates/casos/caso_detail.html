@@ -129,8 +129,9 @@
 <div class="card mt-4">
     <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
         <h5 class="card-title mb-0">Oficios Relacionados</h5>
-        <a href="{% url 'oficios:create' %}?caso={{ object.pk }}" class="btn btn-sm btn-light">
-            <i class="fas fa-plus me-1"></i> Nuevo Oficio
+        <a href="{% url 'oficios:create' %}?caso={{ object.pk }}" class="btn btn-sm btn-outline-light d-flex align-items-center">
+            <i class="fas fa-plus-circle me-1"></i>
+            <span class="fw-semibold">Nuevo Oficio</span>
         </a>
     </div>
     <div class="card-body">
