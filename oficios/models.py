@@ -1,5 +1,6 @@
 import os
 from django.db import models
+from django.db.models import Q
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.core.validators import MinValueValidator, FileExtensionValidator
@@ -240,6 +241,25 @@ class Oficio(models.Model):
                 pass  # Es un nuevo oficio, no hay archivo anterior que eliminar
         
         super().save(*args, **kwargs)
+
+        # Actualizar estado del caso segun estados de sus oficios
+        try:
+            if self.caso_id:
+                caso = self.caso
+                qs = caso.oficios.all()
+                # Si todos los oficios del caso estan 'enviado' => CERRADO
+                if qs.exists() and not qs.filter(~Q(estado='enviado')).exists():
+                    if caso.estado != 'CERRADO':
+                        caso.estado = 'CERRADO'
+                        caso.save(update_fields=['estado'])
+                else:
+                    # Si estaba CERRADO y se agrega/cambia un oficio a otro estado => EN_PROCESO
+                    if caso.estado == 'CERRADO':
+                        caso.estado = 'EN_PROCESO'
+                        caso.save(update_fields=['estado'])
+        except Exception:
+            # No bloquear el guardado del oficio por errores al actualizar el caso
+            pass
 
     def get_estado_badge_class(self):
         """Devuelve la clase de Bootstrap para el badge de estado."""

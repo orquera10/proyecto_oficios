@@ -30,7 +30,7 @@
                     
                     <dt class="col-sm-4">Estado:</dt>
                     <dd class="col-sm-8">
-                        <span class="badge bg-{{ object.estado|estado_badge_class }}">
+                        <span class="badge bg-{% if object.estado == 'ABIERTO' %}primary{% elif object.estado == 'EN_PROCESO' %}warning{% elif object.estado == 'CERRADO' %}success{% else %}secondary{% endif %}">
                             {{ object.get_estado_display }}
                         </span>
                     </dd>
@@ -56,6 +56,7 @@
             <div class="card-body">
                 {% if object.caso_ninos.all %}
                 <div class="table-responsive">
+                    <style>.bg-violet{background-color:#e0cffc!important;color:#212529!important;}</style>
                     <table class="table table-sm">
                         <thead class="table-light">
                             <tr>
@@ -220,17 +221,21 @@
                             </td>
                             <td>
                                 {% if movimiento.estado_anterior %}
-                                <span class="badge bg-{{ movimiento.estado_anterior|estado_badge_class }}">
+                                {% with e=movimiento.estado_anterior %}
+                                <span class="badge bg-{% if e == 'cargado' %}secondary{% elif e == 'asignado' %}warning{% elif e == 'respondido' %}primary{% elif e == 'enviado' %}success{% elif e == 'devuelto' %}violet{% else %}light{% endif %}">
                                     {{ movimiento.get_estado_anterior_display }}
                                 </span>
+                                {% endwith %}
                                 {% else %}
                                 <span class="badge bg-light text-dark">-</span>
                                 {% endif %}
                             </td>
                             <td>
-                                <span class="badge bg-{{ movimiento.estado_nuevo|estado_badge_class }}">
+                                {% with e=movimiento.estado_nuevo %}
+                                <span class="badge bg-{% if e == 'cargado' %}secondary{% elif e == 'asignado' %}warning{% elif e == 'respondido' %}primary{% elif e == 'enviado' %}success{% elif e == 'devuelto' %}violet{% else %}light{% endif %}">
                                     {{ movimiento.get_estado_nuevo_display }}
                                 </span>
+                                {% endwith %}
                             </td>
                             <td>{{ movimiento.institucion.nombre|default:"-" }}</td>
                             <td>{{ movimiento.detalle|truncatechars:30 }}</td>
