@@ -440,10 +440,6 @@ class RespuestaCreateView(LoginRequiredMixin, CreateView):
             messages.success(self.request, 'Se marco el oficio como Respondido.')
         return HttpResponseRedirect(reverse('oficios:detail', kwargs={'pk': self.oficio.pk}))
 
-
-
-
-
 def _is_informatica(user):
     try:
         sector = getattr(getattr(user, 'perfil', None), 'id_sector', None)
