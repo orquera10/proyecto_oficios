@@ -1,15 +1,32 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 {% block content %}
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Detalle del Oficio #{{ oficio.id }}</h2>
         <div class="btn-group">
-{% if oficio.estado == 'cargado' or oficio.estado == 'devuelto' %}
-            {% if not user.perfil.id_sector or not 'despacho' in user.perfil.id_sector.nombre|lower %}
+            {% if user.perfil.id_sector and user.perfil.id_sector.nombre|lower == 'informatica' %}
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#asignarModal">
                 <i class="fas fa-user-check me-1"></i> Asignar
             </button>
-            {% endif %}
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#movimientoModal">
+                <i class="fas fa-exchange-alt me-1"></i> Mover
+            </button>
+            <a href="{% url 'oficios:responder' oficio.pk %}" class="btn btn-success" id="btnResponder">
+                <i class="fas fa-reply me-1"></i> Responder
+            </a>
+            <button type="button" id="btnEnviarOficio" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#enviarModal">
+                <i class="fas fa-paper-plane me-1"></i> Enviar
+            </button>
+            <a href="{% url 'oficios:update' oficio.pk %}" class="btn btn-warning">
+                <i class="fas fa-edit me-1"></i> Editar
+            </a>
+            {% else %}
+            {% if oficio.estado == 'cargado' or oficio.estado == 'devuelto' %}
+                {% if not user.perfil.id_sector or not 'despacho' in user.perfil.id_sector.nombre|lower %}
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#asignarModal">
+                    <i class="fas fa-user-check me-1"></i> Asignar
+                </button>
+                {% endif %}
             {% endif %}
             {% if user.perfil.id_sector and user.perfil.id_sector.nombre|lower == 'informatica' %}
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#movimientoModal">
@@ -21,7 +38,7 @@
                 <i class="fas fa-reply me-1"></i> Responder
             </a>
             {% endif %}
-{% if user.perfil.id_sector and 'despacho' in user.perfil.id_sector.nombre|lower and oficio.estado == 'respondido' %}
+            {% if user.perfil.id_sector and 'despacho' in user.perfil.id_sector.nombre|lower and oficio.estado == 'respondido' %}
             <button type="button" id="btnEnviarOficio" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#enviarModal">
                 <i class="fas fa-paper-plane me-1"></i> Enviar
             </button>
@@ -30,6 +47,7 @@
             <a href="{% url 'oficios:update' oficio.pk %}" class="btn btn-warning">
                 <i class="fas fa-edit me-1"></i> Editar
             </a>
+            {% endif %}
             {% endif %}
             <a href="{% url 'oficios:list' %}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left me-1"></i> Volver
@@ -107,7 +125,7 @@
                         <dd class="col-sm-8">{{ oficio.legajo|default:"-" }}</dd>
 
                         <dt class="col-sm-4">Institución:</dt>
-                        <dd class="col-sm-8">{{ oficio.institucion.nombre }}</dd>
+                        <dd class="col-sm-8">{{ oficio.institucion.nombre|default:"-" }}</dd>
 
                         <dt class="col-sm-4">Juzgado/Agente:</dt>
                         <dd class="col-sm-8">
@@ -240,12 +258,12 @@
                             {% endfor %}
                             {% if oficio.caso.ninos.count > 3 %}
                                 <li class="list-group-item text-muted">
-                                    +{{ oficio.caso.ninos.count|add:"-3" }} más...
+                                    +{{ oficio.caso.ninos.count|add:"-3" }} mÃ¡s...
                                 </li>
                             {% endif %}
                         </ul>
                     {% else %}
-                        <p class="text-muted">No hay niños relacionados con este caso.</p>
+                        <p class="text-muted">No hay Niños relacionados con este caso.</p>
                     {% endif %}
                 </div>
                 <div class="col-md-6">
@@ -259,7 +277,7 @@
                             {% endfor %}
                             {% if oficio.caso.partes.count > 3 %}
                                 <li class="list-group-item text-muted">
-                                    +{{ oficio.caso.partes.count|add:"-3" }} más...
+                                    +{{ oficio.caso.partes.count|add:"-3" }} mÃ¡s...
                                 </li>
                             {% endif %}
                         </ul>
@@ -291,7 +309,7 @@
                             {% if not oficio.institucion %}
                             <div class="mb-3">
                                 <label for="institucion_enviar" class="form-label">Institución</label>
-                                <select class="form-select" id="institucion_enviar" name="institucion" required>
+                                <label for="institucion_enviar" class="form-label">Institución</label>
                                     {% for institucion in instituciones %}
                                         <option value="{{ institucion.id }}">{{ institucion.nombre }}</option>
                                     {% endfor %}
@@ -330,7 +348,7 @@
                         <div class="modal-body">
                             <div class="mb-3">
                                 <label for="institucion_asignar" class="form-label">Institución</label>
-                                <select class="form-select" id="institucion_asignar" name="institucion" required>
+                                <label for="institucion_asignar" class="form-label">Institución</label>
                                     {% for institucion in instituciones %}
                                         <option value="{{ institucion.id }}" {% if oficio.institucion and institucion.id == oficio.institucion.id %}selected{% endif %}>{{ institucion.nombre }}</option>
                                     {% endfor %}
@@ -345,7 +363,7 @@
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                             <button type="submit" class="btn btn-primary">Confirmar Asignación</button>
-                        </div>
+                            <button type="submit" class="btn btn-primary">Confirmar Asignación</button>
                     </form>
                 </div>
             </div>
@@ -382,7 +400,7 @@
                             <th>Estado Anterior</th>
                             <th>Nuevo Estado</th>
                             <th>Institución</th>
-                            <th>Documento</th>
+                            <th>Institución</th>
                             <th>Detalles</th>
                         </tr>
                     </thead>
@@ -487,9 +505,9 @@
                 <div class="table-responsive">
                     <table class="table table-hover mb-0">
                         <thead class="table-light">
-                            <tr>
                                 <th>Fecha</th>
                                 <th>Usuario</th>
+                                <th>Profesional</th>
                                 <th>Institución</th>
                                 <th>Detalle</th>
                                 <th>Archivo</th>
@@ -500,7 +518,7 @@
                             <tr>
                                 <td>{{ r.fecha_hora|date:"d/m/Y H:i" }}</td>
                                 <td>{{ r.id_usuario.get_full_name|default:r.id_usuario.username|default:"-" }}</td>
-                                <td>{{ r.id_institucion.nombre|default:"-" }}</td>
+                                <td>{{ r.id_profesional.get_full_name|default:r.id_profesional.username|default:"-" }}</td>
                                 <td>{{ r.respuesta|default:"-"|truncatechars:60 }}</td>
                                 <td>
                                     {% if r.respuesta_pdf %}
@@ -514,7 +532,7 @@
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="4" class="text-center text-muted py-3">
+                                <td colspan="6" class="text-center text-muted py-3">
                                     <i class="fas fa-info-circle me-1"></i> No hay respuestas registradas.
                                 </td>
                             </tr>
@@ -578,7 +596,7 @@
                 <i class="fas fa-edit me-1"></i> Editar
             </a>
             <a href="{% url 'oficios:delete' oficio.pk %}" class="btn btn-danger"
-               onclick="return confirm('¿Está seguro que desea eliminar este oficio?')">
+               onclick="return confirm('Â¿Está seguro que desea eliminar este oficio?')">
                 <i class="fas fa-trash me-1"></i> Eliminar
             </a>
         </div>

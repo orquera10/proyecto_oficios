@@ -4,6 +4,12 @@ from django.contrib.auth import get_user_model
 from .models import Respuesta
 
 
+class UserFullNameChoiceField(forms.ModelChoiceField):
+    def label_from_instance(self, obj):
+        full = (obj.get_full_name() or '').strip()
+        return full if full else obj.username
+
+
 class RespuestaForm(forms.ModelForm):
     # Campo no-modelo para indicar si se devuelve en lugar de responder
     devolver = forms.BooleanField(
@@ -12,7 +18,7 @@ class RespuestaForm(forms.ModelForm):
         label='Devolver',
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
     )
-    id_profesional = forms.ModelChoiceField(
+    id_profesional = UserFullNameChoiceField(
         queryset=get_user_model().objects.none(),
         required=False,
         label='Profesional'
