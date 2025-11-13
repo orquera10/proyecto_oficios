@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="card border-danger">
+    <div class="card-header bg-danger text-white">
+      <strong>Confirmar eliminación</strong>
+    </div>
+    <div class="card-body">
+      <p>¿Seguro que deseas eliminar la institución <strong>{{ object.nombre }}</strong>?</p>
+
+      {% with total=object.oficios.count %}
+      {% if total > 0 %}
+      <div class="alert alert-danger">
+        <i class="bi bi-exclamation-octagon-fill"></i>
+        Esta institución está relacionada con <strong>{{ total }}</strong> oficio(s).
+        Es probable que no se pueda eliminar mientras existan esas referencias.
+      </div>
+      <div class="mb-2 small">
+        {% for o in object.oficios.all|slice:':5' %}
+          <div>
+            • <a href="{% url 'oficios:detail' o.pk %}">Oficio #{{ o.id }}</a>
+            {% if o.denuncia %} – Denuncia: {{ o.denuncia }}{% endif %}
+          </div>
+        {% endfor %}
+        {% if total > 5 %}
+          <div>… y {{ total|add:'-5' }} más.</div>
+        {% endif %}
+      </div>
+      {% endif %}
+      {% endwith %}
+
+      <form method="post">
+        {% csrf_token %}
+        <a href="{% url 'oficios:institucion_detail' object.pk %}" class="btn btn-outline-secondary me-2">Cancelar</a>
+        <button type="submit" class="btn btn-danger">Eliminar</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

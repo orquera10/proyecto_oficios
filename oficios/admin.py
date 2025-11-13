@@ -25,7 +25,7 @@ class CustomUserAdmin(UserAdmin):
         model = UsuarioPerfil
         can_delete = False
         extra = 0
-        fields = ('id_sector', 'id_institucion')
+        fields = ('id_sector', 'es_profesional', 'id_institucion')
         autocomplete_fields = ('id_sector', 'id_institucion')
 
     list_display = ('username', 'email', 'first_name', 'last_name', 'is_active', 'is_staff', 'is_superuser', 'last_login')

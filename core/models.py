@@ -31,6 +31,10 @@ class UsuarioPerfil(models.Model):
         related_name='usuarios',
         verbose_name='Sector'
     )
+    es_profesional = models.BooleanField(
+        default=False,
+        verbose_name='Es profesional'
+    )
     id_institucion = models.ForeignKey(
         'oficios.Institucion',
         on_delete=models.SET_NULL,

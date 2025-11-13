@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="card border-danger">
+    <div class="card-header bg-danger text-white">
+      <strong>Confirmar eliminación</strong>
+    </div>
+    <div class="card-body">
+      <p>¿Seguro que deseas eliminar al profesional <strong>{{ object.get_full_name|default:object.username }}</strong>?</p>
+
+      {% with total=object.respuestas_como_profesional.count %}
+      {% if total > 0 %}
+      <div class="alert alert-danger">
+        <i class="bi bi-exclamation-octagon-fill"></i>
+        Este profesional está asociado a <strong>{{ total }}</strong> respuesta(s).
+        No se permitirá la eliminación mientras existan esas referencias.
+      </div>
+      {% endif %}
+      {% endwith %}
+
+      <form method="post">
+        {% csrf_token %}
+        <a href="{% url 'oficios:profesional_detail' object.pk %}" class="btn btn-outline-secondary me-2">Cancelar</a>
+        <button type="submit" class="btn btn-danger">Eliminar</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

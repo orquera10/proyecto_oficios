@@ -54,7 +54,7 @@ class RespuestaForm(forms.ModelForm):
 
             qs = get_user_model().objects.all()
             if institucion:
-                qs = qs.filter(perfil__id_institucion=institucion)
+                qs = qs.filter(perfil__id_institucion=institucion, perfil__es_profesional=True, is_active=True)
             else:
                 qs = qs.none()
             self.fields['id_profesional'].queryset = qs.order_by('first_name', 'last_name', 'username')

@@ -91,6 +91,32 @@
                     </li>
 
                     <!-- Menú desplegable de Personas -->
+                    <!-- Dropdown de Referencias: Agentes/Juzgados e Instituciones -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="refsDropdown" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-database me-1"></i> Referencias
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="refsDropdown">
+                            <li>
+                                <a class="dropdown-item" href="{% url 'oficios:juzgado_list' %}">
+                                    <i class="fas fa-gavel me-2"></i> Agentes/Juzgados
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'oficios:institucion_list' %}">
+                                    <i class="fas fa-building me-2"></i> Instituciones
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'oficios:profesional_list' %}">
+                                    <i class="fas fa-user-md me-2"></i> Profesionales
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="personasDropdown" role="button" 
                            data-bs-toggle="dropdown" aria-expanded="false">
@@ -191,10 +217,12 @@
     <main class="container py-4">
         {% if messages %}
             {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {% with tag=message.tags %}
+                <div class="alert alert-{% if tag == 'error' %}danger{% elif tag == 'debug' %}secondary{% else %}{{ tag }}{% endif %} alert-dismissible fade show" role="alert">
                     {{ message }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
+                {% endwith %}
             {% endfor %}
         {% endif %}
 
