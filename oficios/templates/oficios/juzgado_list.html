@@ -28,7 +28,7 @@
       <tbody>
         {% for j in juzgados %}
         <tr>
-          <td><a href="{% url 'oficios:juzgado_detail' j.pk %}">{{ j.nombre }}</a></td>
+          <td>{{ j.nombre }}</td>
           <td>{{ j.telefono|default:"-" }}</td>
           <td>{{ j.direccion|default:"-"|truncatechars:60 }}</td>
           <td class="text-end table-actions">

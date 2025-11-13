@@ -27,7 +27,7 @@
       <tbody>
         {% for inst in instituciones %}
         <tr>
-          <td><a href="{% url 'oficios:institucion_detail' inst.pk %}">{{ inst.nombre }}</a></td>
+          <td>{{ inst.nombre }}</td>
           <td>{{ inst.direccion|default:"-"|truncatechars:80 }}</td>
           <td class="text-end table-actions">
             <div class="btn-group" role="group" aria-label="Acciones">
