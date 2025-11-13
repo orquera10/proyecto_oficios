@@ -27,6 +27,8 @@ urlpatterns = [
     
     # Acción para marcar oficio como enviado
     path('<int:pk>/enviar/', views.OficioEnviarView.as_view(), name='enviar'),
+    path('<int:pk>/asignar-caso/', views.OficioAsignarCasoView.as_view(), name='asignar_caso'),
+    path('<int:pk>/desvincular-caso/', views.OficioDesvincularCasoView.as_view(), name='desvincular_caso'),
 
     # CRUD Juzgados (Agentes)
     path('juzgados/', JuzgadoListView.as_view(), name='juzgado_list'),

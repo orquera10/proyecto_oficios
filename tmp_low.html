@@ -1,0 +1,159 @@
+                           target="_blank" 
+                           class="btn btn-primary">
+                            <i class="fas fa-external-link-alt me-2"></i>Abrir en nueva pestaña
+                        </a>
+                        <a href="{{ oficio.archivo_pdf.url }}" 
+                           download
+                           class="btn btn-outline-secondary ms-2">
+                            <i class="fas fa-download me-2"></i>Descargar
+                        </a>
+                    </div>
+
+                    <div class="pdf-viewer-container mt-3" style="height: 800px;">
+                        <iframe src="{{ oficio.archivo_pdf.url }}" width="100%" height="100%" style="border: 1px solid #ccc;"></iframe>
+                    </div>
+
+                    <div class="text-muted small mt-2">
+                        <i class="fas fa-info-circle me-1"></i>
+                        {{ oficio.archivo_pdf.name|slice:"-50:" }}
+                    </div>
+                </div>
+            {% else %}
+                <div class="alert alert-info mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    No hay ningún documento adjunto a este oficio.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Sección de Respuestas -->
+    <div class="card mt-4">
+        <div class="card-header bg-success text-white">
+            <h4 class="mb-0">
+                <i class="fas fa-reply me-2"></i>Respuestas
+            </h4>
+        </div>
+        <div class="card-body p-0">
+            {% if oficio.respuestas.all %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                                <th>Fecha</th>
+                                <th>Usuario</th>
+                                <th>Profesional</th>
+                                <th>Institución</th>
+                                <th>Detalle</th>
+                                <th>Archivo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in oficio.respuestas.all %}
+                            <tr>
+                                <td>{{ r.fecha_hora|date:"d/m/Y H:i" }}</td>
+                                <td>{% if r.id_usuario %}{{ r.id_usuario.get_full_name|default:r.id_usuario.username }}{% else %}-{% endif %}</td>
+                                <td>{% if r.id_profesional %}{{ r.id_profesional.get_full_name|default:r.id_profesional.username }}{% else %}-{% endif %}</td>
+                                <td>{{ r.id_institucion.nombre|default:"-" }}</td>
+                                <td>{{ r.respuesta|default:"-"|truncatechars:60 }}</td>
+                                <td>
+                                    {% if r.respuesta_pdf %}
+                                        <a class="btn btn-sm btn-outline-primary" href="{{ r.respuesta_pdf.url }}" target="_blank">
+                                            <i class="fas fa-file-pdf me-1"></i>Abrir
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-3">
+                                    <i class="fas fa-info-circle me-1"></i> No hay respuestas registradas.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    No hay respuestas registradas.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+        {# Modal para asignar (solo cuando estado es cargado) #}
+        <div class="modal fade" id="asignarModal" tabindex="-1" aria-labelledby="asignarModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="asignarModalLabel">Asignar Oficio #{{ oficio.id }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form method="post" action="{% url 'oficios:enviar' oficio.pk %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <input type="hidden" name="nuevo_estado" value="asignado">
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="institucion_asignar" class="form-label">Institución</label>
+                                <select class="form-select" id="institucion_asignar" name="institucion" required>
+                                    {% for institucion in instituciones %}
+                                        <option value="{{ institucion.id }}" {% if oficio.institucion and institucion.id == oficio.institucion.id %}selected{% endif %}>{{ institucion.nombre }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="detalle_asignar" class="form-label">Detalle</label>
+                                <textarea class="form-control" id="detalle_asignar" name="detalle" rows="3" required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="archivo_pdf_asignar" class="form-label">Adjuntar PDF (opcional)</label>
+                                <input type="file" class="form-control" id="archivo_pdf_asignar" name="archivo_pdf" accept=".pdf">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Confirmar Asignación</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    <div class="mt-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a href="{% url 'oficios:list' %}" class="btn btn-outline-secondary d-inline-flex align-items-center shadow-sm">
+            <i class="fas fa-arrow-left me-1"></i> Volver al listado
+        </a>
+        <div class="btn-group" role="group" aria-label="Acciones">
+            <a href="{% url 'oficios:update' oficio.pk %}" class="btn btn-warning" title="Editar">
+                <i class="fas fa-edit me-1"></i> Editar
+            </a>
+            <a href="{% url 'oficios:delete' oficio.pk %}" class="btn btn-danger" title="Eliminar" onclick="return confirm('¿Está seguro que desea eliminar este oficio?')">
+                <i class="fas fa-trash me-1"></i> Eliminar
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const btn = document.getElementById('btnEnviarOficio');
+  const modalEl = document.getElementById('enviarModal');
+  if (btn && modalEl && window.bootstrap) {
+    btn.addEventListener('click', function () {
+      try { new bootstrap.Modal(modalEl).show(); } catch (e) {}
+    });
+  }
+});
+</script>
+{% endblock %}
+
+ 
+
+
+

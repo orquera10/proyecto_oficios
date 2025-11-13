@@ -13,6 +13,7 @@ from django.utils.decorators import method_decorator
 from .models import (
     Oficio, Institucion, Caratula, Juzgado, MovimientoOficio, Respuesta
 )
+from casos.models import Caso
 from .forms import OficioForm
 from .forms_respuesta import RespuestaForm
 from .filters import OficioFilter
@@ -217,8 +218,39 @@ class OficioDetailView(LoginRequiredMixin, DetailView):
         context.update({
             'now': timezone.now(),
             'instituciones': Institucion.objects.all().order_by('nombre'),
+            # Casos para asignar desde modal (últimos 50)
+            'casos_opciones': Caso.objects.all().order_by('-creado')[:50],
         })
         return context
+
+
+class OficioAsignarCasoView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        oficio = get_object_or_404(Oficio, pk=kwargs['pk'])
+        caso_id = request.POST.get('caso_id')
+        try:
+            caso = get_object_or_404(Caso, pk=caso_id)
+            oficio.caso = caso
+            oficio.save(update_fields=['caso'])
+            messages.success(request, 'El caso fue asignado al oficio correctamente.')
+        except Exception:
+            messages.error(request, 'No se pudo asignar el caso seleccionado.')
+        return redirect('oficios:detail', pk=oficio.pk)
+
+
+class OficioDesvincularCasoView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        oficio = get_object_or_404(Oficio, pk=kwargs['pk'])
+        try:
+            if oficio.caso_id:
+                oficio.caso = None
+                oficio.save(update_fields=['caso'])
+                messages.success(request, 'El oficio fue desvinculado del caso correctamente.')
+            else:
+                messages.info(request, 'El oficio no tiene un caso asignado actualmente.')
+        except Exception:
+            messages.error(request, 'No se pudo desvincular el caso del oficio.')
+        return redirect('oficios:detail', pk=oficio.pk)
 
 
 class OficioUpdateView(LoginRequiredMixin, UpdateView):
