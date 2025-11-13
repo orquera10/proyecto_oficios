@@ -200,3 +200,8 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # La sesión no expira al cerrar el nav
 # Tamaño máximo de archivo para cargar (10MB)
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB en bytes
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB en bytes
+
+# Autenticación: bloquear profesionales
+AUTHENTICATION_BACKENDS = [
+    'core.auth_backends.NoProfesionalesBackend',
+]

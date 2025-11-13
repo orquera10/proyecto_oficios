@@ -4,6 +4,7 @@ URL configuration for core project.
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
+from core.forms import ProfesionalBlockAuthenticationForm
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -13,7 +14,10 @@ urlpatterns = [
     path('oficios/', include(('oficios.urls', 'oficios'), namespace='oficios')),
     path('personas/', include(('personas.urls', 'personas'), namespace='personas')),
     path('casos/', include(('casos.urls', 'casos'), namespace='casos')),  # Añade esta línea
-    path('accounts/login/', auth_views.LoginView.as_view(extra_context={'hide_navbar': True}), name='login'),
+    path('accounts/login/', auth_views.LoginView.as_view(
+        form_class=ProfesionalBlockAuthenticationForm,
+        extra_context={'hide_navbar': True}
+    ), name='login'),
     path('accounts/', include('django.contrib.auth.urls')),
 ]
 
