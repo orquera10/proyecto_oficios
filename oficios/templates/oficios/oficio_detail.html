@@ -49,9 +49,6 @@
             </a>
             {% endif %}
             {% endif %}
-            <a href="{% url 'oficios:list' %}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left me-1"></i> Volver
-            </a>
         </div>
 
         <!-- Modal para mover el oficio -->
@@ -65,10 +62,9 @@
                     <form method="post" action="{% url 'oficios:enviar' oficio.pk %}">
                         {% csrf_token %}
                         <div class="modal-body">
-                            <input type="hidden" name="nuevo_estado" value="respondido">
                             <div class="mb-3">
                                 <label for="nuevo_estado" class="form-label">Nuevo Estado</label>
-                                <select class="form-select" id="nuevo_estado" name="nuevo_estado" required disabled style="display:none;">
+                                <select class="form-select" id="nuevo_estado" name="nuevo_estado" required>
                                     {% for value, label in oficio.ESTADO_CHOICES %}
                                         {% if value != oficio.estado %}
                                             <option value="{{ value }}">{{ label }}</option>
@@ -85,7 +81,6 @@
                                         </option>
                                     {% endfor %}
                                 </select>
-                                <input type="hidden" name="institucion" value="{{ oficio.institucion.id }}">
                             </div>
                             <div class="mb-3">
                                 <label for="detalle" class="form-label">Detalle del movimiento</label>
@@ -139,6 +134,8 @@
                                 -
                             {% endif %}
                         </dd>
+                        
+                        </dd>
                     </dl>
                 </div>
                 <div class="col-md-6">
@@ -164,6 +161,14 @@
                                 {% if oficio.fecha_vencimiento < now %}
                                     <span class="badge bg-danger ms-2">Vencido</span>
                                 {% endif %}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </dd>
+                        <dt class="col-sm-4">Fecha de Envío:</dt>
+                        <dd class="col-sm-8">
+                            {% if oficio.fecha_envio %}
+                                {{ oficio.fecha_envio|date:"d/m/Y H:i" }}
                             {% else %}
                                 -
                             {% endif %}
@@ -247,43 +252,55 @@
             <hr>
             <div class="row">
                 <div class="col-md-6">
-                    <h5>Niños relacionados</h5>
-                    {% if oficio.caso.ninos.all %}
-                        <ul class="list-group">
-                            {% for nino in oficio.caso.ninos.all|slice:":3" %}
-                                <li class="list-group-item">
-                                    {{ nino.nombre }} {{ nino.apellido }}
-                                    {% if nino.edad_calculada %}<span class="badge bg-primary ms-2">{{ nino.edad_calculada }} años</span>{% endif %}
+                    <div class="card h-100 mb-3">
+                        <div class="card-header bg-light">
+                            <i class="fas fa-child me-2"></i>Niños relacionados
+                        </div>
+                        <div class="card-body p-0">
+                            {% if oficio.caso and oficio.caso.ninos.all %}
+                            <ul class="list-group list-group-flush">
+                                {% for nino in oficio.caso.ninos.all|slice:":5" %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>{{ nino.nombre }} {{ nino.apellido }}</span>
+                                    {% if nino.edad_calculada %}<span class="badge bg-primary">{{ nino.edad_calculada }} años</span>{% endif %}
                                 </li>
-                            {% endfor %}
-                            {% if oficio.caso.ninos.count > 3 %}
+                                {% endfor %}
+                                {% if oficio.caso.ninos.count > 5 %}
                                 <li class="list-group-item text-muted">
-                                    +{{ oficio.caso.ninos.count|add:"-3" }} mÃ¡s...
+                                    +{{ oficio.caso.ninos.count|add:"-5" }} más...
                                 </li>
+                                {% endif %}
+                            </ul>
+                            {% else %}
+                            <div class="p-3 text-muted">No hay niños relacionados con este caso.</div>
                             {% endif %}
-                        </ul>
-                    {% else %}
-                        <p class="text-muted">No hay Niños relacionados con este caso.</p>
-                    {% endif %}
+                        </div>
+                    </div>
                 </div>
                 <div class="col-md-6">
-                    <h5>Partes relacionadas</h5>
-                    {% if oficio.caso.partes.all %}
-                        <ul class="list-group">
-                            {% for parte in oficio.caso.partes.all|slice:":3" %}
-                                <li class="list-group-item">
-                                    {{ parte.nombre }} {{ parte.apellido }}
+                    <div class="card h-100 mb-3">
+                        <div class="card-header bg-light">
+                            <i class="fas fa-user-tie me-2"></i>Partes relacionadas
+                        </div>
+                        <div class="card-body p-0">
+                            {% if oficio.caso and oficio.caso.partes.all %}
+                            <ul class="list-group list-group-flush">
+                                {% for parte in oficio.caso.partes.all|slice:":5" %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>{{ parte.nombre }} {{ parte.apellido }}</span>
                                 </li>
-                            {% endfor %}
-                            {% if oficio.caso.partes.count > 3 %}
+                                {% endfor %}
+                                {% if oficio.caso.partes.count > 5 %}
                                 <li class="list-group-item text-muted">
-                                    +{{ oficio.caso.partes.count|add:"-3" }} mÃ¡s...
+                                    +{{ oficio.caso.partes.count|add:"-5" }} más...
                                 </li>
+                                {% endif %}
+                            </ul>
+                            {% else %}
+                            <div class="p-3 text-muted">No hay partes relacionadas con este caso.</div>
                             {% endif %}
-                        </ul>
-                    {% else %}
-                        <p class="text-muted">No hay partes relacionadas con este caso.</p>
-                    {% endif %}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -308,13 +325,11 @@
                             </div>
                             {% if not oficio.institucion %}
                             <div class="mb-3">
-                                <label for="institucion_enviar" class="form-label">Institución</label>
-                                <label for="institucion_enviar" class="form-label">Institución</label>
+                                <label for="institucion_enviar" class="form-label">Institución</label>\r\n                                <select class="form-select" id="institucion_enviar" name="institucion" required>
                                     {% for institucion in instituciones %}
                                         <option value="{{ institucion.id }}">{{ institucion.nombre }}</option>
                                     {% endfor %}
                                 </select>
-                                <input type="hidden" name="institucion" value="{{ oficio.institucion.id }}">
                             </div>
                             {% endif %}
                             <div class="mb-3">
@@ -517,8 +532,9 @@
                             {% for r in oficio.respuestas.all %}
                             <tr>
                                 <td>{{ r.fecha_hora|date:"d/m/Y H:i" }}</td>
-                                <td>{{ r.id_usuario.get_full_name|default:r.id_usuario.username|default:"-" }}</td>
-                                <td>{{ r.id_profesional.get_full_name|default:r.id_profesional.username|default:"-" }}</td>
+                                <td>{% if r.id_usuario %}{{ r.id_usuario.get_full_name|default:r.id_usuario.username }}{% else %}-{% endif %}</td>
+                                <td>{% if r.id_profesional %}{{ r.id_profesional.get_full_name|default:r.id_profesional.username }}{% else %}-{% endif %}</td>
+                                <td>{{ r.id_institucion.nombre|default:"-" }}</td>
                                 <td>{{ r.respuesta|default:"-"|truncatechars:60 }}</td>
                                 <td>
                                     {% if r.respuesta_pdf %}
@@ -587,16 +603,15 @@
             </div>
         </div>
 
-    <div class="mt-4 d-flex justify-content-between">
-        <a href="{% url 'oficios:list' %}" class="btn btn-secondary">
+    <div class="mt-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a href="{% url 'oficios:list' %}" class="btn btn-outline-secondary d-inline-flex align-items-center shadow-sm">
             <i class="fas fa-arrow-left me-1"></i> Volver al listado
         </a>
-        <div>
-            <a href="{% url 'oficios:update' oficio.pk %}" class="btn btn-warning">
+        <div class="btn-group" role="group" aria-label="Acciones">
+            <a href="{% url 'oficios:update' oficio.pk %}" class="btn btn-warning" title="Editar">
                 <i class="fas fa-edit me-1"></i> Editar
             </a>
-            <a href="{% url 'oficios:delete' oficio.pk %}" class="btn btn-danger"
-               onclick="return confirm('Â¿Está seguro que desea eliminar este oficio?')">
+            <a href="{% url 'oficios:delete' oficio.pk %}" class="btn btn-danger" title="Eliminar" onclick="return confirm('¿Está seguro que desea eliminar este oficio?')">
                 <i class="fas fa-trash me-1"></i> Eliminar
             </a>
         </div>
@@ -620,3 +635,5 @@ document.addEventListener('DOMContentLoaded', function() {
 {% endblock %}
 
  
+
+

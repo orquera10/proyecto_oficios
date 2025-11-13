@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, get_object_or_404
+﻿from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView, View
 from django.urls import reverse_lazy, reverse
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -20,7 +20,7 @@ from .filters import OficioFilter
 
 def buscar_ninos(request):
     """
-    Vista para buscar niÃ±os por nombre, apellido o documento.
+    Vista para buscar niÃƒÂ±os por nombre, apellido o documento.
     Devuelve resultados en formato JSON para ser usados en autocompletado.
     """
     query = request.GET.get('q', '').strip()
@@ -56,7 +56,7 @@ class OficioListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         queryset = super().get_queryset()
         self.filterset = OficioFilter(self.request.GET, queryset=queryset)
-        # Orden por fecha de vencimiento ascendente (nulos al final), luego por emisiÃ³n desc
+        # Orden por fecha de vencimiento ascendente (nulos al final), luego por emisiÃƒÂ³n desc
         return (
             self.filterset.qs
             .select_related('institucion', 'juzgado', 'usuario')
@@ -255,7 +255,7 @@ class OficioEnviarView(LoginRequiredMixin, View):
         detalle = request.POST.get('detalle', '').strip()
         archivo_pdf = request.FILES.get('archivo_pdf')
         
-        # Validar que el nuevo estado sea vÃ¡lido
+        # Validar que el nuevo estado sea vÃƒÂ¡lido
         if nuevo_estado not in dict(oficio.ESTADO_CHOICES):
             messages.error(request, 'El estado seleccionado no es valido.')
             return redirect('oficios:detail', pk=oficio.pk)
@@ -269,10 +269,10 @@ class OficioEnviarView(LoginRequiredMixin, View):
             # Obtener la institucion
             institucion = Institucion.objects.get(pk=institucion_id)
             
-            # Definir detalle por defecto si viene vacío
+            # Definir detalle por defecto si viene vacÃ­o
             if not detalle:
                 if nuevo_estado == 'asignado':
-                    detalle_final = 'Se asignó a institución'
+                    detalle_final = 'Se asignÃ³ a instituciÃ³n'
                 elif nuevo_estado == 'enviado':
                     detalle_final = 'Oficio enviado a agente'
                 else:
@@ -296,16 +296,19 @@ class OficioEnviarView(LoginRequiredMixin, View):
             )
             
             # Actualizar estado del oficio (sin tocar el PDF del oficio)
+            # Actualizar estado del oficio (y fecha de envío si corresponde)
             oficio.estado = nuevo_estado
             oficio.institucion = institucion
-            oficio.save(update_fields=['estado', 'institucion'])
-            
-            messages.success(request, f'El oficio ha sido movido a "{dict(oficio.ESTADO_CHOICES).get(nuevo_estado, nuevo_estado)}" correctamente.')
+            update_fields = ['estado', 'institucion']
+            if nuevo_estado == 'enviado' and not getattr(oficio, 'fecha_envio', None):
+                oficio.fecha_envio = timezone.now()
+                update_fields.append('fecha_envio')
+            oficio.save(update_fields=update_fields)
             
         except institucion.DoesNotExist:
-            messages.error(request, 'la institucion seleccionada no es vÃ¡lida.')
+            messages.error(request, 'la institucion seleccionada no es vÃƒÂ¡lida.')
         except Exception as e:
-            messages.error(request, f'Ocurrio ³ un error al procesar el movimiento: {str(e)}')
+            messages.error(request, f'Ocurrio Â³ un error al procesar el movimiento: {str(e)}')
         
         return redirect('oficios:detail', pk=oficio.pk)
 
@@ -341,7 +344,7 @@ class RespuestaCreateView(LoginRequiredMixin, CreateView):
 
     def get_initial(self):
         initial = super().get_initial()
-        # Preseleccionar instituciÃ³n del oficio si estÃ¡ disponible
+        # Preseleccionar instituciÃƒÂ³n del oficio si estÃƒÂ¡ disponible
         if self.oficio and self.oficio.institucion_id:
             initial['id_institucion'] = self.oficio.institucion_id
         return initial
@@ -354,7 +357,7 @@ class RespuestaCreateView(LoginRequiredMixin, CreateView):
         obj = form.save(commit=False)
         obj.id_oficio = self.oficio
         obj.id_usuario = self.request.user
-        # Si no se env�a instituci�n, usar la del oficio por conveniencia
+        # Si no se envía institución, usar la del oficio por conveniencia
         if not obj.id_institucion and self.oficio.institucion:
             obj.id_institucion = self.oficio.institucion
         # Autocompletar respuesta si viene vacia
@@ -366,7 +369,7 @@ class RespuestaCreateView(LoginRequiredMixin, CreateView):
             obj.respuesta = 'Se respondio el oficio'
         obj.save()
 
-        # Registrar movimiento y, segÃºn opciÃ³n, mantener estado en 'asignado' o pasar a 'devuelto'
+        # Registrar movimiento y, segÃƒÂºn opciÃƒÂ³n, mantener estado en 'asignado' o pasar a 'devuelto'
         try:
             institucion_mov = obj.id_institucion or self.oficio.institucion
             detalle_mov = obj.respuesta.strip()[:200] if obj.respuesta else 'Se respondio el oficio'
@@ -400,7 +403,7 @@ class RespuestaCreateView(LoginRequiredMixin, CreateView):
             pass
 
         if form.cleaned_data.get('devolver'):
-            messages.success(self.request, 'La respuesta se registrÃ³ y el oficio pasÃ³ a Devuelto.')
+            messages.success(self.request, 'La respuesta se registrÃƒÂ³ y el oficio pasÃƒÂ³ a Devuelto.')
         else:
             messages.success(self.request, 'Se marco el oficio como Respondido.')
         return HttpResponseRedirect(reverse('oficios:detail', kwargs={'pk': self.oficio.pk}))
