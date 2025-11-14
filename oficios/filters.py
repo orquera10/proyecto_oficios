@@ -2,6 +2,7 @@ import django_filters
 from django import forms
 from django.db.models import Q
 from .models import Oficio, Institucion, Juzgado, Caratula
+from personas.models import Nino
 
 class OficioFilter(django_filters.FilterSet):
     ESTADO_CHOICES = [
@@ -76,6 +77,18 @@ class OficioFilter(django_filters.FilterSet):
             'data-placeholder': 'Buscar juzgado...'
         })
     )
+
+    # Filtro por Niño/a relacionado vía Caso
+    nino = django_filters.ModelChoiceFilter(
+        field_name='caso__ninos',
+        queryset=Nino.objects.all().order_by('apellido', 'nombre') if hasattr(Nino, 'apellido') else Nino.objects.all(),
+        label='Niño/a',
+        empty_label='Todos',
+        widget=forms.Select(attrs={
+            'class': 'form-select form-select-sm select2',
+            'data-placeholder': 'Seleccionar niño/a...'
+        })
+    )
     
     
     class Meta:
@@ -86,7 +99,8 @@ class OficioFilter(django_filters.FilterSet):
             'fecha_desde',
             'fecha_hasta',
             'institucion',
-            'juzgado'
+            'juzgado',
+            'nino'
         ]
     
     def filtro_busqueda(self, queryset, name, value):

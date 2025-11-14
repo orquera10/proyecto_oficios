@@ -5,18 +5,6 @@ from .models import Caso, CasoNino, CasoParte
 from personas.models import Nino, Parte
 
 class CasoFilter(django_filters.FilterSet):
-    TIPO_CHOICES = [
-        ('', 'Todos'),
-        ('MPA', 'MPA'),
-        ('JUDICIAL', 'Judicial'),
-    ]
-    
-    ESTADO_CHOICES = [
-        ('', 'Todos'),
-        ('ABIERTO', 'Abierto'),
-        ('EN_PROCESO', 'En Proceso'),
-        ('CERRADO', 'Cerrado'),
-    ]
     
     # Filtro de búsqueda general
     busqueda = django_filters.CharFilter(
@@ -29,10 +17,11 @@ class CasoFilter(django_filters.FilterSet):
     )
     
     # Filtros básicos
+    # Usar las choices del modelo para mantener sincronía (incluye 'Nota', 'Provincial', etc.)
     tipo = django_filters.ChoiceFilter(
         field_name='tipo',
         label='Tipo de Caso',
-        choices=TIPO_CHOICES,
+        choices=Caso.TIPO_CHOICES,
         empty_label='Todos los tipos',
         widget=forms.Select(attrs={'class': 'form-select form-select-sm'})
     )
@@ -40,11 +29,19 @@ class CasoFilter(django_filters.FilterSet):
     estado = django_filters.ChoiceFilter(
         field_name='estado',
         label='Estado',
-        choices=ESTADO_CHOICES,
+        choices=Caso.ESTADO_CHOICES,
         empty_label='Todos los estados',
         widget=forms.Select(attrs={'class': 'form-select form-select-sm'})
     )
-    
+
+    # Filtro por niño/a (ModelChoice)
+    nino = django_filters.ModelChoiceFilter(
+        label='Niño/a',
+        queryset=Nino.objects.all().order_by('apellido', 'nombre'),
+        field_name='caso_ninos__nino',
+        widget=forms.Select(attrs={'class': 'form-select form-select-sm'})
+    )
+
     # Filtros por fechas
     fecha_desde = django_filters.DateFilter(
         field_name='creado',
@@ -75,6 +72,7 @@ class CasoFilter(django_filters.FilterSet):
             'busqueda',
             'tipo',
             'estado',
+            'nino',
             'fecha_desde',
             'fecha_hasta'
         ]

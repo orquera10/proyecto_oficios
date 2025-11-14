@@ -63,8 +63,11 @@
                     {{ filter.form.fecha_hasta|add_class:'form-control' }}
                 </div>
                 
-                <!-- Espacio vacío para mantener el diseño de 3 columnas -->
-                <div class="col-md-4"></div>
+                <!-- Filtro por Niño/a -->
+                <div class="col-md-4">
+                    <label for="{{ filter.form.nino.id_for_label }}" class="form-label">{{ filter.form.nino.label }}</label>
+                    {{ filter.form.nino|add_class:'form-select select2' }}
+                </div>
                 
                 <div class="col-12 mt-3">
                     <button type="submit" class="btn btn-primary">
