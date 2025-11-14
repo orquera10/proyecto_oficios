@@ -651,12 +651,14 @@
             <i class="fas fa-arrow-left me-1"></i> Volver al listado
         </a>
         <div class="btn-group" role="group" aria-label="Acciones">
+            {% if user.perfil.id_sector and user.perfil.id_sector.nombre|lower == 'informatica' %}
             <a href="{% url 'oficios:update' oficio.pk %}" class="btn btn-warning" title="Editar">
                 <i class="fas fa-edit me-1"></i> Editar
             </a>
             <a href="{% url 'oficios:delete' oficio.pk %}" class="btn btn-danger" title="Eliminar" onclick="return confirm('¿Está seguro que desea eliminar este oficio?')">
                 <i class="fas fa-trash me-1"></i> Eliminar
             </a>
+            {% endif %}
         </div>
     </div>
 </div>

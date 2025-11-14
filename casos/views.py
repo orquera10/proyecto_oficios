@@ -202,5 +202,10 @@ class CasoDeleteView(LoginRequiredMixin, DeleteView):
         return queryset
     
     def delete(self, request, *args, **kwargs):
+        caso = self.get_object()
+        # Bloquear eliminación si el caso tiene oficios asociados
+        if hasattr(caso, 'oficios') and caso.oficios.exists():
+            messages.error(request, 'No se puede eliminar el caso porque tiene oficios asociados.')
+            return redirect('casos:detail', pk=caso.pk)
         messages.success(request, 'Caso eliminado exitosamente.')
         return super().delete(request, *args, **kwargs)

@@ -133,9 +133,11 @@
                                 <a href="{% url 'casos:update' caso.pk %}" class="btn btn-sm btn-warning" title="Editar">
                                     <i class="bi bi-pencil"></i>
                                 </a>
-                                <a href="{% url 'casos:delete' caso.pk %}" class="btn btn-sm btn-danger" title="Eliminar">
-                                    <i class="bi bi-trash"></i>
-                                </a>
+                                {% if not caso.oficios.all %}
+                                    <a href="{% url 'casos:delete' caso.pk %}" class="btn btn-sm btn-danger" title="Eliminar">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                {% endif %}
                                 {% endif %}
                         </td>
                     </tr>

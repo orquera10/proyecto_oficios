@@ -374,8 +374,8 @@ class OficioDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('oficios:list')
 
     def dispatch(self, request, *args, **kwargs):
-        if _is_despacho(request.user):
-            messages.error(request, 'No tiene permisos para responder oficios.')
+        if not _is_informatica(request.user):
+            messages.error(request, 'No tiene permisos para eliminar oficios.')
             return redirect('oficios:detail', pk=kwargs.get('pk'))
         return super().dispatch(request, *args, **kwargs)
 
