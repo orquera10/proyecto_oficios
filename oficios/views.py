@@ -7,6 +7,7 @@ from django.utils import timezone
 from django.http import JsonResponse, HttpResponseRedirect
 from django.db.models import Q, F
 from django.views.decorators.http import require_http_methods
+import unicodedata
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 
@@ -109,6 +110,16 @@ class OficioCreateView(LoginRequiredMixin, CreateView):
     model = Oficio
     form_class = OficioForm
     template_name = 'oficios/oficio_form.html'
+    
+    def dispatch(self, request, *args, **kwargs):
+        perfil = getattr(request.user, 'perfil', None)
+        raw_nombre = getattr(getattr(perfil, 'id_sector', None), 'nombre', '') or ''
+        norm = unicodedata.normalize('NFKD', raw_nombre)
+        sector_nombre = ''.join(c for c in norm if not unicodedata.combining(c)).lower()
+        if 'coordinacion opd' in sector_nombre:
+            messages.error(request, 'No tiene permisos para crear oficios.')
+            return redirect('oficios:list')
+        return super().dispatch(request, *args, **kwargs)
     
     def get_initial(self):
         initial = super().get_initial()

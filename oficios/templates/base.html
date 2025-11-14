@@ -38,11 +38,13 @@
                                     <i class="fas fa-list me-2"></i>Listado de Oficios
                                 </a>
                             </li>
+                            {% if not (user.perfil.id_sector and 'coordinacion opd' in user.perfil.id_sector.nombre|lower) %}
                             <li>
                                 <a class="dropdown-item" href="{% url 'oficios:create' %}">
                                     <i class="fas fa-plus-circle me-2"></i>Nuevo Oficio
                                 </a>
                             </li>
+                            {% endif %}
                         </ul>
                     </li>
                     <li class="nav-item dropdown">

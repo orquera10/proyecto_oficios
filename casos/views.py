@@ -5,6 +5,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.db import transaction
 from django.db.models import Q
+import unicodedata
 
 from .models import Caso, CasoNino, CasoParte
 from .forms import CasoForm, CasoNinoFormSet, CasoParteFormSet
@@ -40,6 +41,17 @@ class CasoCreateView(LoginRequiredMixin, CreateView):
     model = Caso
     form_class = CasoForm
     template_name = 'casos/caso_form.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        perfil = getattr(request.user, 'perfil', None)
+        raw_nombre = getattr(getattr(perfil, 'id_sector', None), 'nombre', '') or ''
+        # Normalizar eliminando acentos y a minúsculas para comparar de forma robusta
+        norm = unicodedata.normalize('NFKD', raw_nombre)
+        sector_nombre = ''.join(c for c in norm if not unicodedata.combining(c)).lower()
+        if 'coordinacion opd' in sector_nombre:
+            messages.error(request, 'No tiene permisos para crear casos.')
+            return redirect('casos:list')
+        return super().dispatch(request, *args, **kwargs)
 
     def get_success_url(self):
         return reverse_lazy('casos:detail', kwargs={'pk': self.object.pk})

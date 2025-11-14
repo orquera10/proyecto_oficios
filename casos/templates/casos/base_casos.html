@@ -8,9 +8,19 @@
         <h1>{% block page_title %}Gestión de Casos{% endblock %}</h1>
         <div>
             {% block page_actions %}
-            <a href="{% url 'casos:create' %}" class="btn btn-primary">
-                <i class="bi bi-plus-circle"></i> Nuevo Caso
-            </a>
+            {% if user.perfil.id_sector %}
+                {% if 'coordinacion opd' in user.perfil.id_sector.nombre|lower %}
+                    {# Oculto para Coordinación OPD #}
+                {% else %}
+                    <a href="{% url 'casos:create' %}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Nuevo Caso
+                    </a>
+                {% endif %}
+            {% else %}
+                <a href="{% url 'casos:create' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Nuevo Caso
+                </a>
+            {% endif %}
             {% endblock %}
         </div>
     </div>
