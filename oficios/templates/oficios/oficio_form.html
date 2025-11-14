@@ -62,13 +62,18 @@ $(document).ready(function() {
     $('select').select2({
         theme: 'bootstrap-5',
         width: '100%',
-        placeholder: 'Seleccione una opción',
-        allowClear: true
+        placeholder: 'Seleccione una opcion',
+        allowClear: true,
+        dropdownParent: $('#oficio-form'),
+        dropdownAutoWidth: true
     });
     
     // Configurar select2 para los nuevos selects que se agreguen dinámicamente
-    $(document).on('select2:open', () => {
-        document.querySelector('.select2-search__field').focus();
+    $(document).on('select2:open', function() {
+        const el = document.querySelector('.select2-container--open .select2-search__field');
+        if (el) {
+            try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); }
+        }
     });
 });
 </script>
