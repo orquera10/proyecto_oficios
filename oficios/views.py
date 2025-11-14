@@ -73,8 +73,14 @@ class OficioListView(LoginRequiredMixin, ListView):
         try:
             qs = self.filterset.qs if hasattr(self, 'filterset') else self.get_queryset()
             context['total_vencidos'] = qs.filter(fecha_vencimiento__lt=now).count()
+            context['total_asignados'] = qs.filter(estado='asignado').count()
+            context['total_respondidos'] = qs.filter(estado='respondido').count()
+            context['total_enviados'] = qs.filter(estado='enviado').count()
         except Exception:
             context['total_vencidos'] = 0
+            context['total_asignados'] = 0
+            context['total_respondidos'] = 0
+            context['total_enviados'] = 0
         return context
 
 
@@ -102,8 +108,14 @@ class OficioEstadoListView(LoginRequiredMixin, ListView):
         try:
             qs = self.filterset.qs if hasattr(self, 'filterset') else self.get_queryset()
             context['total_vencidos'] = qs.filter(fecha_vencimiento__lt=now).count()
+            context['total_asignados'] = qs.filter(estado='asignado').count()
+            context['total_respondidos'] = qs.filter(estado='respondido').count()
+            context['total_enviados'] = qs.filter(estado='enviado').count()
         except Exception:
             context['total_vencidos'] = 0
+            context['total_asignados'] = 0
+            context['total_respondidos'] = 0
+            context['total_enviados'] = 0
         return context
 
 class OficioCreateView(LoginRequiredMixin, CreateView):

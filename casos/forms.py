@@ -9,7 +9,10 @@ class CasoForm(ModelForm):
         fields = ['tipo', 'expte']
         widgets = {
             'tipo': forms.Select(attrs={'class': 'form-select'}),
-            'expte': forms.TextInput(attrs={'class': 'form-control'}),
+            'expte': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'C-190244/2025 (letra, numero y año)'
+            }),
         }
     
     def __init__(self, *args, **kwargs):

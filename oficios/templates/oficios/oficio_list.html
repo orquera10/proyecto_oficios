@@ -103,7 +103,19 @@
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <div class="text-muted small">
                     <i class="fas fa-list-ol me-1"></i>
-                    Total: <span class="fw-semibold">{{ filter.qs.count }}</span> <span class="mx-2">|</span> <i class="fas fa-hourglass-end me-1"></i> Vencidos: <span class="fw-semibold">{{ total_vencidos }}</span>
+                    Total: <span class="fw-semibold">{{ filter.qs.count }}</span>
+                    <span class="mx-2">|</span>
+                    <i class="fas fa-user-check me-1"></i>
+                    Asignados: <span class="fw-semibold">{{ total_asignados }}</span>
+                    <span class="mx-2">|</span>
+                    <i class="fas fa-reply me-1"></i>
+                    Respondidos: <span class="fw-semibold">{{ total_respondidos }}</span>
+                    <span class="mx-2">|</span>
+                    <i class="fas fa-paper-plane me-1"></i>
+                    Enviados: <span class="fw-semibold">{{ total_enviados }}</span>
+                    <span class="mx-2">|</span>
+                    <i class="fas fa-hourglass-end me-1"></i>
+                    Vencidos: <span class="fw-semibold">{{ total_vencidos }}</span>
                 </div>
             </div>
             

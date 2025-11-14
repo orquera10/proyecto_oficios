@@ -33,8 +33,16 @@ class CasoListView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # Agregar el filtro al contexto
-        context['filter'] = getattr(self, 'filterset', None) or \
-                          CasoFilter(queryset=self.get_queryset())
+        context['filter'] = getattr(self, 'filterset', None) or CasoFilter(queryset=self.get_queryset())
+        try:
+            qs = self.filterset.qs if hasattr(self, 'filterset') else self.get_queryset()
+            context['total_abiertos'] = qs.filter(estado='ABIERTO').count()
+            context['total_en_proceso'] = qs.filter(estado='EN_PROCESO').count()
+            context['total_cerrados'] = qs.filter(estado='CERRADO').count()
+        except Exception:
+            context['total_abiertos'] = 0
+            context['total_en_proceso'] = 0
+            context['total_cerrados'] = 0
         return context
     
 class CasoCreateView(LoginRequiredMixin, CreateView):
