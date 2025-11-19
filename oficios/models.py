@@ -79,12 +79,36 @@ class Juzgado(models.Model):
     nombre = models.CharField(max_length=200, verbose_name='Nombre del Juzgado')
     direccion = models.TextField(verbose_name='Dirección', blank=True, null=True)
     telefono = models.CharField(max_length=50, verbose_name='Teléfono', blank=True, null=True)
+    # Nueva relación a categoría de juzgado
+    id_categoria = models.ForeignKey(
+        'CategoriaJuzgado',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='juzgados',
+        verbose_name='Categoría',
+        db_column='id_categoria'
+    )
     creado = models.DateTimeField(auto_now_add=True)
     actualizado = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = 'Juzgado'
         verbose_name_plural = 'Juzgados'
+        ordering = ['nombre']
+
+    def __str__(self):
+        return self.nombre
+
+
+class CategoriaJuzgado(models.Model):
+    nombre = models.CharField(max_length=100, unique=True, verbose_name='Nombre de la categoría')
+    creado = models.DateTimeField(auto_now_add=True)
+    actualizado = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Categoría de Juzgado'
+        verbose_name_plural = 'Categorías de Juzgado'
         ordering = ['nombre']
 
     def __str__(self):

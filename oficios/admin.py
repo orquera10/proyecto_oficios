@@ -9,7 +9,8 @@ from core.models import UsuarioPerfil
 
 from .models import (
     Institucion, Caratula,
-    Juzgado, Oficio, CaratulaOficio, Respuesta
+    Juzgado, Oficio, CaratulaOficio, Respuesta,
+    CategoriaJuzgado,
 )
 
 User = get_user_model()
@@ -102,13 +103,13 @@ class CaratulaAdmin(admin.ModelAdmin):
 
 @admin.register(Juzgado)
 class JuzgadoAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'direccion', 'telefono', 'creado', 'actualizado')
+    list_display = ('nombre', 'direccion', 'telefono', 'id_categoria', 'creado', 'actualizado')
     search_fields = ('nombre', 'direccion', 'telefono')
-    list_filter = ('creado', 'actualizado')
+    list_filter = ('creado', 'actualizado', 'id_categoria')
     ordering = ('nombre',)
 
     def get_queryset(self, request):
-        return super().get_queryset(request).select_related()
+        return super().get_queryset(request).select_related('id_categoria')
 
 @admin.register(Oficio)
 class OficioAdmin(admin.ModelAdmin):
@@ -146,3 +147,10 @@ class RespuestaAdmin(admin.ModelAdmin):
     list_filter = ('fecha_hora', 'creacion', 'id_usuario', 'id_profesional', 'id_institucion')
     search_fields = ('id_oficio__denuncia', 'id_oficio__legajo', 'id_usuario__username', 'id_profesional__username')
     readonly_fields = ('creacion', 'modificacion')
+
+
+@admin.register(CategoriaJuzgado)
+class CategoriaJuzgadoAdmin(admin.ModelAdmin):
+    list_display = ('id', 'nombre', 'creado', 'actualizado')
+    search_fields = ('nombre',)
+    ordering = ('nombre',)

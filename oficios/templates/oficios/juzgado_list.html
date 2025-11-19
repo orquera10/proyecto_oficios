@@ -8,8 +8,8 @@
       <i class="fas fa-plus-circle me-1"></i> Nuevo
     </a>
   </div>
+
   <style>
-    /* Evitar que los botones de acción salten de línea */
     .table-actions { white-space: nowrap; width: 1%; }
     .table-actions .btn { padding: .25rem .5rem; }
   </style>
@@ -22,6 +22,7 @@
           <th>Nombre</th>
           <th>Teléfono</th>
           <th>Dirección</th>
+          <th>Categoría</th>
           <th class="text-end table-actions">Acciones</th>
         </tr>
       </thead>
@@ -31,6 +32,7 @@
           <td>{{ j.nombre }}</td>
           <td>{{ j.telefono|default:"-" }}</td>
           <td>{{ j.direccion|default:"-"|truncatechars:60 }}</td>
+          <td>{{ j.id_categoria.nombre|default:"-" }}</td>
           <td class="text-end table-actions">
             <div class="btn-group" role="group" aria-label="Acciones">
               <a href="{% url 'oficios:juzgado_detail' j.pk %}" class="btn btn-sm btn-info" title="Ver"><i class="bi bi-eye"></i></a>
