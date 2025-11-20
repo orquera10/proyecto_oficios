@@ -42,7 +42,7 @@
                             <th>DNI</th>
                             <th>Apellido</th>
                             <th>Nombre</th>
-                            <th>Dirección</th>
+                            <th>DirecciÃ³n</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -62,7 +62,7 @@
                                         <i class="fas fa-edit"></i>
                                     </a>
                                     <a href="{% url 'personas:parte_delete' parte.pk %}" class="btn btn-danger" title="Eliminar"
-                                       onclick="return confirm('¿Está seguro que desea eliminar esta parte?')">
+                                       onclick="return confirm('Â¿EstÃ¡ seguro que desea eliminar esta parte?')">
                                         <i class="fas fa-trash"></i>
                                     </a>
                                 </div>
@@ -78,7 +78,7 @@
             </div>
             
             {% if is_paginated %}
-            <nav aria-label="Paginación" class="mt-4">
+            <nav aria-label="PaginaciÃ³n" class="mt-4">
                 <ul class="pagination justify-content-center">
                     {% if page_obj.has_previous %}
                         <li class="page-item">
@@ -91,7 +91,7 @@
                     
                     <li class="page-item active">
                         <span class="page-link">
-                            Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                            PÃ¡gina {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
                         </span>
                     </li>
                     
@@ -100,7 +100,7 @@
                             <a class="page-link" href="?page={{ page_obj.next_page_number }}">Siguiente</a>
                         </li>
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Última &raquo;</a>
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Ãšltima &raquo;</a>
                         </li>
                     {% endif %}
                 </ul>
