@@ -26,7 +26,7 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    <!-- Menú desplegable de Casos -->
+                    <!-- MenÃº desplegable de Casos -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="casosDropdown" role="button" 
                            data-bs-toggle="dropdown" aria-expanded="false">
@@ -46,7 +46,7 @@
                         </ul>
                     </li>
 
-                    <!-- Menú desplegable de Oficios -->
+                    <!-- MenÃº desplegable de Oficios -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="oficiosDropdown" role="button" 
                            data-bs-toggle="dropdown" aria-expanded="false">
@@ -90,7 +90,7 @@
                         </ul>
                     </li>
 
-                    <!-- Menú desplegable de Personas -->
+                    <!-- Menu desplegable de Personas -->
                     <!-- Dropdown de Referencias: Agentes/Juzgados e Instituciones -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="refsDropdown" role="button"
@@ -112,6 +112,11 @@
                             <li>
                                 <a class="dropdown-item" href="{% url 'oficios:profesional_list' %}">
                                     <i class="fas fa-user-md me-2"></i> Profesionales
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'oficios:categoria_list' %}">
+                                    <i class="fas fa-tags me-2"></i> Categorías de Juzgado
                                 </a>
                             </li>
                         </ul>
@@ -149,7 +154,7 @@
                                 </ul>
                             </li>
 
-                            <!-- Submenú de Partes -->
+                            <!-- SubmenÃº de Partes -->
                             <li class="dropdown-submenu">
                                 <a class="dropdown-item dropdown-toggle" href="#">
                                     <i class="fas fa-user-tie me-2"></i>Partes
@@ -243,7 +248,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Cerrar automáticamente los alerts después de 4 segundos
+            // Cerrar automáticamente los alerts despues de 4 segundos
             const alerts = document.querySelectorAll('.alert');
             alerts.forEach(function(el) {
                 setTimeout(function() {
@@ -251,7 +256,7 @@
                         const instance = bootstrap.Alert.getOrCreateInstance(el);
                         instance.close();
                     } catch (e) {
-                        // Fallback por si no está bootstrap.Alert
+                        // Fallback por si no estÃ¡ bootstrap.Alert
                         el.classList.remove('show');
                         el.remove();
                     }

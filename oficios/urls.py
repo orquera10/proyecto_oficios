@@ -6,6 +6,9 @@ from .juzgado_views import (
 from .institucion_views import (
     InstitucionListView, InstitucionCreateView, InstitucionDetailView, InstitucionUpdateView, InstitucionDeleteView
 )
+from .categoria_views import (
+    CategoriaListView, CategoriaCreateView, CategoriaDetailView, CategoriaUpdateView, CategoriaDeleteView
+)
 from .profesional_views import (
     ProfesionalListView, ProfesionalCreateView, ProfesionalDetailView, ProfesionalUpdateView, ProfesionalDeleteView
 )
@@ -43,6 +46,13 @@ urlpatterns = [
     path('instituciones/<int:pk>/', InstitucionDetailView.as_view(), name='institucion_detail'),
     path('instituciones/<int:pk>/editar/', InstitucionUpdateView.as_view(), name='institucion_update'),
     path('instituciones/<int:pk>/eliminar/', InstitucionDeleteView.as_view(), name='institucion_delete'),
+
+    # CRUD Categorías de Juzgados
+    path('categorias/', CategoriaListView.as_view(), name='categoria_list'),
+    path('categorias/nuevo/', CategoriaCreateView.as_view(), name='categoria_create'),
+    path('categorias/<int:pk>/', CategoriaDetailView.as_view(), name='categoria_detail'),
+    path('categorias/<int:pk>/editar/', CategoriaUpdateView.as_view(), name='categoria_update'),
+    path('categorias/<int:pk>/eliminar/', CategoriaDeleteView.as_view(), name='categoria_delete'),
 
     # CRUD Profesionales (usuarios con perfil.es_profesional)
     path('profesionales/', ProfesionalListView.as_view(), name='profesional_list'),

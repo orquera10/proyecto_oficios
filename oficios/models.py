@@ -30,11 +30,11 @@ def movimiento_upload_path(instance, filename):
 User = get_user_model()
 
 # Se han eliminado los modelos intermedios OficioParte y OficioNino
-# ya que la relaciÃ³n ahora se manejarÃ¡ a travÃ©s del modelo Caso
+# ya que la relación ahora se manejará a través del modelo Caso
 
 class Institucion(models.Model):
-    nombre = models.CharField(max_length=100, verbose_name='Nombre de la InstituciÃ³n')
-    direccion = models.TextField(verbose_name='DirecciÃ³n', blank=True, null=True)
+    nombre = models.CharField(max_length=100, verbose_name='Nombre de la Institución')
+    direccion = models.TextField(verbose_name='Dirección', blank=True, null=True)
     creado = models.DateTimeField(auto_now_add=True)
     actualizado = models.DateTimeField(auto_now=True)
 
@@ -47,7 +47,7 @@ class Institucion(models.Model):
         return self.nombre
 
 class Caratula(models.Model):
-    nombre = models.CharField(max_length=100, verbose_name='Nombre de la CarÃ¡tula')
+    nombre = models.CharField(max_length=100, verbose_name='Nombre de la Carátula')
     nota = models.TextField(verbose_name='Notas', blank=True, null=True)
     creado = models.DateTimeField(auto_now_add=True)
     actualizado = models.DateTimeField(auto_now=True)
@@ -62,8 +62,8 @@ class Caratula(models.Model):
 
 
 class CaratulaOficio(models.Model):
-    nombre = models.CharField(max_length=100, verbose_name='Nombre de la CarÃ¡tula de Oficio')
-    descripcion = models.TextField(verbose_name='DescripciÃ³n', blank=True, null=True)
+    nombre = models.CharField(max_length=100, verbose_name='Nombre de la Carátula de Oficio')
+    descripcion = models.TextField(verbose_name='Descripción', blank=True, null=True)
     creado = models.DateTimeField(auto_now_add=True)
     actualizado = models.DateTimeField(auto_now=True)
 
@@ -234,8 +234,8 @@ class Oficio(models.Model):
 
     def clean(self):
         super().clean()
-        # Validar que si se proporciona un nÃºmero de denuncia, no exista otro con el mismo nÃºmero
-        # Validar que si se proporciona un nÃºmero de legajo, no exista otro con el mismo nÃºmero\r\n
+        # Validar que si se proporciona un número de denuncia, no exista otro con el mismo número
+        # Validar que si se proporciona un número de legajo, no exista otro con el mismo número
 
     def save(self, *args, **kwargs):
         # Validar el modelo antes de guardar
@@ -245,7 +245,7 @@ class Oficio(models.Model):
         if not self.id and self.plazo_horas:
             self.fecha_vencimiento = timezone.now() + timezone.timedelta(hours=self.plazo_horas)
         
-        # Si el oficio ya existe, verifica si se modificÃ³ el plazo_horas
+        # Si el oficio ya existe, verifica si se modificó el plazo_horas
         elif self.id and self.plazo_horas:
             # Obtener el oficio actual de la base de datos
             old_instance = Oficio.objects.get(pk=self.id)
@@ -266,7 +266,7 @@ class Oficio(models.Model):
         if not self.usuario_id and hasattr(self, '_current_user'):
             self.usuario = self._current_user
         
-        # Si el oficio ya existe y tiene un archivo PDF, verificar si se estÃ¡ actualizando
+        # Si el oficio ya existe y tiene un archivo PDF, verificar si se está actualizando
         if self.id and self.archivo_pdf:
             try:
                 # Obtener el oficio actual de la base de datos

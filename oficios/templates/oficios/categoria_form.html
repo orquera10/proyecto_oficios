@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>{% if object %}Editar{% else %}Nueva{% endif %} Categoría</h2>
+    <a href="{% url 'oficios:categoria_list' %}" class="btn btn-secondary">
+      <i class="fas fa-arrow-left me-1"></i> Volver
+    </a>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label class="form-label" for="id_nombre">Nombre</label>
+          {{ form.nombre }}
+        </div>
+        <div class="d-flex justify-content-end">
+          <a href="{% url 'oficios:categoria_list' %}" class="btn btn-outline-secondary me-2">Cancelar</a>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save me-1"></i> Guardar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
