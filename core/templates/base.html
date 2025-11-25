@@ -4,17 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Sistema de Oficios{% endblock %}</title>
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <!-- Font Awesome para iconos -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     {% block extra_css %}{% endblock %}
 </head>
 <body>
     {% if not hide_navbar %}
-    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
             <a class="navbar-brand" href="{% url 'casos:list' %}">
@@ -26,7 +22,6 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    <!-- MenÃº desplegable de Casos -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="casosDropdown" role="button" 
                            data-bs-toggle="dropdown" aria-expanded="false">
@@ -46,7 +41,6 @@
                         </ul>
                     </li>
 
-                    <!-- MenÃº desplegable de Oficios -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="oficiosDropdown" role="button" 
                            data-bs-toggle="dropdown" aria-expanded="false">
@@ -58,7 +52,6 @@
                                     <i class="fas fa-list me-2"></i>Lista de Oficios
                                 </a>
                             </li>
-
                             <li><hr class="dropdown-divider"></li>
                             <li class="dropdown-header">Por estado</li>
                             <li>
@@ -86,12 +79,9 @@
                                     <span class="badge bg-violet me-2">Devuelto</span> Devueltos
                                 </a>
                             </li>
-                            
                         </ul>
                     </li>
 
-                    <!-- Menu desplegable de Personas -->
-                    <!-- Dropdown de Referencias: Agentes/Juzgados e Instituciones -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="refsDropdown" role="button"
                            data-bs-toggle="dropdown" aria-expanded="false">
@@ -105,7 +95,7 @@
                             </li>
                             <li>
                                 <a class="dropdown-item" href="{% url 'oficios:categoria_list' %}">
-                                    <i class="fas fa-tags me-2"></i> Categorías de Agente/Juzgado
+                                    <i class="fas fa-tags me-2"></i> Categorias de Agente/Juzgado
                                 </a>
                             </li>
                             <li>
@@ -119,7 +109,6 @@
                                     <i class="fas fa-user-md me-2"></i> Profesionales
                                 </a>
                             </li>
-                            
                         </ul>
                     </li>
 
@@ -135,53 +124,34 @@
                                 </a>
                             </li>
                             <li><hr class="dropdown-divider"></li>
-                            <!-- Submenú de Niños -->
-                            <li class="dropdown-submenu">
-                                <a class="dropdown-item dropdown-toggle" href="#">
-                                    <i class="fas fa-child me-2"></i>Niños
+                            <li>
+                                <a class="dropdown-item" href="{% url 'personas:nino_list' %}">
+                                    <i class="fas fa-child me-2"></i>Lista de Ninos
                                 </a>
-                                <ul class="dropdown-menu">
-                                    <li>
-                                        <a class="dropdown-item" href="{% url 'personas:nino_list' %}">
-                                            <i class="fas fa-list-ul me-2"></i>Lista de Niños
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="{% url 'personas:nino_create' %}">
-                                            <i class="fas fa-plus-circle me-2"></i>Nuevo Niño
-                                        </a>
-                                    </li>
-                                    
-                                </ul>
                             </li>
-
-                            <!-- SubmenÃº de Partes -->
-                            <li class="dropdown-submenu">
-                                <a class="dropdown-item dropdown-toggle" href="#">
-                                    <i class="fas fa-user-tie me-2"></i>Partes
+                            <li>
+                                <a class="dropdown-item" href="{% url 'personas:nino_create' %}">
+                                    <i class="fas fa-plus-circle me-2"></i>Nuevo Nino
                                 </a>
-                                <ul class="dropdown-menu">
-                                    <li>
-                                        <a class="dropdown-item" href="{% url 'personas:parte_list' %}">
-                                            <i class="fas fa-list-ul me-2"></i>Lista de Partes
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="{% url 'personas:parte_create' %}">
-                                            <i class="fas fa-plus-circle me-2"></i>Nueva Parte
-                                        </a>
-                                    </li>
-                                    
-                                </ul>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'personas:parte_list' %}">
+                                    <i class="fas fa-user-tie me-2"></i>Lista de Partes
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'personas:parte_create' %}">
+                                    <i class="fas fa-plus-circle me-2"></i>Nueva Parte
+                                </a>
                             </li>
                         </ul>
                     </li>
 
-                    <!-- Enlace a Administración (solo para staff) -->
                     {% if user.is_staff %}
                     <li class="nav-item">
                         <a class="nav-link" href="/admin/">
-                            <i class="fas fa-cog me-1"></i> Administración
+                            <i class="fas fa-cog me-1"></i> Administracion
                         </a>
                     </li>
                     {% endif %}
@@ -200,7 +170,7 @@
                                     <form id="logoutForm" method="post" action="{% url 'logout' %}">
                                         {% csrf_token %}
                                         <button type="submit" class="dropdown-item" style="background: none; border: none; width: 100%; text-align: left;">
-                                            <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+                                            <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesion
                                         </button>
                                     </form>
                                 </li>
@@ -209,7 +179,7 @@
                     {% else %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'login' %}">
-                                <i class="fas fa-sign-in-alt me-1"></i> Iniciar Sesión
+                                <i class="fas fa-sign-in-alt me-1"></i> Iniciar Sesion
                             </a>
                         </li>
                     {% endif %}
@@ -219,7 +189,6 @@
     </nav>
     {% endif %}
 
-    <!-- Contenido principal -->
     <main class="container py-4">
         {% if messages %}
             {% for message in messages %}
@@ -232,24 +201,19 @@
             {% endfor %}
         {% endif %}
 
-        {% block content %}
-        {% endblock %}
+        {% block content %}{% endblock %}
     </main>
 
-    <!-- Footer -->
     <footer class="bg-light py-3 mt-4">
         <div class="container text-center">
-            <span class="text-muted">Sistema de Gestión de Oficios &copy; {% now "Y" %}</span>
+            <span class="text-muted">Sistema de Gestion de Oficios &copy; {% now "Y" %}</span>
         </div>
     </footer>
 
-    <!-- JQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- Bootstrap JS and dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Cerrar automáticamente los alerts despues de 4 segundos
             const alerts = document.querySelectorAll('.alert');
             alerts.forEach(function(el) {
                 setTimeout(function() {
@@ -257,7 +221,6 @@
                         const instance = bootstrap.Alert.getOrCreateInstance(el);
                         instance.close();
                     } catch (e) {
-                        // Fallback por si no estÃ¡ bootstrap.Alert
                         el.classList.remove('show');
                         el.remove();
                     }
@@ -266,9 +229,7 @@
         });
     </script>
     
-    <!-- Estilos para submenús desplegables -->
     <style>
-        /* Badge personalizado violeta para estados */
         .badge.bg-violet { background-color: #6f42c1 !important; color: #fff; }
 
         .dropdown-submenu {
