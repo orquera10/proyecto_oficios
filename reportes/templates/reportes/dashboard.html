@@ -1,0 +1,375 @@
+{% extends "base.html" %}
+
+{% block title %}Reportes{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card-kpi {
+        border: 1px solid #e5e7eb;
+        border-radius: 0.75rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        height: 100%;
+    }
+    .card-kpi .icon-circle {
+        width: 44px;
+        height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: #f1f5f9;
+        color: #0d6efd;
+    }
+    .small-muted { color: #6c757d; font-size: 0.9rem; }
+    .table-sm td, .table-sm th { padding: 0.35rem 0.5rem; }
+    .pill {
+        display: inline-block;
+        padding: 0.2rem 0.55rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4">
+    <div>
+        <h1 class="h3 mb-1">Reportes</h1>
+        <p class="text-muted mb-0">Informes estadisticos y generales para seguir la evolucion de los oficios.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-secondary" href="{% url 'oficios:list' %}">
+            <i class="bi bi-list-ul me-1"></i> Ir a oficios
+        </a>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form class="row g-3 align-items-end" method="get">
+            <div class="col-md-4">
+                <label class="form-label">Desde</label>
+                <input type="date" name="desde" value="{{ fecha_desde|date:'Y-m-d' }}" class="form-control">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Hasta</label>
+                <input type="date" name="hasta" value="{{ fecha_hasta|date:'Y-m-d' }}" class="form-control">
+            </div>
+            <div class="col-md-4 text-md-end">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="bi bi-filter"></i> Aplicar filtros
+                </button>
+                <a class="btn btn-outline-secondary" href="{% url 'reportes:dashboard' %}">Limpiar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card card-kpi">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="small-muted mb-1">Total de oficios</p>
+                        <h4 class="mb-0">{{ kpis.total_oficios|default:0 }}</h4>
+                    </div>
+                    <div class="icon-circle"><i class="bi bi-archive"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-kpi">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="small-muted mb-1">Respondidos</p>
+                        <h4 class="mb-0">{{ kpis.respondidos|default:0 }}</h4>
+                    </div>
+                    <div class="icon-circle text-success"><i class="bi bi-reply-fill"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-kpi">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="small-muted mb-1">Enviados</p>
+                        <h4 class="mb-0">{{ kpis.enviados|default:0 }}</h4>
+                    </div>
+                    <div class="icon-circle text-primary"><i class="bi bi-send-fill"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-kpi">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="small-muted mb-1">Pendientes</p>
+                        <h4 class="mb-0">{{ kpis.pendientes|default:0 }}</h4>
+                    </div>
+                    <div class="icon-circle text-warning"><i class="bi bi-hourglass-split"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card card-kpi">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="small-muted mb-1">Vencidos</p>
+                        <h4 class="mb-0 text-danger">{{ kpis.vencidos|default:0 }}</h4>
+                    </div>
+                    <div class="icon-circle text-danger"><i class="bi bi-exclamation-octagon"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-kpi">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="small-muted mb-1">Vencen en 7 dias</p>
+                        <h4 class="mb-0">{{ kpis.proximos|default:0 }}</h4>
+                    </div>
+                    <div class="icon-circle text-info"><i class="bi bi-calendar-event"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-kpi">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="small-muted mb-1">Casos vinculados</p>
+                        <h4 class="mb-0">{{ kpis.casos_vinculados|default:0 }}</h4>
+                    </div>
+                    <div class="icon-circle text-secondary"><i class="bi bi-diagram-3"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Estado de los oficios</span>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Estado</th>
+                            <th class="text-end">Cantidad</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for estado in estado_resumen %}
+                        <tr>
+                            <td>{{ estado.nombre }}</td>
+                            <td class="text-end">
+                                <span class="pill bg-light text-dark">{{ estado.total }}</span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="2" class="text-center text-muted">Sin datos para el filtro seleccionado.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Evolucion mensual</span>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Mes</th>
+                            <th class="text-end">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for fila in serie_mensual %}
+                        <tr>
+                            <td>{{ fila.mes|date:"M Y" }}</td>
+                            <td class="text-end">{{ fila.total }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="2" class="text-center text-muted">No hay registros en el rango.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">Top instituciones</div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    {% for item in top_instituciones %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>{{ item.institucion__nombre }}</span>
+                        <span class="badge bg-primary rounded-pill">{{ item.total }}</span>
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item text-muted">No hay datos para mostrar.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">Top juzgados / agentes</div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    {% for item in top_juzgados %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>{{ item.juzgado__nombre }}</span>
+                        <span class="badge bg-secondary rounded-pill">{{ item.total }}</span>
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item text-muted">No hay datos para mostrar.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Movimientos recientes</span>
+            </div>
+            <div class="card-body">
+                {% if movimientos_recientes %}
+                <ul class="list-group list-group-flush">
+                    {% for mov in movimientos_recientes %}
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <div class="fw-semibold">Oficio {{ mov.oficio_id }} - {{ mov.get_estado_nuevo_display }}</div>
+                                <div class="text-muted small">
+                                    {{ mov.fecha_creacion|date:"d/m/Y H:i" }}
+                                    {% if mov.institucion %} · {{ mov.institucion.nombre }}{% endif %}
+                                    {% if mov.usuario %} · {{ mov.usuario.get_full_name|default:mov.usuario.username }}{% endif %}
+                                </div>
+                            </div>
+                            <span class="badge bg-light text-dark">{{ mov.estado_nuevo }}</span>
+                        </div>
+                        {% if mov.detalle %}
+                        <div class="text-muted small mt-1">{{ mov.detalle|truncatechars:120 }}</div>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted mb-0">Sin movimientos en el rango seleccionado.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Respuestas recientes</span>
+            </div>
+            <div class="card-body">
+                {% if respuestas_recientes %}
+                <ul class="list-group list-group-flush">
+                    {% for res in respuestas_recientes %}
+                    <li class="list-group-item">
+                        <div class="fw-semibold">Oficio {{ res.id_oficio_id }}</div>
+                        <div class="text-muted small">
+                            {{ res.fecha_hora|date:"d/m/Y H:i" }}
+                            {% if res.id_institucion %} · {{ res.id_institucion.nombre }}{% endif %}
+                            {% if res.id_usuario %} · {{ res.id_usuario.get_full_name|default:res.id_usuario.username }}{% endif %}
+                        </div>
+                        {% if res.respuesta %}
+                        <div class="text-muted small mt-1">{{ res.respuesta|truncatechars:120 }}</div>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted mb-0">No hay respuestas en el rango seleccionado.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        Informes generales (seguimiento y vencimientos)
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-lg-8">
+                <h6 class="text-uppercase text-muted small mb-2">Oficios proximos a vencer</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Institucion</th>
+                                <th>Juzgado</th>
+                                <th>Vence</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for oficio in oficios_proximos_vencer %}
+                            <tr>
+                                <td class="fw-semibold">
+                                    <a href="{% url 'oficios:detail' oficio.id %}">#{{ oficio.id }}</a>
+                                </td>
+                                <td>{{ oficio.institucion.nombre|default:"-" }}</td>
+                                <td>{{ oficio.juzgado.nombre|default:"-" }}</td>
+                                <td>{{ oficio.fecha_vencimiento|date:"d/m/Y H:i" }}</td>
+                                <td>
+                                    <span class="badge bg-light text-dark">{{ oficio.get_estado_display }}</span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="5" class="text-muted text-center">No hay vencimientos proximos.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <h6 class="text-uppercase text-muted small mb-2">Notas rapidas</h6>
+                <ul class="list-unstyled small text-muted mb-0">
+                    <li>· Usa los filtros de fecha para acotar los informes estadisticos.</li>
+                    <li>· Movimientos y respuestas muestran las ultimas 8 entradas del rango.</li>
+                    <li>· Los tops listan hasta 5 instituciones o juzgados con mas actividad.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -94,6 +94,7 @@ INSTALLED_APPS = [
     'oficios.apps.OficiosConfig',
     'personas.apps.PersonasConfig',
     'casos.apps.CasosConfig',
+    'reportes.apps.ReportesConfig',
 ]
 
 MIDDLEWARE = [
