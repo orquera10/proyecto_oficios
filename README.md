@@ -91,3 +91,7 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 
 Dario Orquera
 Para más información, por favor contacta con el equipo de desarrollo.
+## Documentacion adicional
+
+- Modulo de oficios: ver ``oficios/README.md``.
+- Manual general: ``docs/README.md``.

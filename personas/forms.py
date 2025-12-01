@@ -2,6 +2,15 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 from .models import Nino, Parte
 
+
+def _normalize_nombre(value: str) -> str:
+    """Normaliza nombres y apellidos a formato capitalizado."""
+    if not value:
+        return value
+    value = " ".join(part.strip() for part in value.split() if part.strip())
+    return value.title()
+
+
 class NinoForm(forms.ModelForm):
     class Meta:
         model = Nino
@@ -45,7 +54,15 @@ class NinoForm(forms.ModelForm):
             'edad': _('Edad (opcional)'),
             'direccion': _('Dirección (opcional)'),
         }
-        
+
+    def clean_nombre(self):
+        nombre = self.cleaned_data.get('nombre', '')
+        return _normalize_nombre(nombre)
+
+    def clean_apellido(self):
+        apellido = self.cleaned_data.get('apellido', '')
+        return _normalize_nombre(apellido)
+
     def clean_dni(self):
         dni = self.cleaned_data.get('dni')
         if dni:
@@ -102,6 +119,14 @@ class ParteForm(forms.ModelForm):
             'telefono': _('Teléfono (opcional)'),
             'direccion': _('Dirección (opcional)'),
         }
+
+    def clean_nombre(self):
+        nombre = self.cleaned_data.get('nombre', '')
+        return _normalize_nombre(nombre)
+
+    def clean_apellido(self):
+        apellido = self.cleaned_data.get('apellido', '')
+        return _normalize_nombre(apellido)
 
     def clean_dni(self):
         dni = self.cleaned_data.get('dni')
