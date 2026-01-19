@@ -5,9 +5,9 @@
 {% block extra_css %}
 <style>
     .card-kpi {
-        border: 1px solid #e5e7eb;
-        border-radius: 0.75rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        border: 1px solid var(--border-200);
+        border-radius: 16px;
+        box-shadow: var(--shadow-soft);
         height: 100%;
     }
     .card-kpi .icon-circle {
@@ -17,16 +17,17 @@
         align-items: center;
         justify-content: center;
         border-radius: 50%;
-        background: #f1f5f9;
-        color: #0d6efd;
+        background: rgba(42, 123, 176, 0.12);
+        color: var(--brand-700);
     }
-    .small-muted { color: #6c757d; font-size: 0.9rem; }
-    .table-sm td, .table-sm th { padding: 0.35rem 0.5rem; }
+    .small-muted { color: var(--text-600); font-size: 0.9rem; }
+    .table-sm td, .table-sm th { padding: 0.45rem 0.6rem; }
     .pill {
         display: inline-block;
         padding: 0.2rem 0.55rem;
         border-radius: 999px;
         font-size: 0.85rem;
+        background: #f1f5fb;
     }
 </style>
 {% endblock %}
@@ -34,7 +35,7 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-start mb-4">
     <div>
-        <h1 class="h3 mb-1">Reportes</h1>
+        <h1 class="mb-1">Reportes</h1>
         <p class="text-muted mb-0">Informes estadisticos y generales para seguir la evolucion de los oficios.</p>
     </div>
     <div class="d-flex gap-2">
