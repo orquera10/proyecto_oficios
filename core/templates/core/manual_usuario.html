@@ -10,10 +10,28 @@
     </a>
 </div>
 
-<div class="card">
-    <div class="card-body">
-        <div class="manual-content">
-            {{ manual_html|safe }}
+<div class="row g-4">
+    <div class="col-12 col-lg-4">
+        <div class="card sticky-top manual-toc">
+            <div class="card-body">
+                <h5 class="mb-3">Secciones</h5>
+                <div class="list-group list-group-flush">
+                    {% for item in manual_toc %}
+                        <a class="list-group-item list-group-item-action {% if item.level == 3 %}ps-4{% endif %}" href="#{{ item.anchor }}">
+                            {{ item.title }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-8">
+        <div class="card">
+            <div class="card-body">
+                <div class="manual-content">
+                    {{ manual_html|safe }}
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -39,6 +57,9 @@
     }
     .manual-content li {
         margin-bottom: 0.35rem;
+    }
+    .manual-toc {
+        top: 110px;
     }
 </style>
 {% endblock %}

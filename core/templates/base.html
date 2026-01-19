@@ -5,15 +5,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Sistema de Oficios{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="icon" href="{% static 'core/logo.svg' %}" type="image/svg+xml">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{% static 'core/css/theme.css' %}" rel="stylesheet">
     {% block extra_css %}{% endblock %}
 </head>
 <body>
     {% if not hide_navbar %}
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center gap-2" href="{% url 'core:home' %}">
                 <img src="{% static 'core/logo.svg' %}" alt="Sistema de Oficios" class="brand-logo">
@@ -179,6 +183,14 @@
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                                 <li><a class="dropdown-item" href="{% url 'core:perfil' %}"><i class="fas fa-user me-2"></i>Perfil</a></li>
                                 <li><a class="dropdown-item" href="{% url 'core:manual_usuario' %}"><i class="fas fa-book me-2"></i>Manual de usuario</a></li>
+                                <li>
+                                    <div class="dropdown-item d-flex align-items-center justify-content-between">
+                                        <span><i class="fas fa-moon me-2"></i>Tema oscuro</span>
+                                        <div class="form-check form-switch m-0">
+                                            <input class="form-check-input" type="checkbox" id="themeToggle">
+                                        </div>
+                                    </div>
+                                </li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <form id="logoutForm" method="post" action="{% url 'logout' %}">
@@ -203,7 +215,7 @@
     </nav>
     {% endif %}
 
-    <main class="container py-4">
+    <main class="container py-4 main-offset">
         {% if messages %}
             {% for message in messages %}
                 {% with tag=message.tags %}
@@ -241,6 +253,29 @@
                 }, 4000);
             });
         });
+    </script>
+    <script>
+        (function() {
+            const storageKey = 'oficios-theme';
+            const toggle = document.getElementById('themeToggle');
+            const root = document.documentElement;
+            const saved = localStorage.getItem(storageKey);
+            if (saved === 'dark') {
+                root.setAttribute('data-theme', 'dark');
+                if (toggle) toggle.checked = true;
+            }
+            if (toggle) {
+                toggle.addEventListener('change', function() {
+                    const next = toggle.checked ? 'dark' : 'light';
+                    if (next === 'dark') {
+                        root.setAttribute('data-theme', 'dark');
+                    } else {
+                        root.removeAttribute('data-theme');
+                    }
+                    localStorage.setItem(storageKey, next);
+                });
+            }
+        })();
     </script>
     
     <style>

@@ -30,7 +30,8 @@ El menu principal incluye:
 - Personas: ninos y partes.
 - Referencias: catalogos (instituciones, juzgados, categorias, profesionales).
 - Reportes: solo visible para Informatica.
-- Usuario: perfil y manual.
+ - Usuario: perfil, cambio de contrasena y manual.
+- Tema oscuro: disponible desde el menu de usuario.
 
 ## 5. Casos
 
@@ -181,4 +182,14 @@ Puede filtrar por rango de fechas para acotar la informacion.
 - Mantenga actualizados los datos de casos y personas antes de crear oficios.
 - Registre movimientos con detalle claro para trazabilidad.
 - Use los filtros para priorizar oficios proximos a vencer.
- - Revise el estado del oficio antes de avanzar al siguiente paso.
+- Revise el estado del oficio antes de avanzar al siguiente paso.
+
+## 13. Modo oscuro
+
+Puede activar el modo oscuro desde el menu de usuario (switch "Tema oscuro").
+El sistema guarda su preferencia en el navegador para mantener el tema elegido.
+
+## 14. Perfil y cambio de contrasena
+
+Desde el menu de usuario puede ingresar a Perfil para ver sus datos.
+Si su cuenta lo permite, tambien puede cambiar la contrasena desde las opciones de cuenta.

@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
+from django.utils.text import slugify
 
 from .models import UsuarioPerfil
 
@@ -31,7 +32,15 @@ def home(request):
 def _render_manual_md(text):
     lines = (text or '').splitlines()
     html_parts = []
+    toc = []
     in_list = False
+    used_ids = {}
+
+    def _unique_id(base):
+        base = base or 'seccion'
+        count = used_ids.get(base, 0) + 1
+        used_ids[base] = count
+        return base if count == 1 else f"{base}-{count}"
 
     for line in lines:
         stripped = line.strip()
@@ -45,19 +54,27 @@ def _render_manual_md(text):
             if in_list:
                 html_parts.append('</ul>')
                 in_list = False
-            html_parts.append(f'<h3>{escape(stripped[4:])}</h3>')
+            title = stripped[4:]
+            anchor = _unique_id(slugify(title))
+            html_parts.append(f'<h3 id="{anchor}">{escape(title)}</h3>')
+            toc.append({'level': 3, 'title': title, 'anchor': anchor})
             continue
         if stripped.startswith('## '):
             if in_list:
                 html_parts.append('</ul>')
                 in_list = False
-            html_parts.append(f'<h2>{escape(stripped[3:])}</h2>')
+            title = stripped[3:]
+            anchor = _unique_id(slugify(title))
+            html_parts.append(f'<h2 id="{anchor}">{escape(title)}</h2>')
+            toc.append({'level': 2, 'title': title, 'anchor': anchor})
             continue
         if stripped.startswith('# '):
             if in_list:
                 html_parts.append('</ul>')
                 in_list = False
-            html_parts.append(f'<h1>{escape(stripped[2:])}</h1>')
+            title = stripped[2:]
+            anchor = _unique_id(slugify(title))
+            html_parts.append(f'<h1 id="{anchor}">{escape(title)}</h1>')
             continue
 
         if stripped.startswith('- '):
@@ -75,7 +92,7 @@ def _render_manual_md(text):
     if in_list:
         html_parts.append('</ul>')
 
-    return mark_safe('\n'.join(html_parts))
+    return mark_safe('\n'.join(html_parts)), toc
 
 
 @login_required
@@ -86,7 +103,8 @@ def manual_usuario(request):
         manual_text = manual_path.read_text(encoding='utf-8')
     except Exception:
         manual_text = 'No se pudo cargar el manual de usuario.'
-    manual_html = _render_manual_md(manual_text)
+    manual_html, manual_toc = _render_manual_md(manual_text)
     return render(request, 'core/manual_usuario.html', {
         'manual_html': manual_html,
+        'manual_toc': manual_toc,
     })
