@@ -91,7 +91,7 @@
 </div>
 
 <!-- Modal para seleccionar niños -->
-<div class="modal fade" id="ninosModal" tabindex="-1" aria-labelledby="ninosModalLabel" aria-hidden="true">
+<div class="modal fade" id="ninosModal" tabindex="-1" aria-labelledby="ninosModalLabel" aria-hidden="true" data-bs-backdrop="true" data-bs-keyboard="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -132,7 +132,7 @@
 </div>
 
 <!-- Modal para seleccionar partes -->
-<div class="modal fade" id="partesModal" tabindex="-1" aria-labelledby="partesModalLabel" aria-hidden="true">
+<div class="modal fade" id="partesModal" tabindex="-1" aria-labelledby="partesModalLabel" aria-hidden="true" data-bs-backdrop="true" data-bs-keyboard="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -213,7 +213,7 @@ $(document).ready(function() {
             return;
         }
         ninosDisponibles.forEach(nino => {
-            const isSelected = ninosSeleccionados.some(n => n.id === nino.id);
+            const isSelected = ninosSeleccionados.some(n => n.id === nino.id && !n.deleted);
             const tr = $(`
                 <tr>
                     <td>
@@ -257,9 +257,12 @@ $(document).ready(function() {
         $('input[name="seleccionNino"]:checked').each(function() {
             const ninoId = parseInt($(this).val());
             const nino = ninosDisponibles.find(n => n.id === ninoId);
-            
-            if (nino && !ninosSeleccionados.some(n => n.id === ninoId)) {
+            const existente = ninosSeleccionados.find(n => n.id === ninoId);
+
+            if (nino && !existente) {
                 ninosSeleccionados.push(nino);
+            } else if (existente) {
+                existente.deleted = false;
             }
         });
         
@@ -355,8 +358,8 @@ $(document).ready(function() {
         }
         
         partesDisponibles.forEach(parte => {
-            const isSelected = partesSeleccionadas.some(p => p.id === parte.id);
-            const selectedParte = isSelected ? partesSeleccionadas.find(p => p.id === parte.id) : null;
+            const selectedParte = partesSeleccionadas.find(p => p.id === parte.id && !p.deleted) || null;
+            const isSelected = Boolean(selectedParte);
             
             const tr = $(`
                 <tr>
@@ -367,8 +370,13 @@ $(document).ready(function() {
                     <td>${parte.nombre}</td>
                     <td>${parte.dni}</td>
                     <td>
-                        <input type="text" class="form-control form-control-sm" id="vinculo-${parte.id}" 
-                               placeholder="Vínculo" value="${selectedParte ? selectedParte.vinculo : ''}">
+                        <select class="form-select form-select-sm" id="vinculo-${parte.id}">
+                            <option value="">Seleccionar...</option>
+                            <option value="PADRE/MADRE" ${(!selectedParte || selectedParte.vinculo === 'PADRE/MADRE') ? 'selected' : ''}>PADRE/MADRE</option>
+                            <option value="TUTOR" ${selectedParte && selectedParte.vinculo === 'TUTOR' ? 'selected' : ''}>TUTOR</option>
+                            <option value="ABUELO/A" ${selectedParte && selectedParte.vinculo === 'ABUELO/A' ? 'selected' : ''}>ABUELO/A</option>
+                            <option value="OTRO" ${selectedParte && selectedParte.vinculo === 'OTRO' ? 'selected' : ''}>OTRO</option>
+                        </select>
                     </td>
                 </tr>
             `);
@@ -385,8 +393,9 @@ $(document).ready(function() {
             const parteId = parseInt($(this).val());
             const vinculo = $(`#vinculo-${parteId}`).val() || 'No especificado';
             const parte = partesDisponibles.find(p => p.id === parteId);
-            
-            if (parte && !partesSeleccionadas.some(p => p.id === parteId)) {
+            const existente = partesSeleccionadas.find(p => p.id === parteId);
+
+            if (parte && !existente) {
                 partesSeleccionadas.push({
                     id: parte.id,
                     nombre: parte.nombre,
@@ -394,6 +403,9 @@ $(document).ready(function() {
                     dni: parte.dni,
                     vinculo: vinculo
                 });
+            } else if (existente) {
+                existente.deleted = false;
+                existente.vinculo = vinculo;
             }
         });
         
@@ -477,6 +489,7 @@ $(document).ready(function() {
             actualizarNinosDisplay();
             actualizarNinoFormset();
         }
+        $(`input[name="seleccionNino"][value="${ninoId}"]`).prop('checked', false);
         
         return false; // Prevenir cualquier otro comportamiento
     });
@@ -494,6 +507,7 @@ $(document).ready(function() {
             actualizarPartesDisplay();
             actualizarParteFormset();
         }
+        $(`input[name="seleccionParte"][value="${parteId}"]`).prop('checked', false);
         
         return false; // Prevenir cualquier otro comportamiento
     });

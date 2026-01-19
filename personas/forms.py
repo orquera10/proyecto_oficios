@@ -71,7 +71,7 @@ class NinoForm(forms.ModelForm):
             # Verificar que solo contenga números
             if not dni.isdigit():
                 raise forms.ValidationError('El DNI solo puede contener números y puntos')
-        return dni
+        return dni or None
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -136,7 +136,7 @@ class ParteForm(forms.ModelForm):
             # Verificar que solo contenga números
             if not dni.isdigit():
                 raise forms.ValidationError('El DNI solo puede contener números y puntos')
-        return dni
+        return dni or None
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

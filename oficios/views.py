@@ -145,6 +145,7 @@ class OficioCreateView(LoginRequiredMixin, CreateView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['titulo'] = 'Nuevo Oficio'
         return context
     def form_valid(self, form):
         instituciones = list(form.cleaned_data.get("instituciones") or [])
@@ -289,6 +290,10 @@ class OficioUpdateView(LoginRequiredMixin, UpdateView):
 
     def get_success_url(self):
         return reverse_lazy('oficios:detail', kwargs={'pk': self.object.pk})
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['titulo'] = 'Editar Oficio'
+        return context
     def form_valid(self, form):
         self.object = form.save()
         messages.success(self.request, 'El oficio se ha actualizado correctamente.')

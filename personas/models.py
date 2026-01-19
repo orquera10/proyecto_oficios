@@ -41,7 +41,7 @@ class Parte(models.Model):
     id_partes = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=100)
     apellido = models.CharField(max_length=100)
-    dni = models.CharField(max_length=20, unique=True)
+    dni = models.CharField(max_length=20, unique=True, blank=True, null=True)
     direccion = models.CharField(max_length=200, blank=True, null=True)
     telefono = models.CharField('Teléfono', max_length=20, blank=True, null=True)
 
