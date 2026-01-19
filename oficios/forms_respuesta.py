@@ -46,7 +46,10 @@ class RespuestaForm(forms.ModelForm):
         oficio = kwargs.pop('oficio', None)
         super().__init__(*args, **kwargs)
         if not self.instance.pk and not self.initial.get('fecha_hora'):
-            self.initial['fecha_hora'] = timezone.now().strftime('%Y-%m-%dT%H:%M')
+            local_now = timezone.localtime(timezone.now())
+            self.initial['fecha_hora'] = local_now.strftime('%Y-%m-%dT%H:%M')
+        if not self.instance.pk and not self.initial.get('respuesta'):
+            self.initial['respuesta'] = 'SE RESPONDIO CORRECTAMENTE EL OFICIO DESDE LA INSTITUCION'
         self.fields['respuesta_pdf'].required = False
         # Filtrar profesionales por institución del oficio
         try:

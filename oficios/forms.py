@@ -53,7 +53,8 @@ class OficioForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         # Set initial fecha_emision to now if not set
         if not self.instance.pk:
-            self.initial['fecha_emision'] = timezone.now().strftime('%Y-%m-%dT%H:%M')
+            local_now = timezone.localtime(timezone.now())
+            self.initial['fecha_emision'] = local_now.strftime('%Y-%m-%dT%H:%M')
 
         # Configurar campos opcionales
         self.fields['nro_oficio'].required = False

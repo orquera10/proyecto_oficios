@@ -158,7 +158,7 @@
                         <dd class="col-sm-8">
                             {% if oficio.fecha_vencimiento %}
                                 {{ oficio.fecha_vencimiento|date:"d/m/Y H:i" }}
-                                {% if oficio.fecha_vencimiento < now %}
+                                {% if oficio.fecha_vencimiento < now and oficio.estado != 'enviado' %}
                                     <span class="badge bg-danger ms-2">Vencido</span>
                                 {% endif %}
                             {% else %}
@@ -342,7 +342,7 @@
                             {% endif %}
                             <div class="mb-3">
                                 <label for="detalle_enviar" class="form-label">Detalle</label>
-                                <textarea class="form-control" id="detalle_enviar" name="detalle" rows="3"></textarea>
+                            <textarea class="form-control" id="detalle_enviar" name="detalle" rows="3">SE ENVIO CORRECTAMENTE EL OFCIO AL AGENTE SOLICITANTE</textarea>
                             </div>
                             <div class="mb-3">
                                 <label for="archivo_pdf_enviar" class="form-label">Adjuntar PDF (opcional)</label>
@@ -595,7 +595,7 @@
                             </div>
                             <div class="mb-3">
                                 <label for="detalle_asignar" class="form-label">Detalle</label>
-                                <textarea class="form-control" id="detalle_asignar" name="detalle" rows="3" required></textarea>
+                                <textarea class="form-control" id="detalle_asignar" name="detalle" rows="3" required>EL OFICIO SE ASIGNO CORRECTAMENTE A UNA OPD</textarea>
                             </div>
                             <div class="mb-3">
                                 <label for="archivo_pdf_asignar" class="form-label">Adjuntar PDF (opcional)</label>
@@ -631,17 +631,6 @@
 
 {% block extra_js %}
 {{ block.super }}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const btn = document.getElementById('btnEnviarOficio');
-  const modalEl = document.getElementById('enviarModal');
-  if (btn && modalEl && window.bootstrap) {
-    btn.addEventListener('click', function () {
-      try { new bootstrap.Modal(modalEl).show(); } catch (e) {}
-    });
-  }
-});
-</script>
 {% endblock %}
 
  
