@@ -82,11 +82,13 @@
                         </ul>
                     </li>
 
+                    {% if user.is_authenticated and user.perfil.id_sector and user.perfil.id_sector.nombre|lower == 'informatica' %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'reportes:dashboard' %}">
                             <i class="fas fa-chart-bar me-1"></i> Reportes
                         </a>
                     </li>
+                    {% endif %}
 
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="refsDropdown" role="button"
@@ -171,6 +173,7 @@
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                                 <li><a class="dropdown-item" href="{% url 'core:perfil' %}"><i class="fas fa-user me-2"></i>Perfil</a></li>
+                                <li><a class="dropdown-item" href="{% url 'core:manual_usuario' %}"><i class="fas fa-book me-2"></i>Manual de usuario</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <form id="logoutForm" method="post" action="{% url 'logout' %}">

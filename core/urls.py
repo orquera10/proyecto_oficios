@@ -11,6 +11,7 @@ urlpatterns = [
     path('oficios/', include('oficios.urls')),  
     path('casos/', include('casos.urls', namespace='casos')),  
     path('perfil/', views.perfil, name='perfil'),
+    path('manual/', views.manual_usuario, name='manual_usuario'),
 ]
 
 # Add this to set the default login redirect URL
