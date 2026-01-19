@@ -22,7 +22,7 @@ from .filters import OficioFilter
 
 def buscar_ninos(request):
     """
-    Vista para buscar niÃƒÂ±os por nombre, apellido o documento.
+    Vista para buscar niños por nombre, apellido o documento.
     Devuelve resultados en formato JSON para ser usados en autocompletado.
     """
     query = request.GET.get('q', '').strip()
@@ -163,7 +163,7 @@ class OficioCreateView(LoginRequiredMixin, CreateView):
                     usuario=self.request.user,
                     estado_anterior=None,
                     estado_nuevo='cargado',
-                    detalle='Oficio creado',
+                    detalle='OFICIO CREADO',
                     institucion=obj.institucion
                 )
             except Exception:
@@ -195,7 +195,7 @@ class OficioCreateView(LoginRequiredMixin, CreateView):
                         usuario=self.request.user,
                         estado_anterior=None,
                         estado_nuevo='cargado',
-                        detalle='Oficio creado',
+                        detalle='OFICIO CREADO',
                         institucion=obj.institucion
                     )
                 except Exception:
@@ -301,9 +301,6 @@ class OficioEnviarView(LoginRequiredMixin, View):
     """
     @method_decorator(login_required)
     def post(self, request, *args, **kwargs):
-        if _is_despacho(request.user):
-            messages.error(request, 'No tiene permisos para responder oficios.')
-            return redirect('oficios:detail', pk=kwargs.get('pk'))
         oficio = get_object_or_404(Oficio, pk=kwargs['pk'])
         nuevo_estado = request.POST.get('nuevo_estado')
         institucion_id = request.POST.get('institucion')
@@ -327,7 +324,7 @@ class OficioEnviarView(LoginRequiredMixin, View):
             # Definir detalle por defecto si viene vacÃ­o
             if not detalle:
                 if nuevo_estado == 'asignado':
-                    detalle_final = 'Se asignÃ³ a instituciÃ³n'
+                    detalle_final = 'Se asignó a institucion'
                 elif nuevo_estado == 'enviado':
                     detalle_final = 'Oficio enviado a agente'
                 else:
@@ -338,6 +335,7 @@ class OficioEnviarView(LoginRequiredMixin, View):
                     )
             else:
                 detalle_final = detalle
+            detalle_final = (detalle_final or '').upper()
 
             # Crear registro del movimiento (guardar PDF si se adjunta)
             MovimientoOficio.objects.create(
@@ -428,6 +426,7 @@ class RespuestaCreateView(LoginRequiredMixin, CreateView):
         try:
             institucion_mov = obj.id_institucion or self.oficio.institucion
             detalle_mov = obj.respuesta.strip()[:200] if obj.respuesta else 'Se respondio el oficio'
+            detalle_mov = (detalle_mov or '').upper()
             devolver = form.cleaned_data.get('devolver')
             nuevo_estado = 'devuelto' if devolver else 'respondido'
 
@@ -458,7 +457,7 @@ class RespuestaCreateView(LoginRequiredMixin, CreateView):
             pass
 
         if form.cleaned_data.get('devolver'):
-            messages.success(self.request, 'La respuesta se registrÃƒÂ³ y el oficio pasÃƒÂ³ a Devuelto.')
+            messages.success(self.request, 'La respuesta se registra y el oficio pasara a Devuelto.')
         else:
             messages.success(self.request, 'Se marco el oficio como Respondido.')
         return HttpResponseRedirect(reverse('oficios:detail', kwargs={'pk': self.oficio.pk}))

@@ -357,42 +357,7 @@
                 </div>
             </div>
         </div>
-        {# Modal para asignar (solo cuando estado es cargado) #}
-        <div class="modal fade" id="asignarModal" tabindex="-1" aria-labelledby="asignarModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="asignarModalLabel">Asignar Oficio #{{ oficio.id }}</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <form method="post" action="{% url 'oficios:enviar' oficio.pk %}" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        <input type="hidden" name="nuevo_estado" value="asignado">
-                        <div class="modal-body">
-                            <div class="mb-3">
-                                <label for="institucion_asignar" class="form-label">Institución</label>
-                                <label for="institucion_asignar" class="form-label">Institución</label>
-                                    {% for institucion in instituciones %}
-                                        <option value="{{ institucion.id }}" {% if oficio.institucion and institucion.id == oficio.institucion.id %}selected{% endif %}>{{ institucion.nombre }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="detalle_asignar" class="form-label">Detalle</label>
-                                <textarea class="form-control" id="detalle_asignar" name="detalle" rows="3"></textarea>
-                            </div>
-                            
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-primary">Confirmar Asignación</button>
-                            <button type="submit" class="btn btn-primary">Confirmar Asignación</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% else %}
+        {% else %}
     <div class="card mt-4">
         <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
             <h4 class="mb-0">Caso Relacionado</h4>
@@ -458,7 +423,7 @@
                             <th>Estado Anterior</th>
                             <th>Nuevo Estado</th>
                             <th>Institución</th>
-                            <th>Institución</th>
+                            <th>Archivo</th>
                             <th>Detalles</th>
                         </tr>
                     </thead>

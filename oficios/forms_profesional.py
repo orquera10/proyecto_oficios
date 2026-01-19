@@ -61,6 +61,10 @@ class ProfesionalForm(forms.ModelForm):
     def save(self, commit=True):
         is_new = self.instance.pk is None
         user = super().save(commit=False)
+        if user.first_name:
+            user.first_name = user.first_name.upper()
+        if user.last_name:
+            user.last_name = user.last_name.upper()
         p1 = self.cleaned_data.get('password1')
         if p1:
             user.set_password(p1)
@@ -72,4 +76,3 @@ class ProfesionalForm(forms.ModelForm):
         perfil.id_institucion = self.cleaned_data.get('id_institucion')
         perfil.save(update_fields=['es_profesional', 'id_institucion'])
         return user
-

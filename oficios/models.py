@@ -238,6 +238,10 @@ class Oficio(models.Model):
         # Validar que si se proporciona un número de legajo, no exista otro con el mismo número
 
     def save(self, *args, **kwargs):
+        if self.legajo:
+            self.legajo = self.legajo.upper()
+        if self.caratula_oficio:
+            self.caratula_oficio = self.caratula_oficio.upper()
         # Validar el modelo antes de guardar
         self.full_clean()
         
@@ -434,6 +438,9 @@ class MovimientoOficio(models.Model):
         # Si se proporciona una institución, usarla, de lo contrario usar la del oficio
         if not self.institucion and self.oficio and self.oficio.institucion:
             self.institucion = self.oficio.institucion
+
+        if self.detalle:
+            self.detalle = self.detalle.upper()
             
         super().save(*args, **kwargs)
 
@@ -511,6 +518,11 @@ class Respuesta(models.Model):
 
     def __str__(self):
         return f"Respuesta {self.id} de Oficio {self.id_oficio_id}"
+
+    def save(self, *args, **kwargs):
+        if self.respuesta:
+            self.respuesta = self.respuesta.upper()
+        super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
         # Eliminar el archivo fÃ­sico si existe

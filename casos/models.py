@@ -148,6 +148,11 @@ class Caso(models.Model):
     
     def __str__(self):
         return f"{self.get_tipo_display()} - {self.expte}"
+
+    def save(self, *args, **kwargs):
+        if self.expte:
+            self.expte = self.expte.upper()
+        super().save(*args, **kwargs)
         
     def get_all_movimientos(self):
         """

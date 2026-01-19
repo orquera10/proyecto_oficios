@@ -15,6 +15,15 @@ class Nino(models.Model):
 
     def __str__(self):
         return f"{self.nombre} {self.apellido}"
+
+    def save(self, *args, **kwargs):
+        if self.nombre:
+            self.nombre = self.nombre.upper()
+        if self.apellido:
+            self.apellido = self.apellido.upper()
+        if self.direccion:
+            self.direccion = self.direccion.upper()
+        super().save(*args, **kwargs)
         
     @property
     def edad_calculada(self):
@@ -42,3 +51,12 @@ class Parte(models.Model):
 
     def __str__(self):
         return f"{self.nombre} {self.apellido}"
+
+    def save(self, *args, **kwargs):
+        if self.nombre:
+            self.nombre = self.nombre.upper()
+        if self.apellido:
+            self.apellido = self.apellido.upper()
+        if self.direccion:
+            self.direccion = self.direccion.upper()
+        super().save(*args, **kwargs)

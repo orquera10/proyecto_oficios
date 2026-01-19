@@ -101,7 +101,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 'total_oficios': oficios_qs.count(),
                 'respondidos': oficios_qs.filter(estado='respondido').count(),
                 'enviados': oficios_qs.filter(estado='enviado').count(),
-                'pendientes': oficios_qs.filter(estado__in=['cargado', 'asignado']).count(),
+                'pendientes': oficios_qs.filter(estado__in=['cargado', 'asignado', 'devuelto']).count(),
                 'vencidos': oficios_qs.filter(fecha_vencimiento__lt=today).count(),
                 'proximos': oficios_qs.filter(
                     fecha_vencimiento__gte=today,

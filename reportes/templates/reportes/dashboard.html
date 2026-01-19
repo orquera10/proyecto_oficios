@@ -278,7 +278,9 @@
                                     {% if mov.usuario %} · {{ mov.usuario.get_full_name|default:mov.usuario.username }}{% endif %}
                                 </div>
                             </div>
-                            <span class="badge bg-light text-dark">{{ mov.estado_nuevo }}</span>
+                            <span class="badge align-self-start py-1 px-2 bg-{% if mov.estado_nuevo == 'cargado' %}secondary{% elif mov.estado_nuevo == 'asignado' %}warning text-dark{% elif mov.estado_nuevo == 'respondido' %}primary{% elif mov.estado_nuevo == 'enviado' %}success{% elif mov.estado_nuevo == 'devuelto' %}violet{% else %}light text-dark{% endif %}">
+                                {{ mov.get_estado_nuevo_display }}
+                            </span>
                         </div>
                         {% if mov.detalle %}
                         <div class="text-muted small mt-1">{{ mov.detalle|truncatechars:120 }}</div>
@@ -351,7 +353,9 @@
                                 <td>{{ oficio.juzgado.nombre|default:"-" }}</td>
                                 <td>{{ oficio.fecha_vencimiento|date:"d/m/Y H:i" }}</td>
                                 <td>
-                                    <span class="badge bg-light text-dark">{{ oficio.get_estado_display }}</span>
+                                    <span class="badge bg-{{ oficio.get_estado_badge_class }}{% if oficio.estado == 'asignado' %} text-dark{% endif %}">
+                                        {{ oficio.get_estado_display }}
+                                    </span>
                                 </td>
                             </tr>
                             {% empty %}
