@@ -6,7 +6,7 @@ from . import views
 app_name = 'core'
 
 urlpatterns = [
-    path('', RedirectView.as_view(pattern_name='casos:list', permanent=False)),
+    path('', views.home, name='home'),
     path('accounts/', include('django.contrib.auth.urls')),  
     path('oficios/', include('oficios.urls')),  
     path('casos/', include('casos.urls', namespace='casos')),  

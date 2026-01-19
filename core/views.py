@@ -23,6 +23,11 @@ def perfil(request):
     })
 
 
+@login_required
+def home(request):
+    return render(request, 'core/home.html')
+
+
 def _render_manual_md(text):
     lines = (text or '').splitlines()
     html_parts = []

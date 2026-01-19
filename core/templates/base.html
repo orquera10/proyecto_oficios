@@ -1,9 +1,11 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Sistema de Oficios{% endblock %}</title>
+    <link rel="icon" href="{% static 'core/logo.svg' %}" type="image/svg+xml">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -13,8 +15,9 @@
     {% if not hide_navbar %}
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'casos:list' %}">
-                <i class="fas fa-file-alt me-2"></i>Sistema de Oficios
+            <a class="navbar-brand d-flex align-items-center gap-2" href="{% url 'core:home' %}">
+                <img src="{% static 'core/logo.svg' %}" alt="Sistema de Oficios" class="brand-logo">
+                <span>Sistema de Oficios</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
                     aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -120,6 +123,7 @@
                         </ul>
                     </li>
 
+                    {% if not user.perfil.id_sector or user.perfil.id_sector.nombre|slugify != 'coordinacion-opd' %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="personasDropdown" role="button" 
                            data-bs-toggle="dropdown" aria-expanded="false">
@@ -155,6 +159,7 @@
                             </li>
                         </ul>
                     </li>
+                    {% endif %}
 
                     {% if user.is_staff %}
                     <li class="nav-item">
@@ -240,6 +245,7 @@
     
     <style>
         .badge.bg-violet { background-color: #6f42c1 !important; color: #fff; }
+        .brand-logo { height: 28px; width: 28px; }
 
         .dropdown-submenu {
             position: relative;

@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Bienvenida{% endblock %}
+
+{% block content %}
+<div class="text-center mb-5">
+    <img src="{% static 'core/logo.svg' %}" alt="Sistema de Oficios" style="width: 72px; height: 72px;">
+    <h1 class="mt-3">Sistema de Oficios</h1>
+    <p class="text-muted mb-0">Bienvenido, {{ user.get_full_name|default:user.username }}</p>
+    {% if user.perfil.id_sector %}
+    <p class="text-muted mb-0">{{ user.perfil.id_sector.nombre }}</p>
+    {% endif %}
+</div>
+
+<div class="row g-4">
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-folder-open me-2"></i>Casos</h5>
+                <p class="card-text text-muted">Crear, editar y consultar casos con ninos y partes.</p>
+                <a href="{% url 'casos:list' %}" class="btn btn-primary">Ir a Casos</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-file-alt me-2"></i>Oficios</h5>
+                <p class="card-text text-muted">Gestionar oficios, estados y respuestas.</p>
+                <a href="{% url 'oficios:list' %}" class="btn btn-primary">Ir a Oficios</a>
+            </div>
+        </div>
+    </div>
+    {% if not user.perfil.id_sector or user.perfil.id_sector.nombre|slugify != 'coordinacion-opd' %}
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-users me-2"></i>Personas</h5>
+                <p class="card-text text-muted">Administrar ninos y partes vinculadas.</p>
+                <a href="{% url 'personas:home' %}" class="btn btn-primary">Ir a Personas</a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-database me-2"></i>Referencias</h5>
+                <p class="card-text text-muted">Catalogos de instituciones, juzgados y profesionales.</p>
+                <a href="{% url 'oficios:institucion_list' %}" class="btn btn-primary">Ir a Referencias</a>
+            </div>
+        </div>
+    </div>
+    {% if user.is_authenticated and user.perfil.id_sector and user.perfil.id_sector.nombre|lower == 'informatica' %}
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-chart-bar me-2"></i>Reportes</h5>
+                <p class="card-text text-muted">Indicadores y resumenes del sistema.</p>
+                <a href="{% url 'reportes:dashboard' %}" class="btn btn-primary">Ir a Reportes</a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

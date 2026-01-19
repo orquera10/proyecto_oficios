@@ -131,7 +131,7 @@ TEMPLATES = [
 ]
 
 # Authentication settings
-LOGIN_REDIRECT_URL = 'casos:list'
+LOGIN_REDIRECT_URL = 'core:home'
 LOGIN_URL = 'login'
 LOGOUT_REDIRECT_URL = 'login'
 
@@ -173,7 +173,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 # Carpeta de salida de archivos estáticos para producción (collectstatic)
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
