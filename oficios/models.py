@@ -1,4 +1,5 @@
 ﻿import os
+import uuid
 from django.db import models
 from django.db.models import Q
 from django.core.exceptions import ValidationError
@@ -9,11 +10,11 @@ from django.conf import settings
 from casos.models import Caso
 
 def oficio_upload_path(instance, filename):
-    # Guarda el archivo en: MEDIA_ROOT/oficios/<year>/<month>/oficio_<id>/<filename>
+    # Guarda el archivo en: MEDIA_ROOT/oficios/<year>/<month>/oficio_<uuid>/<filename>
     fecha = instance.fecha_emision or timezone.now()
     if timezone.is_aware(fecha):
         fecha = timezone.localtime(fecha)
-    return f'oficios/{fecha:%Y}/{fecha:%m}/oficio_{instance.id}/{filename}'
+    return f'oficios/{fecha:%Y}/{fecha:%m}/oficio_{uuid.uuid4()}/{filename}'
 
 def respuesta_upload_path(instance, filename):
     # Guarda el archivo en: MEDIA_ROOT/respuestas/oficio_<oficio_id>/<filename>
