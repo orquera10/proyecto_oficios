@@ -122,6 +122,11 @@
                         </tbody>
                     </table>
                 </div>
+                <div class="mt-3" id="ninos-empty-actions" style="display: none;">
+                    <a class="btn btn-outline-primary" href="{% url 'personas:nino_create' %}">
+                        <i class="fas fa-plus"></i> Agregar Niño
+                    </a>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
@@ -163,6 +168,11 @@
                             <!-- Partes por JS -->
                         </tbody>
                     </table>
+                </div>
+                <div class="mt-3" id="partes-empty-actions" style="display: none;">
+                    <a class="btn btn-outline-primary" href="{% url 'personas:parte_create' %}">
+                        <i class="fas fa-plus"></i> Agregar Parte
+                    </a>
                 </div>
             </div>
             <div class="modal-footer">
@@ -210,8 +220,10 @@ $(document).ready(function() {
         tbody.empty();
         if (ninosDisponibles.length === 0) {
             tbody.html('<tr><td colspan="4" class="text-center">No se encontraron niños.</td></tr>');
+            $('#ninos-empty-actions').show();
             return;
         }
+        $('#ninos-empty-actions').hide();
         ninosDisponibles.forEach(nino => {
             const isSelected = ninosSeleccionados.some(n => n.id === nino.id && !n.deleted);
             const tr = $(`
@@ -354,8 +366,10 @@ $(document).ready(function() {
         
         if (partesDisponibles.length === 0) {
             tbody.html('<tr><td colspan="5" class="text-center">No se encontraron partes.</td></tr>');
+            $('#partes-empty-actions').show();
             return;
         }
+        $('#partes-empty-actions').hide();
         
         partesDisponibles.forEach(parte => {
             const selectedParte = partesSeleccionadas.find(p => p.id === parte.id && !p.deleted) || null;

@@ -1,12 +1,30 @@
 {% extends 'base_login.html' %}
+{% load static %}
 
 {% block content %}
 <div class="row justify-content-center align-items-center" style="min-height: 100vh;">
     <div class="col-md-5">
+        <div class="d-flex justify-content-end mb-2">
+            <div class="d-flex align-items-center gap-2">
+                <i class="fas fa-moon"></i>
+                <small>Modo oscuro</small>
+                <div class="form-check form-switch m-0">
+                    <input class="form-check-input" type="checkbox" id="themeToggleLogin">
+                </div>
+            </div>
+        </div>
         <div class="card shadow">
-            <div class="card-header bg-primary text-white">
-                <h4 class="mb-0 text-center">Sistema de Oficios</h4>
-                <p class="text-center mb-0">Iniciar Sesión</p>
+            <div class="card-header login-header text-white">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <img src="{% static 'core/logo.svg' %}" alt="Sistema de Oficios" style="width: 32px; height: 32px;">
+                        <div>
+                            <h4 class="mb-0">Sistema de Oficios</h4>
+                            <p class="mb-0">Iniciar Sesión</p>
+                        </div>
+                    </div>
+                    <div></div>
+                </div>
             </div>
             <div class="card-body p-4">
                 {% if form.errors %}
@@ -69,6 +87,29 @@
 {% endblock %}
 
 {% block extra_js %}
+<script>
+    (function() {
+        const storageKey = 'oficios-theme';
+        const toggle = document.getElementById('themeToggleLogin');
+        const root = document.documentElement;
+        const saved = localStorage.getItem(storageKey);
+        if (saved === 'dark') {
+            root.setAttribute('data-theme', 'dark');
+            if (toggle) toggle.checked = true;
+        }
+        if (toggle) {
+            toggle.addEventListener('change', function() {
+                const next = toggle.checked ? 'dark' : 'light';
+                if (next === 'dark') {
+                    root.setAttribute('data-theme', 'dark');
+                } else {
+                    root.removeAttribute('data-theme');
+                }
+                localStorage.setItem(storageKey, next);
+            });
+        }
+    })();
+</script>
 <script>
 // Validación de formulario con Bootstrap
 (function () {

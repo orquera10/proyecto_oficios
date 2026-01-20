@@ -104,6 +104,21 @@ html[data-theme="dark"] .navbar.bg-primary {
     background: linear-gradient(180deg, #f8fbff 0%, #f1f6fb 100%);
 }
 
+.login-header {
+    background: linear-gradient(120deg, var(--brand-900), var(--brand-700));
+    color: #ffffff;
+}
+
+html[data-theme="dark"] .login-header {
+    background: linear-gradient(120deg, var(--brand-950), var(--brand-700));
+    color: #ffffff;
+}
+
+.login-header h4,
+.login-header p {
+    color: #ffffff;
+}
+
 html[data-theme="dark"] .card-header {
     background: linear-gradient(180deg, #182433 0%, #141f2e 100%);
 }
