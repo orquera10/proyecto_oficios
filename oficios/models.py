@@ -9,8 +9,11 @@ from django.conf import settings
 from casos.models import Caso
 
 def oficio_upload_path(instance, filename):
-    # Guarda el archivo en: MEDIA_ROOT/oficios/oficio_<id>/<filename>
-    return f'oficios/oficio_{instance.id}/{filename}'
+    # Guarda el archivo en: MEDIA_ROOT/oficios/<year>/<month>/oficio_<id>/<filename>
+    fecha = instance.fecha_emision or timezone.now()
+    if timezone.is_aware(fecha):
+        fecha = timezone.localtime(fecha)
+    return f'oficios/{fecha:%Y}/{fecha:%m}/oficio_{instance.id}/{filename}'
 
 def respuesta_upload_path(instance, filename):
     # Guarda el archivo en: MEDIA_ROOT/respuestas/oficio_<oficio_id>/<filename>
