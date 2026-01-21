@@ -22,11 +22,14 @@ class OficioForm(forms.ModelForm):
             'instituciones'
         ]
         widgets = {
-            'fecha_emision': forms.DateTimeInput(attrs={'type': 'datetime-local'}, format='%Y-%m-%dT%H:%M'),
-            'nro_oficio': forms.TextInput(attrs={'class': 'form-control'}),
-            'denuncia': forms.TextInput(attrs={'class': 'form-control'}),
-            'legajo': forms.TextInput(attrs={'class': 'form-control'}),
-            'plazo_horas': forms.NumberInput(attrs={'class': 'form-control'}),
+            'fecha_emision': forms.DateTimeInput(
+                attrs={'type': 'datetime-local', 'placeholder': 'YYYY-MM-DD HH:MM'},
+                format='%Y-%m-%dT%H:%M'
+            ),
+            'nro_oficio': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: 1234/2025'}),
+            'denuncia': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: Denuncia 5678'}),
+            'legajo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: Legajo 9012'}),
+            'plazo_horas': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Horas de plazo (opcional)'}),
             'juzgado': forms.Select(attrs={'class': 'form-control'}),
             'archivo_pdf': forms.FileInput(attrs={'class': 'form-control', 'accept': '.pdf'}),
             'caso': forms.HiddenInput(),
@@ -65,6 +68,23 @@ class OficioForm(forms.ModelForm):
         self.fields['caratula'].required = False
         self.fields['caratula_oficio'].required = False
         self.fields['archivo_pdf'].required = False
+
+        # Quitar ayudas en campos con placeholder para evitar redundancia
+        for field_name in ('denuncia', 'legajo'):
+            if field_name in self.fields:
+                self.fields[field_name].help_text = ''
+
+        # Placeholders y labels vacios para selects opcionales
+        if 'juzgado' in self.fields:
+            self.fields['juzgado'].empty_label = 'Seleccione agente (opcional)'
+        if 'caratula' in self.fields:
+            self.fields['caratula'].empty_label = 'Seleccione caratula (opcional)'
+
+        if 'caratula_oficio' in self.fields:
+            self.fields['caratula_oficio'].widget.attrs.setdefault(
+                'placeholder',
+                'Ej: Caratula del oficio'
+            )
 
         # Agregar clases de Bootstrap a todos los campos (evitar checkbox)
         from django.forms import CheckboxInput

@@ -71,7 +71,7 @@
                                                 <td>{{ caso.usuario.get_full_name|default:caso.usuario.username }}</td>
                                                 <td>
                                                     <a href="{% url 'casos:detail' caso.pk %}" class="btn btn-sm btn-outline-primary">
-                                                        <i class="fas fa-eye"></i> Ver
+                                                        <i class="bi bi-eye-fill"></i> Ver
                                                     </a>
                                                 </td>
                                             </tr>
@@ -93,10 +93,10 @@
                         </a>
                         <div>
                             <a href="{% url 'personas:nino_update' nino.pk %}" class="btn btn-warning">
-                                <i class="fas fa-edit"></i> Editar
+                                <i class="bi bi-pencil-square"></i> Editar
                             </a>
                             <a href="{% url 'personas:nino_delete' nino.pk %}" class="btn btn-danger">
-                                <i class="fas fa-trash"></i> Eliminar
+                                <i class="bi bi-trash3"></i> Eliminar
                             </a>
                         </div>
                     </div>

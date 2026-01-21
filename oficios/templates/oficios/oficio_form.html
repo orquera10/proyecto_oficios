@@ -5,7 +5,7 @@
 <div class="container">
     <div class="row">
         <div class="col-12">
-            <div class="card">
+            <div class="card oficio-form-card">
                 <div class="card-header">
                     <h4>{{ titulo }}</h4>
                 </div>
@@ -28,7 +28,39 @@
                                 <h5 class="mb-0">Datos del Oficio</h5>
                             </div>
                             <div class="card-body">
-                                {{ form|crispy }}
+                                {{ form.caso }}
+                                <div class="row g-3">
+                                    <div class="col-12 col-md-4">
+                                        {{ form.nro_oficio|as_crispy_field }}
+                                    </div>
+                                    <div class="col-12 col-md-4">
+                                        {{ form.denuncia|as_crispy_field }}
+                                    </div>
+                                    <div class="col-12 col-md-4">
+                                        {{ form.legajo|as_crispy_field }}
+                                    </div>
+                                    <div class="col-12 col-md-4">
+                                        {{ form.fecha_emision|as_crispy_field }}
+                                    </div>
+                                    <div class="col-12 col-md-4">
+                                        {{ form.plazo_horas|as_crispy_field }}
+                                    </div>
+                                    <div class="col-12 col-md-4">
+                                        {{ form.juzgado|as_crispy_field }}
+                                    </div>
+                                    <div class="col-12 col-md-4">
+                                        {{ form.caratula|as_crispy_field }}
+                                    </div>
+                                    <div class="col-12 col-md-8">
+                                        {{ form.caratula_oficio|as_crispy_field }}
+                                    </div>
+                                    <div class="col-12">
+                                        {{ form.archivo_pdf|as_crispy_field }}
+                                    </div>
+                                    <div class="col-12">
+                                        {{ form.instituciones|as_crispy_field }}
+                                    </div>
+                                </div>
                             </div>
                         </div>
 

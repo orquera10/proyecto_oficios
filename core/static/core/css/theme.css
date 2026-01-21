@@ -99,6 +99,49 @@ html[data-theme="dark"] .navbar.bg-primary {
     background-color: var(--surface-1);
 }
 
+.oficio-form-card {
+    background: linear-gradient(180deg, #f2f7fc 0%, #e7eef7 100%);
+}
+
+.oficio-form-card .card-header {
+    background: linear-gradient(180deg, #e9f1fb 0%, #dde8f5 100%);
+}
+
+.oficio-form-card .card-body .form-control,
+.oficio-form-card .card-body .form-select {
+    background-color: #f7faff;
+    border-color: #c2d1e6;
+}
+
+.oficio-form-card .card-body .form-control:focus,
+.oficio-form-card .card-body .form-select:focus {
+    background-color: #ffffff;
+    border-color: #9fc0de;
+    box-shadow: 0 0 0 0.2rem rgba(42, 123, 176, 0.2);
+}
+
+html[data-theme="dark"] .oficio-form-card .card-body .form-control,
+html[data-theme="dark"] .oficio-form-card .card-body .form-select {
+    background-color: #0f1a28;
+    border-color: #203149;
+    color: var(--text-900);
+}
+
+html[data-theme="dark"] .oficio-form-card .card-body .form-control::placeholder {
+    color: #9fb0c6;
+}
+
+html[data-theme="dark"] .oficio-form-card .card-body .form-control:focus,
+html[data-theme="dark"] .oficio-form-card .card-body .form-select:focus {
+    background-color: #0f1a28;
+    border-color: #2a7bb0;
+    box-shadow: 0 0 0 0.2rem rgba(42, 123, 176, 0.25);
+}
+
+html[data-theme="dark"] .oficio-form-card {
+    background: linear-gradient(180deg, #121d2b 0%, #0f1a28 100%);
+}
+
 .card-header {
     border-bottom: 1px solid var(--border-200);
     background: linear-gradient(180deg, #f8fbff 0%, #f1f6fb 100%);
@@ -289,6 +332,43 @@ html[data-theme="dark"] .table {
     border-radius: 14px;
 }
 
+html[data-theme="dark"] .alert {
+    background-color: #131f2f;
+    border: 1px solid #22344a;
+    color: var(--text-900);
+    box-shadow: 0 12px 26px rgba(0, 0, 0, 0.35);
+}
+
+html[data-theme="dark"] .alert-success {
+    background-color: rgba(31, 157, 138, 0.16);
+    border-color: rgba(31, 157, 138, 0.45);
+    color: #d7f4ef;
+}
+
+html[data-theme="dark"] .alert-danger {
+    background-color: rgba(214, 69, 69, 0.18);
+    border-color: rgba(214, 69, 69, 0.5);
+    color: #ffd6d6;
+}
+
+html[data-theme="dark"] .alert-warning {
+    background-color: rgba(240, 180, 41, 0.18);
+    border-color: rgba(240, 180, 41, 0.55);
+    color: #ffe7b3;
+}
+
+html[data-theme="dark"] .alert-info {
+    background-color: rgba(42, 123, 176, 0.18);
+    border-color: rgba(42, 123, 176, 0.5);
+    color: #d9ecff;
+}
+
+html[data-theme="dark"] .alert-secondary {
+    background-color: rgba(148, 163, 184, 0.16);
+    border-color: rgba(148, 163, 184, 0.4);
+    color: #e2e8f0;
+}
+
 footer {
     border-top: 1px solid var(--border-200);
     background-color: rgba(255, 255, 255, 0.8);
@@ -322,18 +402,32 @@ html[data-theme="dark"] .form-control-plaintext {
     color: var(--text-900);
 }
 
+
+html[data-theme="dark"] input[type="file"] {
+    color: var(--text-900);
+}
+
 html[data-theme="dark"] input[type="file"]::file-selector-button {
     background-color: #1f5578;
     color: #ffffff;
     border: 0;
 }
 
-html[data-theme="dark"] input[type="file"] {
-    color: var(--text-900);
+html[data-theme="dark"] input[type="file"]::file-selector-button:hover {
+    background-color: #1f5578;
+    color: #ffffff;
 }
+
 
 html[data-theme="dark"] .form-control::placeholder {
     color: var(--text-600);
+}
+
+html[data-theme="dark"] label,
+html[data-theme="dark"] .form-label,
+html[data-theme="dark"] .form-check-label,
+html[data-theme="dark"] .form-text {
+    color: var(--text-900);
 }
 
 html[data-theme="dark"] .table {
