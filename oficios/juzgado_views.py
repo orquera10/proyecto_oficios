@@ -7,9 +7,10 @@ from django.shortcuts import redirect
 
 from .models import Juzgado
 from .forms_juzgado import JuzgadoForm
+from .permissions import CoordinacionOPDWriteBlockMixin, CoordinacionOPDContextMixin
 
 
-class JuzgadoListView(LoginRequiredMixin, ListView):
+class JuzgadoListView(CoordinacionOPDContextMixin, LoginRequiredMixin, ListView):
     model = Juzgado
     template_name = 'oficios/juzgado_list.html'
     context_object_name = 'juzgados'
@@ -17,38 +18,41 @@ class JuzgadoListView(LoginRequiredMixin, ListView):
     ordering = ['nombre']
 
 
-class JuzgadoCreateView(LoginRequiredMixin, CreateView):
+class JuzgadoCreateView(CoordinacionOPDWriteBlockMixin, LoginRequiredMixin, CreateView):
     model = Juzgado
     form_class = JuzgadoForm
     template_name = 'oficios/juzgado_form.html'
     success_url = reverse_lazy('oficios:juzgado_list')
+    redirect_url_name = 'oficios:juzgado_list'
 
     def form_valid(self, form):
         messages.success(self.request, 'El juzgado/agente fue creado correctamente.')
         return super().form_valid(form)
 
 
-class JuzgadoUpdateView(LoginRequiredMixin, UpdateView):
+class JuzgadoUpdateView(CoordinacionOPDWriteBlockMixin, LoginRequiredMixin, UpdateView):
     model = Juzgado
     form_class = JuzgadoForm
     template_name = 'oficios/juzgado_form.html'
     success_url = reverse_lazy('oficios:juzgado_list')
+    redirect_url_name = 'oficios:juzgado_list'
 
     def form_valid(self, form):
         messages.success(self.request, 'El juzgado/agente fue actualizado correctamente.')
         return super().form_valid(form)
 
 
-class JuzgadoDetailView(LoginRequiredMixin, DetailView):
+class JuzgadoDetailView(CoordinacionOPDContextMixin, LoginRequiredMixin, DetailView):
     model = Juzgado
     template_name = 'oficios/juzgado_detail.html'
     context_object_name = 'juzgado'
 
 
-class JuzgadoDeleteView(LoginRequiredMixin, DeleteView):
+class JuzgadoDeleteView(CoordinacionOPDWriteBlockMixin, LoginRequiredMixin, DeleteView):
     model = Juzgado
     template_name = 'oficios/juzgado_confirm_delete.html'
     success_url = reverse_lazy('oficios:juzgado_list')
+    redirect_url_name = 'oficios:juzgado_list'
     
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()

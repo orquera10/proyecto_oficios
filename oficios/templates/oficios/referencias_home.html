@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}Referencias{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4">Referencias</h2>
+
+  <div class="row g-4">
+    <div class="col-md-6">
+      <a href="{{ juzgados_url }}" class="text-decoration-none text-reset">
+        <div class="card shadow-sm h-100">
+          <div class="card-body d-flex align-items-center">
+            <div class="me-3 text-primary" style="font-size: 2rem;">
+              <i class="fas fa-gavel"></i>
+            </div>
+            <div>
+              <h5 class="card-title mb-1">Juzgados / Agentes</h5>
+              <p class="card-text text-muted mb-0">Administrar juzgados y agentes emisores.</p>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-md-6">
+      <a href="{{ categorias_url }}" class="text-decoration-none text-reset">
+        <div class="card shadow-sm h-100">
+          <div class="card-body d-flex align-items-center">
+            <div class="me-3 text-secondary" style="font-size: 2rem;">
+              <i class="fas fa-tags"></i>
+            </div>
+            <div>
+              <h5 class="card-title mb-1">Categorias</h5>
+              <p class="card-text text-muted mb-0">Categorias de juzgados y agentes.</p>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-md-6">
+      <a href="{{ instituciones_url }}" class="text-decoration-none text-reset">
+        <div class="card shadow-sm h-100">
+          <div class="card-body d-flex align-items-center">
+            <div class="me-3 text-success" style="font-size: 2rem;">
+              <i class="fas fa-building"></i>
+            </div>
+            <div>
+              <h5 class="card-title mb-1">Instituciones</h5>
+              <p class="card-text text-muted mb-0">Catalogo de instituciones.</p>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-md-6">
+      <a href="{{ profesionales_url }}" class="text-decoration-none text-reset">
+        <div class="card shadow-sm h-100">
+          <div class="card-body d-flex align-items-center">
+            <div class="me-3 text-warning" style="font-size: 2rem;">
+              <i class="fas fa-user-md"></i>
+            </div>
+            <div>
+              <h5 class="card-title mb-1">Profesionales</h5>
+              <p class="card-text text-muted mb-0">Administrar profesionales y usuarios.</p>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

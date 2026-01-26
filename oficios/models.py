@@ -39,6 +39,7 @@ User = get_user_model()
 class Institucion(models.Model):
     nombre = models.CharField(max_length=100, verbose_name='Nombre de la Institución')
     direccion = models.TextField(verbose_name='Dirección', blank=True, null=True)
+    email = models.EmailField(verbose_name='Email', blank=True, null=True)
     creado = models.DateTimeField(auto_now_add=True)
     actualizado = models.DateTimeField(auto_now=True)
 

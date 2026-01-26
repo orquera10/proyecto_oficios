@@ -7,9 +7,10 @@ from django.shortcuts import redirect
 
 from .models import Institucion
 from .forms_institucion import InstitucionForm
+from .permissions import CoordinacionOPDWriteBlockMixin, CoordinacionOPDContextMixin
 
 
-class InstitucionListView(LoginRequiredMixin, ListView):
+class InstitucionListView(CoordinacionOPDContextMixin, LoginRequiredMixin, ListView):
     model = Institucion
     template_name = 'oficios/institucion_list.html'
     context_object_name = 'instituciones'
@@ -17,38 +18,41 @@ class InstitucionListView(LoginRequiredMixin, ListView):
     ordering = ['nombre']
 
 
-class InstitucionCreateView(LoginRequiredMixin, CreateView):
+class InstitucionCreateView(CoordinacionOPDWriteBlockMixin, LoginRequiredMixin, CreateView):
     model = Institucion
     form_class = InstitucionForm
     template_name = 'oficios/institucion_form.html'
     success_url = reverse_lazy('oficios:institucion_list')
+    redirect_url_name = 'oficios:institucion_list'
 
     def form_valid(self, form):
         messages.success(self.request, 'La institucion fue creada correctamente.')
         return super().form_valid(form)
 
 
-class InstitucionUpdateView(LoginRequiredMixin, UpdateView):
+class InstitucionUpdateView(CoordinacionOPDWriteBlockMixin, LoginRequiredMixin, UpdateView):
     model = Institucion
     form_class = InstitucionForm
     template_name = 'oficios/institucion_form.html'
     success_url = reverse_lazy('oficios:institucion_list')
+    redirect_url_name = 'oficios:institucion_list'
 
     def form_valid(self, form):
         messages.success(self.request, 'La institucion fue actualizada correctamente.')
         return super().form_valid(form)
 
 
-class InstitucionDetailView(LoginRequiredMixin, DetailView):
+class InstitucionDetailView(CoordinacionOPDContextMixin, LoginRequiredMixin, DetailView):
     model = Institucion
     template_name = 'oficios/institucion_detail.html'
     context_object_name = 'institucion'
 
 
-class InstitucionDeleteView(LoginRequiredMixin, DeleteView):
+class InstitucionDeleteView(CoordinacionOPDWriteBlockMixin, LoginRequiredMixin, DeleteView):
     model = Institucion
     template_name = 'oficios/institucion_confirm_delete.html'
     success_url = reverse_lazy('oficios:institucion_list')
+    redirect_url_name = 'oficios:institucion_list'
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -80,4 +84,3 @@ class InstitucionDeleteView(LoginRequiredMixin, DeleteView):
                 f'No se puede eliminar porque tiene {total} oficio(s) asociado(s).'
             )
             return redirect('oficios:institucion_detail', pk=self.object.pk)
-

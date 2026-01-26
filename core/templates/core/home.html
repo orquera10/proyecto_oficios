@@ -19,7 +19,7 @@
             <div class="d-flex flex-wrap gap-2">
                 <a class="btn btn-light btn-sm" href="{% url 'casos:list' %}"><i class="fas fa-folder-open me-1"></i>Casos</a>
                 <a class="btn btn-light btn-sm" href="{% url 'oficios:list' %}"><i class="fas fa-file-alt me-1"></i>Oficios</a>
-                <a class="btn btn-light btn-sm" href="{% url 'oficios:institucion_list' %}"><i class="fas fa-database me-1"></i>Referencias</a>
+                <a class="btn btn-light btn-sm" href="{% url 'oficios:referencias_home' %}"><i class="fas fa-database me-1"></i>Referencias</a>
             </div>
         </div>
     </div>
@@ -58,7 +58,7 @@
             <div class="card-body">
                 <h5 class="card-title"><i class="fas fa-database me-2"></i>Referencias</h5>
                 <p class="card-text text-muted">Catalogos de instituciones, juzgados y profesionales.</p>
-                <a href="{% url 'oficios:institucion_list' %}" class="btn btn-primary">Ir a Referencias</a>
+                <a href="{% url 'oficios:referencias_home' %}" class="btn btn-primary">Ir a Referencias</a>
             </div>
         </div>
     </div>

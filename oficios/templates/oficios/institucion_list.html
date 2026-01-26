@@ -4,9 +4,11 @@
 <div class="container mt-4">
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h2>Instituciones</h2>
+    {% if can_manage_referencias %}
     <a class="btn btn-primary" href="{% url 'oficios:institucion_create' %}">
       <i class="fas fa-plus-circle me-1"></i> Nueva
     </a>
+    {% endif %}
   </div>
 
   <style>
@@ -15,35 +17,43 @@
   </style>
 
   {% if instituciones %}
-  <div class="table-responsive">
-    <table class="table table-striped table-hover">
-      <thead class="table-light">
-        <tr>
-          <th>Nombre</th>
-          <th>Dirección</th>
-          <th class="text-end table-actions">Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for inst in instituciones %}
-        <tr>
-          <td>{{ inst.nombre }}</td>
-          <td>{{ inst.direccion|default:"-"|truncatechars:80 }}</td>
-          <td class="text-end table-actions">
-            <div class="btn-group" role="group" aria-label="Acciones">
-              <a href="{% url 'oficios:institucion_detail' inst.pk %}" class="btn btn-sm btn-info" title="Ver"><i class="bi bi-eye-fill"></i></a>
-              <a href="{% url 'oficios:institucion_update' inst.pk %}" class="btn btn-sm btn-warning" title="Editar"><i class="bi bi-pencil-square"></i></a>
-              <a href="{% url 'oficios:institucion_delete' inst.pk %}" class="btn btn-sm btn-danger" title="Eliminar"><i class="bi bi-trash3"></i></a>
-            </div>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+  <div class="card">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-striped table-hover">
+          <thead class="table-light">
+            <tr>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Direccion</th>
+              <th class="text-end table-actions">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for inst in instituciones %}
+            <tr>
+              <td>{{ inst.nombre }}</td>
+              <td>{{ inst.email|default:"-" }}</td>
+              <td>{{ inst.direccion|default:"-"|truncatechars:80 }}</td>
+              <td class="text-end table-actions">
+                <div class="btn-group" role="group" aria-label="Acciones">
+                  <a href="{% url 'oficios:institucion_detail' inst.pk %}" class="btn btn-sm btn-info" title="Ver"><i class="bi bi-eye-fill"></i></a>
+                  {% if can_manage_referencias %}
+                  <a href="{% url 'oficios:institucion_update' inst.pk %}" class="btn btn-sm btn-warning" title="Editar"><i class="bi bi-pencil-square"></i></a>
+                  <a href="{% url 'oficios:institucion_delete' inst.pk %}" class="btn btn-sm btn-danger" title="Eliminar"><i class="bi bi-trash3"></i></a>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
-  {% else %}
+{% else %}
   <div class="alert alert-info">No hay instituciones cargadas.</div>
-  {% endif %}
+{% endif %}
 
   {% if is_paginated %}
   <nav class="mt-3">

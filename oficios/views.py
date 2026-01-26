@@ -10,6 +10,7 @@ from django.views.decorators.http import require_http_methods
 import unicodedata
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
+from django.shortcuts import render
 
 from .models import (
     Oficio, Institucion, Caratula, Juzgado, MovimientoOficio, Respuesta
@@ -18,6 +19,7 @@ from casos.models import Caso
 from .forms import OficioForm
 from .forms_respuesta import RespuestaForm
 from .filters import OficioFilter
+from .permissions import is_coordinacion_opd
 
 
 def buscar_ninos(request):
@@ -47,6 +49,18 @@ def buscar_ninos(request):
     } for nino in ninos]
     
     return JsonResponse(results, safe=False)
+
+
+@login_required
+def referencias_home(request):
+    context = {
+        'juzgados_url': reverse_lazy('oficios:juzgado_list'),
+        'instituciones_url': reverse_lazy('oficios:institucion_list'),
+        'categorias_url': reverse_lazy('oficios:categoria_list'),
+        'profesionales_url': reverse_lazy('oficios:profesional_list'),
+        'can_manage_referencias': not is_coordinacion_opd(request.user),
+    }
+    return render(request, 'oficios/referencias_home.html', context)
 
 # Vista de listado de oficios
 class OficioListView(LoginRequiredMixin, ListView):
