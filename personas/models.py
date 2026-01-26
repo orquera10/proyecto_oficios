@@ -4,7 +4,8 @@ class Nino(models.Model):
     id_ninos = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=100)
     apellido = models.CharField(max_length=100)
-    direccion = models.CharField(max_length=200, blank=True, null=True)
+    domicilio_principal = models.CharField(max_length=200, blank=True, null=True)
+    domicilio_secundario = models.CharField(max_length=200, blank=True, null=True)
     dni = models.CharField(max_length=20, unique=True, blank=True, null=True)
     fecha_nac = models.DateField(blank=True, null=True)
     edad = models.PositiveIntegerField(blank=True, null=True, help_text='Edad en años, si no se conoce la fecha de nacimiento')
@@ -21,8 +22,10 @@ class Nino(models.Model):
             self.nombre = self.nombre.upper()
         if self.apellido:
             self.apellido = self.apellido.upper()
-        if self.direccion:
-            self.direccion = self.direccion.upper()
+        if self.domicilio_principal:
+            self.domicilio_principal = self.domicilio_principal.upper()
+        if self.domicilio_secundario:
+            self.domicilio_secundario = self.domicilio_secundario.upper()
         super().save(*args, **kwargs)
         
     @property

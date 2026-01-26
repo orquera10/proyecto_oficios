@@ -26,7 +26,8 @@
                                     <p><strong>Fecha de Nacimiento:</strong> {{ nino.fecha_nac|date:"d/m/Y"|default:"-" }}</p>
                                 </div>
                                 <div class="col-md-6">
-                                    <p><strong>Dirección:</strong> {{ nino.direccion|default:"-" }}</p>
+                                    <p><strong>Domicilio principal:</strong> {{ nino.domicilio_principal|default:"-" }}</p>
+                                    <p><strong>Domicilio secundario:</strong> {{ nino.domicilio_secundario|default:"-" }}</p>
                                     <p><strong>Edad:</strong> 
                                         {% if nino.edad_calculada is not None %}
                                             {{ nino.edad_calculada }} años

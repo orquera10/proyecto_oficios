@@ -60,7 +60,8 @@
                             <th>Nombre</th>
                             <th>Fecha Nacimiento</th>
                             <th>Edad</th>
-                            <th>Dirección</th>
+                            <th>Domicilio principal</th>
+                            <th>Domicilio secundario</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -78,7 +79,8 @@
                                     -
                                 {% endif %}
                             </td>
-                            <td>{{ nino.direccion|truncatechars:30|default:"-" }}</td>
+                            <td>{{ nino.domicilio_principal|truncatechars:30|default:"-" }}</td>
+                            <td>{{ nino.domicilio_secundario|truncatechars:30|default:"-" }}</td>
                             <td>
                                 <div class="btn-group btn-group-sm" role="group">
                                     <a href="{% url 'personas:nino_detail' nino.pk %}" class="btn btn-info text-white" title="Ver detalles">
@@ -95,7 +97,7 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="7" class="text-center">No hay niños registrados</td>
+                            <td colspan="8" class="text-center">No hay niños registrados</td>
                         </tr>
                         {% endfor %}
                     </tbody>

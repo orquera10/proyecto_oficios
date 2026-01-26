@@ -14,7 +14,7 @@ def _normalize_nombre(value: str) -> str:
 class NinoForm(forms.ModelForm):
     class Meta:
         model = Nino
-        fields = ['nombre', 'apellido', 'dni', 'fecha_nac', 'edad', 'direccion']
+        fields = ['nombre', 'apellido', 'dni', 'fecha_nac', 'edad', 'domicilio_principal', 'domicilio_secundario']
         widgets = {
             'nombre': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -40,10 +40,15 @@ class NinoForm(forms.ModelForm):
                 'min': 0,
                 'placeholder': _('Edad en años (opcional)')
             }),
-            'direccion': forms.Textarea(attrs={
+            'domicilio_principal': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 3,
-                'placeholder': _('Ingrese la dirección (opcional)')
+                'placeholder': _('Ingrese el domicilio principal (opcional)')
+            }),
+            'domicilio_secundario': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': _('Ingrese el domicilio secundario (opcional)')
             }),
         }
         labels = {
@@ -52,7 +57,8 @@ class NinoForm(forms.ModelForm):
             'dni': _('DNI (opcional)'),
             'fecha_nac': _('Fecha de Nacimiento (opcional)'),
             'edad': _('Edad (opcional)'),
-            'direccion': _('Dirección (opcional)'),
+            'domicilio_principal': _('Domicilio principal (opcional)'),
+            'domicilio_secundario': _('Domicilio secundario (opcional)'),
         }
 
     def clean_nombre(self):
@@ -81,7 +87,8 @@ class NinoForm(forms.ModelForm):
         self.fields['dni'].required = False
         self.fields['fecha_nac'].required = False
         self.fields['edad'].required = False
-        self.fields['direccion'].required = False
+        self.fields['domicilio_principal'].required = False
+        self.fields['domicilio_secundario'].required = False
 
 class ParteForm(forms.ModelForm):
     class Meta:

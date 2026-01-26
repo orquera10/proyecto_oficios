@@ -10,7 +10,7 @@ class NinoFilter(django_filters.FilterSet):
         label='Buscar',
         widget=forms.TextInput(attrs={
             'class': 'form-control form-control-sm',
-            'placeholder': 'DNI, Apellido, Nombre, Dirección'
+            'placeholder': 'DNI, Apellido, Nombre, Domicilio'
         })
     )
 
@@ -44,7 +44,8 @@ class NinoFilter(django_filters.FilterSet):
                 Q(dni__icontains=value) |
                 Q(apellido__icontains=value) |
                 Q(nombre__icontains=value) |
-                Q(direccion__icontains=value)
+                Q(domicilio_principal__icontains=value) |
+                Q(domicilio_secundario__icontains=value)
             ).distinct()
         return queryset
 
