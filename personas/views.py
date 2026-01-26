@@ -24,26 +24,24 @@ def _is_coordinacion_opd(user):
         return False
 
 
-class CoordinacionOPDBlockMixin:
+class CoordinacionOPDWriteBlockMixin:
     def dispatch(self, request, *args, **kwargs):
         if _is_coordinacion_opd(request.user):
             messages.error(request, 'No tiene permisos para gestionar personas.')
-            return redirect('casos:list')
+            return redirect('personas:nino_list')
         return super().dispatch(request, *args, **kwargs)
 
 
 def personas_home(request):
-    if _is_coordinacion_opd(request.user):
-        messages.error(request, 'No tiene permisos para gestionar personas.')
-        return redirect('casos:list')
     context = {
         'ninos_url': reverse_lazy('personas:nino_list'),
         'partes_url': reverse_lazy('personas:parte_list'),
+        'can_manage_personas': not _is_coordinacion_opd(request.user),
     }
     return render(request, 'personas/home.html', context)
 
 # Vistas para el modelo Nino
-class NinoListView(CoordinacionOPDBlockMixin, ListView):
+class NinoListView(ListView):
     model = Nino
     template_name = 'personas/nino_list.html'
     context_object_name = 'ninos'
@@ -58,23 +56,24 @@ class NinoListView(CoordinacionOPDBlockMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['filter'] = getattr(self, 'filterset', NinoFilter(self.request.GET, queryset=self.get_queryset()))
+        context['can_manage_personas'] = not _is_coordinacion_opd(self.request.user)
         return context
 
-class NinoCreateView(CoordinacionOPDBlockMixin, SuccessMessageMixin, CreateView):
+class NinoCreateView(CoordinacionOPDWriteBlockMixin, SuccessMessageMixin, CreateView):
     model = Nino
     form_class = NinoForm
     template_name = 'personas/nino_form.html'
     success_url = reverse_lazy('personas:nino_list')
     success_message = _("El niño ha sido creado exitosamente.")
 
-class NinoUpdateView(CoordinacionOPDBlockMixin, SuccessMessageMixin, UpdateView):
+class NinoUpdateView(CoordinacionOPDWriteBlockMixin, SuccessMessageMixin, UpdateView):
     model = Nino
     form_class = NinoForm
     template_name = 'personas/nino_form.html'
     success_url = reverse_lazy('personas:nino_list')
     success_message = _("El niño ha sido actualizado exitosamente.")
 
-class NinoDetailView(CoordinacionOPDBlockMixin, DetailView):
+class NinoDetailView(DetailView):
     model = Nino
     template_name = 'personas/nino_detail.html'
     context_object_name = 'nino'
@@ -95,10 +94,11 @@ class NinoDetailView(CoordinacionOPDBlockMixin, DetailView):
         if 'page' in get_copy:
             del get_copy['page']
         context['get_copy'] = get_copy
+        context['can_manage_personas'] = not _is_coordinacion_opd(self.request.user)
         
         return context
 
-class NinoDeleteView(CoordinacionOPDBlockMixin, DeleteView):
+class NinoDeleteView(CoordinacionOPDWriteBlockMixin, DeleteView):
     model = Nino
     template_name = 'personas/nino_confirm_delete.html'
     success_url = reverse_lazy('personas:nino_list')
@@ -109,7 +109,7 @@ class NinoDeleteView(CoordinacionOPDBlockMixin, DeleteView):
         return super().delete(request, *args, **kwargs)
 
 # Vistas para el modelo Parte
-class ParteListView(CoordinacionOPDBlockMixin, ListView):
+class ParteListView(ListView):
     model = Parte
     template_name = 'personas/parte_list.html'
     context_object_name = 'partes'
@@ -124,23 +124,24 @@ class ParteListView(CoordinacionOPDBlockMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['filter'] = getattr(self, 'filterset', ParteFilter(self.request.GET, queryset=self.get_queryset()))
+        context['can_manage_personas'] = not _is_coordinacion_opd(self.request.user)
         return context
 
-class ParteCreateView(CoordinacionOPDBlockMixin, SuccessMessageMixin, CreateView):
+class ParteCreateView(CoordinacionOPDWriteBlockMixin, SuccessMessageMixin, CreateView):
     model = Parte
     form_class = ParteForm
     template_name = 'personas/parte_form.html'
     success_url = reverse_lazy('personas:parte_list')
     success_message = _("La parte ha sido creada exitosamente.")
 
-class ParteUpdateView(CoordinacionOPDBlockMixin, SuccessMessageMixin, UpdateView):
+class ParteUpdateView(CoordinacionOPDWriteBlockMixin, SuccessMessageMixin, UpdateView):
     model = Parte
     form_class = ParteForm
     template_name = 'personas/parte_form.html'
     success_url = reverse_lazy('personas:parte_list')
     success_message = _("La parte ha sido actualizada exitosamente.")
 
-class ParteDetailView(CoordinacionOPDBlockMixin, DetailView):
+class ParteDetailView(DetailView):
     model = Parte
     template_name = 'personas/parte_detail.html'
     context_object_name = 'parte'
@@ -161,10 +162,11 @@ class ParteDetailView(CoordinacionOPDBlockMixin, DetailView):
         if 'page' in get_copy:
             del get_copy['page']
         context['get_copy'] = get_copy
+        context['can_manage_personas'] = not _is_coordinacion_opd(self.request.user)
         
         return context
 
-class ParteDeleteView(CoordinacionOPDBlockMixin, DeleteView):
+class ParteDeleteView(CoordinacionOPDWriteBlockMixin, DeleteView):
     model = Parte
     template_name = 'personas/parte_confirm_delete.html'
     success_url = reverse_lazy('personas:parte_list')

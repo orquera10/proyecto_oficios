@@ -127,7 +127,6 @@
                         </ul>
                     </li>
 
-                    {% if not user.perfil.id_sector or user.perfil.id_sector.nombre|slugify != 'coordinacion-opd' %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="personasDropdown" role="button" 
                            data-bs-toggle="dropdown" aria-expanded="false">
@@ -145,25 +144,28 @@
                                     <i class="fas fa-child me-2"></i>Lista de Ninos
                                 </a>
                             </li>
+                            {% if not user.perfil.id_sector or user.perfil.id_sector.nombre|slugify != 'coordinacion-opd' %}
                             <li>
                                 <a class="dropdown-item" href="{% url 'personas:nino_create' %}">
                                     <i class="fas fa-plus-circle me-2"></i>Nuevo Nino
                                 </a>
                             </li>
+                            {% endif %}
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <a class="dropdown-item" href="{% url 'personas:parte_list' %}">
                                     <i class="fas fa-user-tie me-2"></i>Lista de Partes
                                 </a>
                             </li>
+                            {% if not user.perfil.id_sector or user.perfil.id_sector.nombre|slugify != 'coordinacion-opd' %}
                             <li>
                                 <a class="dropdown-item" href="{% url 'personas:parte_create' %}">
                                     <i class="fas fa-plus-circle me-2"></i>Nueva Parte
                                 </a>
                             </li>
+                            {% endif %}
                         </ul>
                     </li>
-                    {% endif %}
 
                     {% if user.is_staff %}
                     <li class="nav-item">
