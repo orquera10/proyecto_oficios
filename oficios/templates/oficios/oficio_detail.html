@@ -320,7 +320,7 @@
                         <h5 class="modal-title" id="enviarModalLabel">Enviar Oficio #{{ oficio.id }}</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <form method="post" action="{% url 'oficios:enviar' oficio.pk %}" enctype="multipart/form-data">
+                    <form method="post" action="{% url 'oficios:enviar' oficio.pk %}" enctype="multipart/form-data" id="asignarForm">
                         {% csrf_token %}
                         <input type="hidden" name="nuevo_estado" value="enviado">
                         {% if oficio.institucion %}
@@ -604,9 +604,22 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-primary">Confirmar Asignación</button>
+                            <button type="submit" class="btn btn-primary" id="btnAsignarSubmit">
+                                <span class="spinner-border spinner-border-sm me-2 d-none" role="status" aria-hidden="true"></span>
+                                Confirmar Asignación
+                            </button>
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="asignarLoadingModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-body text-center py-4">
+                        <div class="spinner-border text-primary" role="status" aria-hidden="true"></div>
+                        <div class="mt-3 fw-semibold">El oficio se esta asignando y enviando por mail...</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -649,6 +662,32 @@
 })();
 </script>
 
+<script>
+(function () {
+    const form = document.getElementById('asignarForm');
+    const submitBtn = document.getElementById('btnAsignarSubmit');
+    if (!form || !submitBtn) return;
+    const spinner = submitBtn.querySelector('.spinner-border');
+
+    form.addEventListener('submit', function (e) {
+        if (form.dataset.submitting === 'true') {
+            e.preventDefault();
+            return;
+        }
+        form.dataset.submitting = 'true';
+        submitBtn.disabled = true;
+        if (spinner) spinner.classList.remove('d-none');
+
+        const loadingEl = document.getElementById('asignarLoadingModal');
+        if (loadingEl && window.bootstrap) {
+            e.preventDefault();
+            const modal = bootstrap.Modal.getOrCreateInstance(loadingEl, { backdrop: 'static', keyboard: false });
+            modal.show();
+            setTimeout(() => form.submit(), 50);
+        }
+    });
+})();
+</script>
 {% endblock %}
 
  
