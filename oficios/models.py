@@ -212,6 +212,14 @@ class Oficio(models.Model):
         blank=True,
         null=True
     )
+    validado_coord = models.BooleanField(
+        default=False,
+        verbose_name='Validado por coordinación'
+    )
+    validado_director = models.BooleanField(
+        default=False,
+        verbose_name='Validado por director'
+    )
     creado = models.DateTimeField(
         auto_now_add=True,
         verbose_name='Creado'

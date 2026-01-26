@@ -387,6 +387,9 @@ class OficioEnviarView(LoginRequiredMixin, View):
                 update_fields.append('fecha_envio')
             oficio.save(update_fields=update_fields)
 
+            if nuevo_estado == 'enviado':
+                messages.success(request, 'Se envió correctamente.')
+
             # Enviar email al asignar a institucion (si hay email y PDF del oficio)
             if nuevo_estado == 'asignado':
                 if not institucion.email:
@@ -424,13 +427,67 @@ class OficioEnviarView(LoginRequiredMixin, View):
         return redirect('oficios:detail', pk=oficio.pk)
 
 
+class OficioValidarCoordView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        oficio = get_object_or_404(Oficio, pk=kwargs.get('pk'))
+        if not _is_coordinador(request.user):
+            messages.error(request, 'No tiene permisos para validar este oficio.')
+            return redirect('oficios:detail', pk=oficio.pk)
+        if oficio.estado != 'respondido':
+            messages.error(request, 'Solo se puede validar un oficio en estado Respondido.')
+            return redirect('oficios:detail', pk=oficio.pk)
+        oficio.validado_coord = not oficio.validado_coord
+        oficio.save(update_fields=['validado_coord'])
+        try:
+            detalle = 'VALIDACION COORDINACION: OK' if oficio.validado_coord else 'VALIDACION COORDINACION: REVOCADA'
+            MovimientoOficio.objects.create(
+                oficio=oficio,
+                usuario=request.user,
+                estado_anterior=oficio.estado,
+                estado_nuevo=oficio.estado,
+                institucion=oficio.institucion,
+                detalle=detalle,
+            )
+        except Exception:
+            pass
+        messages.success(request, 'Validación de coordinación actualizada.')
+        return redirect('oficios:detail', pk=oficio.pk)
+
+
+class OficioValidarDirectorView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        oficio = get_object_or_404(Oficio, pk=kwargs.get('pk'))
+        if not _is_director(request.user):
+            messages.error(request, 'No tiene permisos para validar este oficio.')
+            return redirect('oficios:detail', pk=oficio.pk)
+        if oficio.estado != 'respondido':
+            messages.error(request, 'Solo se puede validar un oficio en estado Respondido.')
+            return redirect('oficios:detail', pk=oficio.pk)
+        oficio.validado_director = not oficio.validado_director
+        oficio.save(update_fields=['validado_director'])
+        try:
+            detalle = 'VALIDACION DIRECCION: OK' if oficio.validado_director else 'VALIDACION DIRECCION: REVOCADA'
+            MovimientoOficio.objects.create(
+                oficio=oficio,
+                usuario=request.user,
+                estado_anterior=oficio.estado,
+                estado_nuevo=oficio.estado,
+                institucion=oficio.institucion,
+                detalle=detalle,
+            )
+        except Exception:
+            pass
+        messages.success(request, 'Validación de dirección actualizada.')
+        return redirect('oficios:detail', pk=oficio.pk)
+
+
 class OficioDeleteView(LoginRequiredMixin, DeleteView):
     model = Oficio
     template_name = 'oficios/oficio_confirm_delete.html'
     success_url = reverse_lazy('oficios:list')
 
     def dispatch(self, request, *args, **kwargs):
-        if not _is_informatica(request.user):
+        if not _is_admin_like(request.user):
             messages.error(request, 'No tiene permisos para eliminar oficios.')
             return redirect('oficios:detail', pk=kwargs.get('pk'))
         return super().dispatch(request, *args, **kwargs)
@@ -520,11 +577,37 @@ class RespuestaCreateView(LoginRequiredMixin, CreateView):
             messages.success(self.request, 'Se marco el oficio como Respondido.')
         return HttpResponseRedirect(reverse('oficios:detail', kwargs={'pk': self.oficio.pk}))
 
-def _is_informatica(user):
+def _is_admin_like(user):
     try:
         sector = getattr(getattr(user, 'perfil', None), 'id_sector', None)
         nombre = getattr(sector, 'nombre', '') or ''
-        return nombre.lower() == 'informatica'
+        nombre = nombre.strip().lower()
+        folded = ''.join(c for c in unicodedata.normalize('NFD', nombre) if unicodedata.category(c) != 'Mn')
+        if folded in ('informatica', 'coordinador'):
+            return True
+        return ('director' in folded) and ('ninez' in folded)
+    except Exception:
+        return False
+
+
+def _is_coordinador(user):
+    try:
+        sector = getattr(getattr(user, 'perfil', None), 'id_sector', None)
+        nombre = getattr(sector, 'nombre', '') or ''
+        nombre = nombre.strip().lower()
+        folded = ''.join(c for c in unicodedata.normalize('NFD', nombre) if unicodedata.category(c) != 'Mn')
+        return folded == 'coordinador'
+    except Exception:
+        return False
+
+
+def _is_director(user):
+    try:
+        sector = getattr(getattr(user, 'perfil', None), 'id_sector', None)
+        nombre = getattr(sector, 'nombre', '') or ''
+        nombre = nombre.strip().lower()
+        folded = ''.join(c for c in unicodedata.normalize('NFD', nombre) if unicodedata.category(c) != 'Mn')
+        return ('director' in folded) and ('ninez' in folded)
     except Exception:
         return False
 

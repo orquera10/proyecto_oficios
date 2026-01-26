@@ -129,7 +129,7 @@
                                 <a href="{% url 'casos:detail' caso.pk %}" class="btn btn-sm btn-info" title="Ver">
                                     <i class="bi bi-eye-fill"></i>
                                 </a>
-                                {% if user.perfil.id_sector and user.perfil.id_sector.nombre|lower == 'informatica' %}
+                                {% if user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'informatica' or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'coordinador' or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'director-ninez' %}
                                 <a href="{% url 'casos:update' caso.pk %}" class="btn btn-sm btn-warning" title="Editar">
                                     <i class="bi bi-pencil-square"></i>
                                 </a>

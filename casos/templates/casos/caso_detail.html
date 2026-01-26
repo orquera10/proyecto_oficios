@@ -5,7 +5,7 @@
 {% block page_title %}Detalle del Caso #{{ object.id }}{% endblock %}
 
 {% block page_actions %}
-    {% if user.perfil.id_sector and user.perfil.id_sector.nombre|lower == 'informatica' %}
+    {% if user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'informatica' or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'coordinador' or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'director-ninez' %}
     <a href="{% url 'casos:update' object.pk %}" class="btn btn-warning me-2">
         <i class="bi bi-pencil-square"></i> Editar
     </a>
@@ -131,7 +131,7 @@
     <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
         <h5 class="card-title mb-0">Oficios Relacionados</h5>
         {% if user.perfil.id_sector %}
-            {% if 'despacho' in user.perfil.id_sector.nombre|lower or user.perfil.id_sector.nombre|lower == 'informatica' %}
+            {% if user.perfil.id_sector and 'despacho' in user.perfil.id_sector.nombre|lower or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'informatica' or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'coordinador' or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'director-ninez' %}
             <a href="{% url 'oficios:create' %}?caso={{ object.pk }}" class="btn btn-sm btn-outline-light d-flex align-items-center">
                 <i class="fas fa-plus-circle me-1"></i>
                 <span class="fw-semibold">Nuevo Oficio</span>
@@ -168,7 +168,7 @@
                                 <a href="{% url 'oficios:detail' oficio.pk %}" class="btn btn-info" title="Ver detalles">
                                     <i class="bi bi-eye-fill"></i>
                                 </a>
-                                {% if user.perfil.id_sector and user.perfil.id_sector.nombre|lower == 'informatica' %}
+                                {% if user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'informatica' or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'coordinador' or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'director-ninez' %}
                                 <a href="{% url 'oficios:update' oficio.pk %}" class="btn btn-warning" title="Editar">
                                     <i class="bi bi-pencil-square"></i>
                                 </a>
@@ -262,7 +262,7 @@
         <i class="bi bi-arrow-left"></i> Volver al listado
     </a>
     <div>
-        {% if user.perfil.id_sector and user.perfil.id_sector.nombre|lower == 'informatica' %}
+        {% if user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'informatica' or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'coordinador' or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'director-ninez' %}
         <a href="{% url 'casos:update' object.pk %}" class="btn btn-warning me-2">
             <i class="bi bi-pencil-square"></i> Editar
         </a>

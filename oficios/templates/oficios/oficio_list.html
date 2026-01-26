@@ -127,6 +127,12 @@
                             <div>
                                 <div class="d-flex align-items-center mb-1 flex-wrap">
                                     <span class="badge bg-{{ oficio.get_estado_badge_class }} me-2">{{ oficio.get_estado_display }}</span>
+                                    {% if oficio.validado_coord %}
+                                        <i class="bi bi-check-circle-fill text-success me-1" title="Validado coordinación"></i>
+                                    {% endif %}
+                                    {% if oficio.validado_director %}
+                                        <i class="bi bi-check-circle-fill text-success me-1" title="Validado director"></i>
+                                    {% endif %}
                                     {% if oficio.fecha_vencimiento and oficio.fecha_vencimiento < now and oficio.estado != 'enviado' %}
                                         <span class="badge bg-danger me-2">Vencido</span>
                                     {% endif %}
@@ -151,7 +157,7 @@
                                     <a href="{% url 'oficios:detail' oficio.pk %}" class="btn btn-info" data-bs-toggle="tooltip" title="Ver">
                                         <i class="bi bi-eye-fill"></i>
                                     </a>
-                                    {% if user.perfil.id_sector and user.perfil.id_sector.nombre|lower == 'informatica' %}
+                                    {% if user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'informatica' or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'coordinador' or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'director-ninez' %}
                                     <a href="{% url 'oficios:update' oficio.pk %}" class="btn btn-warning" data-bs-toggle="tooltip" title="Editar">
                                         <i class="bi bi-pencil-square"></i>
                                     </a>
