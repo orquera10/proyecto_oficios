@@ -45,7 +45,7 @@ class OficioForm(forms.ModelForm):
             'caso': forms.HiddenInput(),
         }
         labels = {
-            'juzgado': 'Agente',
+            'juzgado': 'Agente emisor',
             'archivo_pdf': 'Archivo PDF del Oficio',
             'nro_oficio': 'Numero de Oficio'
         }
@@ -89,7 +89,7 @@ class OficioForm(forms.ModelForm):
 
         # Placeholders y labels vacios para selects opcionales
         if 'juzgado' in self.fields:
-            self.fields['juzgado'].empty_label = 'Seleccione agente (opcional)'
+            self.fields['juzgado'].empty_label = 'Seleccione agente emisor (opcional)'
         if 'caratula' in self.fields:
             self.fields['caratula'].empty_label = 'Seleccione caratula (opcional)'
 
