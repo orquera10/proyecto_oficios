@@ -5,6 +5,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.utils import timezone
 from django.http import JsonResponse, HttpResponseRedirect
+from django.conf import settings
+from django.core.mail import EmailMessage
 from django.db.models import Q, F
 from django.views.decorators.http import require_http_methods
 import unicodedata
@@ -335,10 +337,18 @@ class OficioEnviarView(LoginRequiredMixin, View):
         if nuevo_estado == oficio.estado:
             messages.warning(request, 'El oficio ya se encuentra en el estado seleccionado.')
             return redirect('oficios:detail', pk=oficio.pk)
-        
+
         try:
-            # Obtener la institucion
-            institucion = Institucion.objects.get(pk=institucion_id)
+            # Obtener la institucion (si no viene, usar la del oficio)
+            institucion = None
+            if institucion_id:
+                institucion = Institucion.objects.get(pk=institucion_id)
+            else:
+                institucion = oficio.institucion
+
+            if not institucion and nuevo_estado in ('asignado', 'enviado'):
+                messages.error(request, 'Debe seleccionar una institucion.')
+                return redirect('oficios:detail', pk=oficio.pk)
             
             # Definir detalle por defecto si viene vacÃ­o
             if not detalle:
@@ -376,9 +386,38 @@ class OficioEnviarView(LoginRequiredMixin, View):
                 oficio.fecha_envio = timezone.now()
                 update_fields.append('fecha_envio')
             oficio.save(update_fields=update_fields)
+
+            # Enviar email al asignar a institucion (si hay email y PDF del oficio)
+            if nuevo_estado == 'asignado':
+                if not institucion.email:
+                    messages.warning(request, 'La institucion no tiene email registrado.')
+                elif not oficio.archivo_pdf:
+                    messages.warning(request, 'El oficio no tiene PDF adjunto para enviar.')
+                else:
+                    try:
+                        subject = f'Oficio #{oficio.id} asignado'
+                        cuerpo = (
+                            f'Se asigno el oficio #{oficio.id} a la institucion {institucion.nombre}.\\n'
+                            f'Adjunto PDF del oficio.'
+                        )
+                        from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', None) or getattr(settings, 'EMAIL_HOST_USER', None)
+                        correo = EmailMessage(
+                            subject=subject,
+                            body=cuerpo,
+                            from_email=from_email,
+                            to=[institucion.email],
+                        )
+                        correo.attach_file(oficio.archivo_pdf.path)
+                        correo.send(fail_silently=False)
+                        messages.success(request, 'Se envio el oficio por email a la institucion.')
+                    except Exception:
+                        messages.warning(
+                            request,
+                            'Se asigno el oficio, pero hubo un error al enviar el email.'
+                        )
             
-        except institucion.DoesNotExist:
-            messages.error(request, 'la institucion seleccionada no es vÃƒÂ¡lida.')
+        except Institucion.DoesNotExist:
+            messages.error(request, 'La institucion seleccionada no es valida.')
         except Exception as e:
             messages.error(request, f'Ocurrio Â³ un error al procesar el movimiento: {str(e)}')
         

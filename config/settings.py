@@ -14,15 +14,14 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
-load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 # Ajustamos para que apunte a la carpeta del proyecto
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Imprimir la ruta base para depuración
-print(f"DEBUG - Ruta base del proyecto: {BASE_DIR}")
+# Load environment variables from the project .env (force this location)
+load_dotenv(BASE_DIR / '.env', override=True)
+
 
 
 # Quick-start development settings - unsuitable for production
@@ -53,10 +52,10 @@ DATABASES = {
 # Configuración de correo electrónico
 EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
 EMAIL_HOST = os.getenv('EMAIL_HOST', '')
-EMAIL_PORT = os.getenv('EMAIL_PORT', 587)
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '').replace(' ', '')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'webmaster@localhost')
 
 # Configuración de seguridad

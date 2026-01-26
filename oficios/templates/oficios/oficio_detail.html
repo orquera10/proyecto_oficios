@@ -589,17 +589,17 @@
                                 <label for="institucion_asignar" class="form-label">Institución</label>
                                 <select class="form-select" id="institucion_asignar" name="institucion" required>
                                     {% for institucion in instituciones %}
-                                        <option value="{{ institucion.id }}" {% if oficio.institucion and institucion.id == oficio.institucion.id %}selected{% endif %}>{{ institucion.nombre }}</option>
+                                        <option value="{{ institucion.id }}" data-email="{{ institucion.email|default:'' }}" {% if oficio.institucion and institucion.id == oficio.institucion.id %}selected{% endif %}>{{ institucion.nombre }}</option>
                                     {% endfor %}
                                 </select>
+                            </div>
+                            <div class="mb-3 d-flex align-items-center gap-2">
+                                <label class="form-label mb-0">Email de la institucion:</label>
+                                <div id="institucion_email_asignar" class="form-control-plaintext p-0">-</div>
                             </div>
                             <div class="mb-3">
                                 <label for="detalle_asignar" class="form-label">Detalle</label>
                                 <textarea class="form-control" id="detalle_asignar" name="detalle" rows="3" required>EL OFICIO SE ASIGNO CORRECTAMENTE A UNA OPD</textarea>
-                            </div>
-                            <div class="mb-3">
-                                <label for="archivo_pdf_asignar" class="form-label">Adjuntar PDF (opcional)</label>
-                                <input type="file" class="form-control" id="archivo_pdf_asignar" name="archivo_pdf" accept=".pdf">
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -631,6 +631,24 @@
 
 {% block extra_js %}
 {{ block.super }}
+
+<script>
+(function () {
+    const select = document.getElementById('institucion_asignar');
+    const emailText = document.getElementById('institucion_email_asignar');
+    if (!select || !emailText) return;
+
+    function updateEmail() {
+        const opt = select.options[select.selectedIndex];
+        const email = opt ? opt.getAttribute('data-email') || '' : '';
+        emailText.textContent = email || '-';
+    }
+
+    select.addEventListener('change', updateEmail);
+    updateEmail();
+})();
+</script>
+
 {% endblock %}
 
  
