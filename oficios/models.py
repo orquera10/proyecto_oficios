@@ -179,7 +179,7 @@ class Oficio(models.Model):
     )
     plazo_horas = models.PositiveIntegerField(
         validators=[MinValueValidator(1)],
-        verbose_name='Plazo en horas',
+        verbose_name='Plazo',
         null=True,
         blank=True
     )

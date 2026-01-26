@@ -42,16 +42,34 @@
                                     <div class="col-12 col-md-4">
                                         {{ form.fecha_emision|as_crispy_field }}
                                     </div>
-                                    <div class="col-12 col-md-4">
+                                    <div class="col-12 col-md-2">
                                         {{ form.plazo_horas|as_crispy_field }}
                                     </div>
-                                    <div class="col-12 col-md-4">
+                                    <div class="col-12 col-md-2 pe-md-2">
+                                        <label class="form-label d-block">Unidad de plazo</label>
+                                        <div class="btn-group w-100" role="group" aria-label="Unidad de plazo">
+                                            <input type="radio" class="btn-check" name="plazo_unidad" id="plazo-unidad-horas" value="horas" {% if form.plazo_unidad.value == 'horas' or not form.plazo_unidad.value %}checked{% endif %}>
+                                            <label class="btn btn-outline-primary flex-fill" for="plazo-unidad-horas">Horas</label>
+                                            <input type="radio" class="btn-check" name="plazo_unidad" id="plazo-unidad-dias" value="dias" {% if form.plazo_unidad.value == 'dias' %}checked{% endif %}>
+                                            <label class="btn btn-outline-primary flex-fill" for="plazo-unidad-dias">Días</label>
+                                        </div>
+                                        {% if form.plazo_unidad.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.plazo_unidad.errors|join:", " }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-12 col-md-4 ps-md-1">
+                                        <label class="form-label">Fecha de vencimiento (estimada)</label>
+                                        <input type="datetime-local" class="form-control" id="fecha_vencimiento_preview" readonly>
+                                    </div>
+                                    <div class="col-12 col-md-6">
                                         {{ form.juzgado|as_crispy_field }}
                                     </div>
-                                    <div class="col-12 col-md-4">
+                                    <div class="col-12 col-md-6">
                                         {{ form.caratula|as_crispy_field }}
                                     </div>
-                                    <div class="col-12 col-md-8">
+                                    <div class="col-12 col-md-12">
                                         {{ form.caratula_oficio|as_crispy_field }}
                                     </div>
                                     <div class="col-12">
@@ -107,6 +125,56 @@ $(document).ready(function() {
             try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); }
         }
     });
+
+    function pad2(value) {
+        return String(value).padStart(2, '0');
+    }
+
+    function formatLocalDateTime(date) {
+        if (!date || isNaN(date.getTime())) return '';
+        const yyyy = date.getFullYear();
+        const mm = pad2(date.getMonth() + 1);
+        const dd = pad2(date.getDate());
+        const hh = pad2(date.getHours());
+        const mi = pad2(date.getMinutes());
+        return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+    }
+
+    function updateFechaVencimientoPreview() {
+        const plazoInput = document.getElementById('id_plazo_horas');
+        const fechaEmisionInput = document.getElementById('id_fecha_emision');
+        const preview = document.getElementById('fecha_vencimiento_preview');
+        if (!plazoInput || !fechaEmisionInput || !preview) return;
+
+        const plazoValor = parseFloat(plazoInput.value);
+        if (!plazoValor || plazoValor <= 0) {
+            preview.value = '';
+            return;
+        }
+
+        const fechaValor = fechaEmisionInput.value;
+        if (!fechaValor) {
+            preview.value = '';
+            return;
+        }
+
+        const unidad = document.querySelector('input[name="plazo_unidad"]:checked')?.value || 'horas';
+        const horas = unidad === 'dias' ? plazoValor * 24 : plazoValor;
+        const base = new Date(fechaValor);
+        if (isNaN(base.getTime())) {
+            preview.value = '';
+            return;
+        }
+        base.setHours(base.getHours() + horas);
+        preview.value = formatLocalDateTime(base);
+    }
+
+    document.getElementById('id_plazo_horas')?.addEventListener('input', updateFechaVencimientoPreview);
+    document.getElementById('id_fecha_emision')?.addEventListener('input', updateFechaVencimientoPreview);
+    document.querySelectorAll('input[name="plazo_unidad"]').forEach((el) => {
+        el.addEventListener('change', updateFechaVencimientoPreview);
+    });
+    updateFechaVencimientoPreview();
 });
 </script>
 {% endblock %}

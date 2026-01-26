@@ -6,6 +6,16 @@ from .models import (
 
 
 class OficioForm(forms.ModelForm):
+    PLAZO_UNIDAD_CHOICES = (
+        ('horas', 'Horas'),
+        ('dias', 'Dias'),
+    )
+    plazo_unidad = forms.ChoiceField(
+        choices=PLAZO_UNIDAD_CHOICES,
+        required=False,
+        label='Unidad de plazo',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
     instituciones = forms.ModelMultipleChoiceField(
         queryset=Institucion.objects.all().order_by('nombre'),
         required=False,
@@ -58,6 +68,8 @@ class OficioForm(forms.ModelForm):
         if not self.instance.pk:
             local_now = timezone.localtime(timezone.now())
             self.initial['fecha_emision'] = local_now.strftime('%Y-%m-%dT%H:%M')
+        self.initial.setdefault('plazo_unidad', 'dias')
+        self.initial.setdefault('plazo_horas', 5)
 
         # Configurar campos opcionales
         self.fields['nro_oficio'].required = False
@@ -65,6 +77,7 @@ class OficioForm(forms.ModelForm):
         self.fields['legajo'].required = False
         self.fields['juzgado'].required = False
         self.fields['plazo_horas'].required = False
+        self.fields['plazo_unidad'].required = False
         self.fields['caratula'].required = False
         self.fields['caratula_oficio'].required = False
         self.fields['archivo_pdf'].required = False
@@ -97,5 +110,10 @@ class OficioForm(forms.ModelForm):
             field.widget.attrs['class'] = (existing + ' form-control').strip()
 
     def clean(self):
-        # No exigir instituciones: permitir crear sin institución
-        return super().clean()
+        cleaned = super().clean()
+        # No exigir instituciones: permitir crear sin institucion
+        plazo_horas = cleaned.get('plazo_horas')
+        plazo_unidad = cleaned.get('plazo_unidad') or 'horas'
+        if plazo_horas and plazo_unidad == 'dias':
+            cleaned['plazo_horas'] = plazo_horas * 24
+        return cleaned
