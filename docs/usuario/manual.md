@@ -15,7 +15,9 @@ Este manual describe en detalle las funciones del sistema para registrar oficios
 Los permisos se aplican segun el sector del usuario y su perfil:
 
 - Coordinacion OPD: no puede crear casos ni oficios.
-- Despacho Ninez: no puede responder oficios ni cambiar estados (enviar/actualizar).
+- Despacho Ninez: solo puede enviar oficios cuando estan respondidos y tienen doble validacion (coordinacion + director).
+- Coordinador: valida respuestas de oficios respondidos (primer check).
+- Director Ninez: valida respuestas ya validadas por coordinacion (segundo check).
 - Informatica: unico sector habilitado para eliminar oficios.
 - Profesionales: usuarios marcados como profesionales se gestionan desde el modulo de catalogos.
 
@@ -73,6 +75,8 @@ Funciones:
 - Listar y filtrar ninos y partes.
 - Crear, editar y eliminar registros.
 - Ver detalle con los casos asociados.
+- Validacion de duplicados: no se permite crear ninos o partes con el mismo nombre y apellido.
+- Domicilios en ninos: se registran domicilio principal y domicilio secundario.
 
 Estos registros se utilizan como referencia en Casos y filtros de busqueda.
 
@@ -92,10 +96,11 @@ Funciones principales:
 - Listar y filtrar: por texto, estado, fechas, institucion, juzgado y nino asociado.
 - Ver detalle: muestra datos generales, movimientos, respuestas y vinculaciones.
 - Cambiar estado / Enviar: genera un movimiento con detalle y PDF opcional.
-- Responder oficio: registra respuesta y define si queda "respondido" o "devuelto".
+- Responder oficio: registra respuesta, permite adjuntar PDF de respuesta y define si queda "respondido" o "devuelto".
 - Asignar caso: vincula un oficio a un caso existente.
 - Desvincular caso: remueve la relacion con el caso.
 - Eliminar oficio: solo sector Informatica, elimina el registro y el PDF asociado.
+- Validaciones: el envio puede requerir doble validacion (coordinacion + director) segun el sector.
 
 Estados habituales del oficio:
 
@@ -105,16 +110,17 @@ Paso a paso: crear un oficio
 
 1. Ingrese a Oficios -> Nuevo Oficio.
 2. Complete los datos principales (nro, denuncia, legajo, caratula).
-3. Seleccione institucion o instituciones.
-4. Adjunte el PDF si corresponde.
-5. Guarde. Si se eligieron varias instituciones, se crea un oficio por cada una.
+3. Defina el plazo: puede ingresarlo en dias u horas (por defecto 5 dias) y el sistema calcula el vencimiento.
+4. Seleccione institucion o instituciones.
+5. Adjunte el PDF si corresponde.
+6. Guarde. Si se eligieron varias instituciones, se crea un oficio por cada una.
 
 Paso a paso: asignar un oficio
 
 1. Abra el detalle del oficio.
 2. Seleccione Asignar.
-3. Elija la institucion y confirme. El detalle se completa por defecto.
-4. Guarde. El oficio pasa a estado asignado.
+3. Elija la institucion y confirme. Se muestra el email registrado de la institucion (solo lectura).
+4. Guarde. El oficio pasa a estado asignado y el sistema intenta enviar el PDF por email automaticamente.
 
 Paso a paso: responder un oficio
 
@@ -130,6 +136,10 @@ Paso a paso: enviar un oficio
 2. Seleccione Enviar.
 3. Complete el detalle (se precarga por defecto) y adjunte PDF si corresponde.
 4. Confirme. El oficio pasa a enviado y se registra fecha de envio.
+
+Validacion previa al envio:
+
+- En sectores con validacion, el oficio debe estar respondido y tener los dos checks (coordinacion y director).
 
 Paso a paso: vincular/desvincular caso
 
@@ -147,6 +157,12 @@ Desde el modulo de Oficios se administran catalogos:
 - Profesionales
 
 En cada uno puede listar, crear, editar y eliminar registros.
+
+Novedades en catalogos:
+
+- Instituciones: incluyen email.
+- Validacion de nombres: instituciones, juzgados/agentes y categorias validan duplicados por nombre.
+- Normalizacion: los nombres se guardan en mayusculas.
 
 Recomendaciones:
 
