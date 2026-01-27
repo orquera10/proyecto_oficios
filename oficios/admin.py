@@ -6,6 +6,7 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib import messages
 from django.utils.html import format_html
 from core.models import UsuarioPerfil
+from simple_history.admin import SimpleHistoryAdmin
 
 from .models import (
     Institucion, Caratula,
@@ -80,7 +81,7 @@ class CustomUserAdmin(UserAdmin):
 
 # Resto de tus modelos admin...
 @admin.register(Institucion)
-class InstitucionAdmin(admin.ModelAdmin):
+class InstitucionAdmin(SimpleHistoryAdmin):
     list_display = ('nombre', 'direccion', 'creado', 'actualizado')
     search_fields = ('nombre', 'direccion')
     list_filter = ('creado', 'actualizado')
@@ -102,7 +103,7 @@ class CaratulaAdmin(admin.ModelAdmin):
 
 
 @admin.register(Juzgado)
-class JuzgadoAdmin(admin.ModelAdmin):
+class JuzgadoAdmin(SimpleHistoryAdmin):
     list_display = ('nombre', 'direccion', 'telefono', 'id_categoria', 'creado', 'actualizado')
     search_fields = ('nombre', 'direccion', 'telefono')
     list_filter = ('creado', 'actualizado', 'id_categoria')
@@ -112,7 +113,7 @@ class JuzgadoAdmin(admin.ModelAdmin):
         return super().get_queryset(request).select_related('id_categoria')
 
 @admin.register(Oficio)
-class OficioAdmin(admin.ModelAdmin):
+class OficioAdmin(SimpleHistoryAdmin):
     class RespuestaInline(admin.TabularInline):
         model = Respuesta
         extra = 0
@@ -150,7 +151,57 @@ class RespuestaAdmin(admin.ModelAdmin):
 
 
 @admin.register(CategoriaJuzgado)
-class CategoriaJuzgadoAdmin(admin.ModelAdmin):
+class CategoriaJuzgadoAdmin(SimpleHistoryAdmin):
     list_display = ('id', 'nombre', 'creado', 'actualizado')
     search_fields = ('nombre',)
     ordering = ('nombre',)
+
+
+# Registrar modelos historicos para poder ver eliminados/cambios sin el objeto vivo.
+try:
+    from .models import HistoricalOficio, HistoricalInstitucion, HistoricalJuzgado
+
+    @admin.register(HistoricalOficio)
+    class HistoricalOficioAdmin(admin.ModelAdmin):
+        list_display = ('id', 'history_date', 'history_type', 'history_user', 'estado', 'institucion', 'juzgado')
+        list_filter = ('history_type', 'history_date', 'estado')
+        search_fields = ('id', 'denuncia', 'legajo', 'nro_oficio')
+        ordering = ('-history_date', '-history_id')
+        readonly_fields = [f.name for f in HistoricalOficio._meta.fields]
+
+        def has_add_permission(self, request):
+            return False
+
+        def has_delete_permission(self, request, obj=None):
+            return False
+
+    @admin.register(HistoricalInstitucion)
+    class HistoricalInstitucionAdmin(admin.ModelAdmin):
+        list_display = ('id', 'history_date', 'history_type', 'history_user', 'nombre', 'email')
+        list_filter = ('history_type', 'history_date')
+        search_fields = ('nombre', 'email')
+        ordering = ('-history_date', '-history_id')
+        readonly_fields = [f.name for f in HistoricalInstitucion._meta.fields]
+
+        def has_add_permission(self, request):
+            return False
+
+        def has_delete_permission(self, request, obj=None):
+            return False
+
+    @admin.register(HistoricalJuzgado)
+    class HistoricalJuzgadoAdmin(admin.ModelAdmin):
+        list_display = ('id', 'history_date', 'history_type', 'history_user', 'nombre', 'id_categoria')
+        list_filter = ('history_type', 'history_date', 'id_categoria')
+        search_fields = ('nombre', 'direccion', 'telefono')
+        ordering = ('-history_date', '-history_id')
+        readonly_fields = [f.name for f in HistoricalJuzgado._meta.fields]
+
+        def has_add_permission(self, request):
+            return False
+
+        def has_delete_permission(self, request, obj=None):
+            return False
+except Exception:
+    # Si simple_history no esta disponible en este entorno, evitamos romper el admin.
+    pass

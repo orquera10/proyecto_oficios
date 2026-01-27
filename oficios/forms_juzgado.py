@@ -32,3 +32,15 @@ class JuzgadoForm(forms.ModelForm):
                 continue
             existing = field.widget.attrs.get('class', '')
             field.widget.attrs['class'] = (existing + ' form-control').strip()
+
+    def clean_nombre(self):
+        nombre = (self.cleaned_data.get('nombre') or '').strip()
+        if not nombre:
+            return nombre
+
+        dup_qs = Juzgado.objects.filter(nombre__iexact=nombre)
+        if self.instance and self.instance.pk:
+            dup_qs = dup_qs.exclude(pk=self.instance.pk)
+        if dup_qs.exists():
+            raise forms.ValidationError('Ya existe un juzgado/agente con ese nombre.')
+        return nombre

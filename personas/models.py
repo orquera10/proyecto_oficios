@@ -1,4 +1,5 @@
 from django.db import models
+from simple_history.models import HistoricalRecords
 
 class Nino(models.Model):
     id_ninos = models.AutoField(primary_key=True)
@@ -9,6 +10,8 @@ class Nino(models.Model):
     dni = models.CharField(max_length=20, unique=True, blank=True, null=True)
     fecha_nac = models.DateField(blank=True, null=True)
     edad = models.PositiveIntegerField(blank=True, null=True, help_text='Edad en años, si no se conoce la fecha de nacimiento')
+
+    history = HistoricalRecords()
 
     class Meta:
         verbose_name = 'Niño'
@@ -47,6 +50,8 @@ class Parte(models.Model):
     dni = models.CharField(max_length=20, unique=True, blank=True, null=True)
     direccion = models.CharField(max_length=200, blank=True, null=True)
     telefono = models.CharField('Teléfono', max_length=20, blank=True, null=True)
+
+    history = HistoricalRecords()
 
     class Meta:
         verbose_name = 'Parte'

@@ -1,5 +1,8 @@
 from django.db import models
 from django.conf import settings
+from django.contrib.auth import get_user_model
+from simple_history import register
+from simple_history.models import HistoricalRecords
 
 
 class Sector(models.Model):
@@ -43,6 +46,7 @@ class UsuarioPerfil(models.Model):
         related_name='perfiles',
         verbose_name='Institucion'
     )
+    history = HistoricalRecords()
 
     class Meta:
         verbose_name = 'Perfil de Usuario'
@@ -50,3 +54,10 @@ class UsuarioPerfil(models.Model):
 
     def __str__(self):
         return f"Perfil de {self.usuario.username}"
+
+
+# Registrar historial para el modelo de usuario en un lugar visible para makemigrations.
+try:
+    register(get_user_model(), app='core')
+except Exception:
+    pass

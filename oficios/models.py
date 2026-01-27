@@ -7,6 +7,7 @@ from django.utils import timezone
 from django.core.validators import MinValueValidator, FileExtensionValidator
 from django.contrib.auth import get_user_model
 from django.conf import settings
+from simple_history.models import HistoricalRecords
 from casos.models import Caso
 
 def oficio_upload_path(instance, filename):
@@ -42,6 +43,7 @@ class Institucion(models.Model):
     email = models.EmailField(verbose_name='Email', blank=True, null=True)
     creado = models.DateTimeField(auto_now_add=True)
     actualizado = models.DateTimeField(auto_now=True)
+    history = HistoricalRecords()
 
     class Meta:
         verbose_name = 'Institución'
@@ -96,6 +98,7 @@ class Juzgado(models.Model):
     )
     creado = models.DateTimeField(auto_now_add=True)
     actualizado = models.DateTimeField(auto_now=True)
+    history = HistoricalRecords()
 
     class Meta:
         verbose_name = 'Juzgado'
@@ -104,6 +107,20 @@ class Juzgado(models.Model):
 
     def __str__(self):
         return self.nombre
+
+    def save(self, *args, **kwargs):
+        if self.nombre:
+            self.nombre = self.nombre.upper().strip()
+        if self.direccion:
+            self.direccion = self.direccion.upper().strip()
+        super().save(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        if self.nombre:
+            self.nombre = self.nombre.upper().strip()
+        if self.direccion:
+            self.direccion = self.direccion.upper().strip()
+        super().save(*args, **kwargs)
 
 
 class CategoriaJuzgado(models.Model):
@@ -118,6 +135,11 @@ class CategoriaJuzgado(models.Model):
 
     def __str__(self):
         return self.nombre
+
+    def save(self, *args, **kwargs):
+        if self.nombre:
+            self.nombre = self.nombre.upper().strip()
+        super().save(*args, **kwargs)
 
 class Oficio(models.Model):
     ESTADO_CHOICES = [
@@ -220,6 +242,7 @@ class Oficio(models.Model):
         default=False,
         verbose_name='Validado por director'
     )
+    history = HistoricalRecords()
     creado = models.DateTimeField(
         auto_now_add=True,
         verbose_name='Creado'

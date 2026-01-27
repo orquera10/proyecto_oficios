@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils import timezone
+from simple_history.models import HistoricalRecords
 from personas.models import Nino, Parte
 
 User = get_user_model()
@@ -34,9 +35,10 @@ class CasoNino(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Relación Caso-Niño'
-        verbose_name_plural = 'Relaciones Caso-Niño'
+        verbose_name = 'Relacion Caso-Nino'
+        verbose_name_plural = 'Relaciones Caso-Nino'
         unique_together = ('caso', 'nino')  # Evita duplicados
+
 
     def __str__(self):
         return f"{self.caso} - {self.nino}"
@@ -75,9 +77,9 @@ class CasoParte(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Relación Caso-Parte'
+        verbose_name = 'Relacion Caso-Parte'
         verbose_name_plural = 'Relaciones Caso-Parte'
-        unique_together = ('caso', 'parte', 'tipo_relacion')  # Evita duplicados con el mismo tipo
+        unique_together = ('caso', 'parte')
 
     def __str__(self):
         return f"{self.caso} - {self.parte} ({self.tipo_relacion})"
@@ -137,9 +139,10 @@ class Caso(models.Model):
         verbose_name='Partes relacionadas',
         blank=True
     )
-    
+
     creado = models.DateTimeField('Creado', auto_now_add=True)
     actualizado = models.DateTimeField('Actualizado', auto_now=True)
+    history = HistoricalRecords()
     
     class Meta:
         verbose_name = 'Caso'

@@ -90,6 +90,23 @@ class NinoForm(forms.ModelForm):
         self.fields['domicilio_principal'].required = False
         self.fields['domicilio_secundario'].required = False
 
+    def clean(self):
+        cleaned = super().clean()
+        nombre = (cleaned.get('nombre') or '').strip()
+        apellido = (cleaned.get('apellido') or '').strip()
+        if not nombre or not apellido:
+            return cleaned
+
+        dup_qs = Nino.objects.filter(
+            nombre__iexact=nombre,
+            apellido__iexact=apellido,
+        )
+        if self.instance and self.instance.pk:
+            dup_qs = dup_qs.exclude(pk=self.instance.pk)
+        if dup_qs.exists():
+            raise forms.ValidationError('Ya existe un niño con el mismo nombre y apellido.')
+        return cleaned
+
 class ParteForm(forms.ModelForm):
     class Meta:
         model = Parte
@@ -153,3 +170,20 @@ class ParteForm(forms.ModelForm):
         self.fields['dni'].required = False
         self.fields['telefono'].required = False
         self.fields['direccion'].required = False
+
+    def clean(self):
+        cleaned = super().clean()
+        nombre = (cleaned.get('nombre') or '').strip()
+        apellido = (cleaned.get('apellido') or '').strip()
+        if not nombre or not apellido:
+            return cleaned
+
+        dup_qs = Parte.objects.filter(
+            nombre__iexact=nombre,
+            apellido__iexact=apellido,
+        )
+        if self.instance and self.instance.pk:
+            dup_qs = dup_qs.exclude(pk=self.instance.pk)
+        if dup_qs.exists():
+            raise forms.ValidationError('Ya existe una parte con el mismo nombre y apellido.')
+        return cleaned

@@ -22,3 +22,15 @@ class InstitucionForm(forms.ModelForm):
         for field in self.fields.values():
             existing = field.widget.attrs.get('class', '')
             field.widget.attrs['class'] = (existing + ' form-control').strip()
+
+    def clean_nombre(self):
+        nombre = (self.cleaned_data.get('nombre') or '').strip()
+        if not nombre:
+            return nombre
+
+        dup_qs = Institucion.objects.filter(nombre__iexact=nombre)
+        if self.instance and self.instance.pk:
+            dup_qs = dup_qs.exclude(pk=self.instance.pk)
+        if dup_qs.exists():
+            raise forms.ValidationError('Ya existe una institución con ese nombre.')
+        return nombre.upper()
