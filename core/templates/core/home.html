@@ -19,14 +19,14 @@
             <div class="d-flex flex-wrap gap-2">
                 <a class="btn btn-light btn-sm" href="{% url 'casos:list' %}"><i class="fas fa-folder-open me-1"></i>Casos</a>
                 <a class="btn btn-light btn-sm" href="{% url 'oficios:list' %}"><i class="fas fa-file-alt me-1"></i>Oficios</a>
-                <a class="btn btn-light btn-sm" href="{% url 'oficios:referencias_home' %}"><i class="fas fa-database me-1"></i>Referencias</a>
+                <a class="btn btn-light btn-sm" href="/oficios/referencias/"><i class="fas fa-database me-1"></i>Referencias</a>
             </div>
         </div>
     </div>
 </div>
 
 <div class="row g-4">
-    <div class="col-12 col-md-6 col-lg-4">
+    <div class="col-12 col-md-6 col-lg-3">
         <div class="card h-100 home-card">
             <div class="card-body">
                 <h5 class="card-title"><i class="fas fa-folder-open me-2"></i>Casos</h5>
@@ -35,7 +35,7 @@
             </div>
         </div>
     </div>
-    <div class="col-12 col-md-6 col-lg-4">
+    <div class="col-12 col-md-6 col-lg-3">
         <div class="card h-100 home-card">
             <div class="card-body">
                 <h5 class="card-title"><i class="fas fa-file-alt me-2"></i>Oficios</h5>
@@ -44,7 +44,7 @@
             </div>
         </div>
     </div>
-    <div class="col-12 col-md-6 col-lg-4">
+    <div class="col-12 col-md-6 col-lg-3">
         <div class="card h-100 home-card">
             <div class="card-body">
                 <h5 class="card-title"><i class="fas fa-users me-2"></i>Personas</h5>
@@ -53,17 +53,17 @@
             </div>
         </div>
     </div>
-    <div class="col-12 col-md-6 col-lg-4">
+    <div class="col-12 col-md-6 col-lg-3">
         <div class="card h-100 home-card">
             <div class="card-body">
                 <h5 class="card-title"><i class="fas fa-database me-2"></i>Referencias</h5>
                 <p class="card-text text-muted">Catalogos de instituciones, juzgados y profesionales.</p>
-                <a href="{% url 'oficios:referencias_home' %}" class="btn btn-primary">Ir a Referencias</a>
+                <a href="/oficios/referencias/" class="btn btn-primary">Ir a Referencias</a>
             </div>
         </div>
     </div>
     {% if user.is_authenticated and user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'informatica' or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'coordinador' or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'director-ninez' %}
-    <div class="col-12 col-md-6 col-lg-4">
+    <div class="col-12 col-md-6 col-lg-3">
         <div class="card h-100 home-card">
             <div class="card-body">
                 <h5 class="card-title"><i class="fas fa-chart-bar me-2"></i>Reportes</h5>
@@ -74,4 +74,177 @@
     </div>
     {% endif %}
 </div>
+
+{% if is_coordinacion_opd or is_despacho_ninez or is_director_ninez or is_coordinador %}
+<div class="row g-4 mt-1">
+    {% if is_coordinacion_opd %}
+    <div class="col-12 col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="card-title mb-0"><i class="fas fa-inbox me-2"></i>Últimos oficios cargados</h5>
+                    <a href="{% url 'oficios:list_by_estado' 'cargado' %}" class="btn btn-sm btn-outline-primary">Ver todos</a>
+                </div>
+                {% if ultimos_cargados %}
+                    <div class="list-group list-group-flush">
+                        {% for oficio in ultimos_cargados %}
+                            <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-start" href="{% url 'oficios:detail' oficio.pk %}">
+                                <div class="me-3">
+                                    <div class="fw-semibold">#{{ oficio.pk }} · {{ oficio.caratula_oficio|default:"Sin carátula" }}</div>
+                                    <div class="text-muted small">
+                                        {% if oficio.caso %}Caso: {{ oficio.caso.expte|default:oficio.caso.pk }} · {% endif %}
+                                        Inst.: {{ oficio.institucion.nombre|default:"-" }}
+                                    </div>
+                                </div>
+                                <span class="text-muted small">{{ oficio.creado|date:"d/m/Y H:i" }}</span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-muted">No hay oficios cargados recientemente.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    <div class="col-12 col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    {% if is_despacho_ninez %}
+                    <h5 class="card-title mb-0"><i class="fas fa-check-double me-2"></i>Listos para enviar</h5>
+                    {% elif is_director_ninez %}
+                    <h5 class="card-title mb-0"><i class="fas fa-check me-2"></i>Respondidos para control</h5>
+                    {% elif is_coordinador %}
+                    <h5 class="card-title mb-0"><i class="far fa-square me-2"></i>Respondidos para control</h5>
+                    {% else %}
+                    <h5 class="card-title mb-0"><i class="fas fa-reply me-2"></i>Ultimos oficios respondidos</h5>
+                    {% endif %}
+                    <a href="{% url 'oficios:list_by_estado' 'respondido' %}" class="btn btn-sm btn-outline-primary">Ver todos</a>
+                </div>
+                {% if is_director_ninez %}
+                    {% with lista=ultimos_respondidos_un_check %}
+                        {% if lista %}
+                            <div class="list-group list-group-flush">
+                                {% for oficio in lista %}
+                                    <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-start" href="{% url 'oficios:detail' oficio.pk %}">
+                                        <div class="me-3">
+                                            <div class="fw-semibold">#{{ oficio.pk }} - {{ oficio.caratula_oficio|default:"Sin caratula" }}</div>
+                                            <div class="text-muted small">
+                                                {% if oficio.caso %}Caso: {{ oficio.caso.expte|default:oficio.caso.pk }} - {% endif %}
+                                                Inst.: {{ oficio.institucion.nombre|default:"-" }}
+                                            </div>
+                                        </div>
+                                        <span class="text-muted small">{{ oficio.creado|date:"d/m/Y H:i" }}</span>
+                                    </a>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-muted">No hay oficios con un check recientemente.</div>
+                        {% endif %}
+                    {% endwith %}
+                {% elif is_coordinador %}
+                    {% with lista=ultimos_respondidos_sin_check %}
+                        {% if lista %}
+                            <div class="list-group list-group-flush">
+                                {% for oficio in lista %}
+                                    <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-start" href="{% url 'oficios:detail' oficio.pk %}">
+                                        <div class="me-3">
+                                            <div class="fw-semibold">#{{ oficio.pk }} - {{ oficio.caratula_oficio|default:"Sin caratula" }}</div>
+                                            <div class="text-muted small">
+                                                {% if oficio.caso %}Caso: {{ oficio.caso.expte|default:oficio.caso.pk }} - {% endif %}
+                                                Inst.: {{ oficio.institucion.nombre|default:"-" }}
+                                            </div>
+                                        </div>
+                                        <span class="text-muted small">{{ oficio.creado|date:"d/m/Y H:i" }}</span>
+                                    </a>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-muted">No hay oficios sin check recientemente.</div>
+                        {% endif %}
+                    {% endwith %}
+                {% elif ultimos_asignados %}
+                    <div class="list-group list-group-flush">
+                        {% for oficio in ultimos_asignados %}
+                            <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-start" href="{% url 'oficios:detail' oficio.pk %}">
+                                <div class="me-3">
+                                    <div class="fw-semibold">#{{ oficio.pk }} · {{ oficio.caratula_oficio|default:"Sin carátula" }}</div>
+                                    <div class="text-muted small">
+                                        {% if oficio.caso %}Caso: {{ oficio.caso.expte|default:oficio.caso.pk }} · {% endif %}
+                                        Inst.: {{ oficio.institucion.nombre|default:"-" }}
+                                    </div>
+                                </div>
+                                <span class="text-muted small">{{ oficio.creado|date:"d/m/Y H:i" }}</span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-muted">No hay oficios respondidos recientemente.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% if is_despacho_ninez or is_director_ninez %}
+    <div class="col-12 col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="card-title mb-0"><i class="fas fa-paper-plane me-2"></i>Últimos enviados</h5>
+                    <a href="{% url 'oficios:list_by_estado' 'enviado' %}" class="btn btn-sm btn-outline-primary">Ver todos</a>
+                </div>
+                {% if ultimos_enviados %}
+                    <div class="list-group list-group-flush">
+                        {% for oficio in ultimos_enviados %}
+                            <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-start" href="{% url 'oficios:detail' oficio.pk %}">
+                                <div class="me-3">
+                                    <div class="fw-semibold">#{{ oficio.pk }} · {{ oficio.caratula_oficio|default:"Sin carátula" }}</div>
+                                    <div class="text-muted small">
+                                        {% if oficio.caso %}Caso: {{ oficio.caso.expte|default:oficio.caso.pk }} · {% endif %}
+                                        Inst.: {{ oficio.institucion.nombre|default:"-" }}
+                                    </div>
+                                </div>
+                                <span class="text-muted small">{{ oficio.creado|date:"d/m/Y H:i" }}</span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-muted">No hay oficios enviados recientemente.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% if is_coordinador %}
+    <div class="col-12 col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="card-title mb-0"><i class="fas fa-check me-2"></i>Respondidos para control del director</h5>
+                    <a href="{% url 'oficios:list_by_estado' 'respondido' %}" class="btn btn-sm btn-outline-primary">Ver todos</a>
+                </div>
+                {% if ultimos_respondidos_para_director %}
+                    <div class="list-group list-group-flush">
+                        {% for oficio in ultimos_respondidos_para_director %}
+                            <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-start" href="{% url 'oficios:detail' oficio.pk %}">
+                                <div class="me-3">
+                                    <div class="fw-semibold">#{{ oficio.pk }} - {{ oficio.caratula_oficio|default:"Sin caratula" }}</div>
+                                    <div class="text-muted small">
+                                        {% if oficio.caso %}Caso: {{ oficio.caso.expte|default:oficio.caso.pk }} - {% endif %}
+                                        Inst.: {{ oficio.institucion.nombre|default:"-" }}
+                                    </div>
+                                </div>
+                                <span class="text-muted small">{{ oficio.creado|date:"d/m/Y H:i" }}</span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-muted">No hay oficios con un check recientemente.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
 {% endblock %}

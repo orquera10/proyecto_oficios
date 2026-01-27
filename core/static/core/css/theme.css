@@ -554,6 +554,7 @@ html[data-theme="dark"] .modal-content {
     height: 280px;
     background: radial-gradient(circle, rgba(255, 255, 255, 0.25), transparent 60%);
     opacity: 0.6;
+    pointer-events: none;
 }
 
 .welcome-hero img {

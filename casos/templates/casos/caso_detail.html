@@ -18,8 +18,8 @@
 <div class="row">
     <div class="col-md-6">
         <div class="card mb-4">
-            <div class="card-header bg-primary text-white">
-                <h5 class="card-title mb-0">Información del Caso</h5>
+            <div class="card-header bg-primary">
+                <h5 class="card-title mb-0"><i class="fas fa-folder-open me-2"></i>Información del Caso</h5>
             </div>
             <div class="card-body">
                 <dl class="row">
@@ -51,8 +51,8 @@
     
     <div class="col-md-6">
         <div class="card mb-4">
-            <div class="card-header bg-info text-white">
-                <h5 class="card-title mb-0">Niños Relacionados</h5>
+            <div class="card-header bg-info">
+                <h5 class="card-title mb-0"><i class="fas fa-child me-2"></i>Niños Relacionados</h5>
             </div>
             <div class="card-body">
                 {% if object.caso_ninos.all %}
@@ -80,8 +80,9 @@
                     </table>
                 </div>
                 {% else %}
-                <div class="alert alert-warning mb-0">
-                    <i class="bi bi-exclamation-triangle"></i> No hay niños relacionados con este caso.
+                <div class="text-muted small">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Aún no hay niños relacionados con este caso.
                 </div>
                 {% endif %}
                 
@@ -89,8 +90,8 @@
         </div>
         
         <div class="card">
-            <div class="card-header bg-info text-white">
-                <h5 class="card-title mb-0">Partes Relacionadas</h5>
+            <div class="card-header bg-info">
+                <h5 class="card-title mb-0"><i class="fas fa-users me-2"></i>Partes Relacionadas</h5>
             </div>
             <div class="card-body">
                 {% if object.caso_partes.all %}
@@ -117,8 +118,9 @@
                     </table>
                 </div>
                 {% else %}
-                <div class="alert alert-warning mb-0">
-                    <i class="bi bi-exclamation-triangle"></i> No hay partes relacionadas con este caso.
+                <div class="text-muted small">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Aún no hay partes relacionadas con este caso.
                 </div>
                 {% endif %}
                 
@@ -128,11 +130,11 @@
 </div>
 
 <div class="card mt-4">
-    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-        <h5 class="card-title mb-0">Oficios Relacionados</h5>
+    <div class="card-header bg-success d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0"><i class="fas fa-file-alt me-2"></i>Oficios Relacionados</h5>
         {% if user.perfil.id_sector %}
             {% if user.perfil.id_sector and 'despacho' in user.perfil.id_sector.nombre|lower or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'informatica' or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'coordinador' or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'director-ninez' %}
-            <a href="{% url 'oficios:create' %}?caso={{ object.pk }}" class="btn btn-sm btn-outline-light d-flex align-items-center">
+            <a href="{% url 'oficios:create' %}?caso={{ object.pk }}" class="btn btn-sm btn-outline-secondary d-flex align-items-center">
                 <i class="fas fa-plus-circle me-1"></i>
                 <span class="fw-semibold">Nuevo Oficio</span>
             </a>
@@ -181,8 +183,9 @@
             </table>
         </div>
         {% else %}
-        <div class="alert alert-info mb-0">
-            <i class="bi bi-info-circle"></i> No hay oficios relacionados con este caso.
+        <div class="text-muted small">
+            <i class="bi bi-info-circle me-1"></i>
+            Aún no hay oficios relacionados con este caso.
         </div>
         {% endif %}
     </div>
@@ -192,14 +195,15 @@
     {% if movimientos %}
     <!-- Sección de Movimientos de Oficios -->
     <div class="card mt-4">
-        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+        <div class="card-header bg-dark d-flex justify-content-between align-items-center">
             <h5 class="card-title mb-0">
                 <i class="fas fa-history me-2"></i>Historial de Movimientos
             </h5>
         </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
+        <div class="card-body p-3">
+            <div class="border rounded-3 overflow-hidden">
+            <div class="table-responsive" style="max-height: 420px; overflow-y: auto;">
+                <table class="table table-hover mb-0 align-middle">
                     <thead class="table-light">
                         <tr>
                             <th>Fecha y Hora</th>
@@ -251,6 +255,7 @@
                         {% endfor %}
                     </tbody>
                 </table>
+            </div>
             </div>
         </div>
     </div>

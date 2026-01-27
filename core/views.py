@@ -1,3 +1,4 @@
+import unicodedata
 from pathlib import Path
 
 from django.conf import settings
@@ -8,6 +9,7 @@ from django.utils.safestring import mark_safe
 from django.utils.text import slugify
 
 from .models import UsuarioPerfil
+from oficios.models import Oficio
 
 
 @login_required
@@ -26,7 +28,100 @@ def perfil(request):
 
 @login_required
 def home(request):
-    return render(request, 'core/home.html')
+    def _sector_nombre(user):
+        try:
+            sector = getattr(getattr(user, 'perfil', None), 'id_sector', None)
+            raw_nombre = getattr(sector, 'nombre', '') or ''
+            norm = unicodedata.normalize('NFKD', raw_nombre)
+            return ''.join(c for c in norm if not unicodedata.combining(c)).lower()
+        except Exception:
+            return ''
+
+    sector_nombre = _sector_nombre(request.user)
+    is_coordinacion_opd = 'coordinacion opd' in sector_nombre
+    # Sea flexible con acentos/variantes: basta con que contenga despacho + ninez
+    is_despacho_ninez = 'despacho' in sector_nombre and 'ninez' in sector_nombre
+    is_director_ninez = 'director' in sector_nombre and 'ninez' in sector_nombre
+    is_coordinador = 'coordinador' in sector_nombre
+    ultimos_cargados = []
+    ultimos_asignados = []
+    ultimos_enviados = []
+    ultimos_respondidos_un_check = []
+    ultimos_respondidos_sin_check = []
+    ultimos_respondidos_para_director = []
+    if is_coordinacion_opd:
+        ultimos_cargados = list(
+            Oficio.objects.filter(estado='cargado')
+            .select_related('institucion', 'juzgado', 'caso')
+            .order_by('-creado')[:8]
+        )
+        ultimos_asignados = list(
+            Oficio.objects.filter(estado='respondido')
+            .select_related('institucion', 'juzgado', 'caso')
+            .order_by('-creado')[:8]
+        )
+    elif is_despacho_ninez:
+        ultimos_asignados = list(
+            Oficio.objects.filter(
+                estado='respondido',
+                validado_coord=True,
+                validado_director=True,
+            )
+            .select_related('institucion', 'juzgado', 'caso')
+            .order_by('-creado')[:8]
+        )
+        ultimos_enviados = list(
+            Oficio.objects.filter(estado='enviado')
+            .select_related('institucion', 'juzgado', 'caso')
+            .order_by('-creado')[:8]
+        )
+    elif is_director_ninez:
+        ultimos_respondidos_un_check = list(
+            Oficio.objects.filter(
+                estado='respondido',
+                validado_coord=True,
+                validado_director=False,
+            )
+            .select_related('institucion', 'juzgado', 'caso')
+            .order_by('-creado')[:8]
+        )
+        ultimos_enviados = list(
+            Oficio.objects.filter(estado='enviado')
+            .select_related('institucion', 'juzgado', 'caso')
+            .order_by('-creado')[:8]
+        )
+    elif is_coordinador:
+        ultimos_respondidos_sin_check = list(
+            Oficio.objects.filter(
+                estado='respondido',
+                validado_coord=False,
+                validado_director=False,
+            )
+            .select_related('institucion', 'juzgado', 'caso')
+            .order_by('-creado')[:8]
+        )
+        ultimos_respondidos_para_director = list(
+            Oficio.objects.filter(
+                estado='respondido',
+                validado_coord=True,
+                validado_director=False,
+            )
+            .select_related('institucion', 'juzgado', 'caso')
+            .order_by('-creado')[:8]
+        )
+
+    return render(request, 'core/home.html', {
+        'is_coordinacion_opd': is_coordinacion_opd,
+        'is_despacho_ninez': is_despacho_ninez,
+        'is_director_ninez': is_director_ninez,
+        'is_coordinador': is_coordinador,
+        'ultimos_cargados': ultimos_cargados,
+        'ultimos_asignados': ultimos_asignados,
+        'ultimos_enviados': ultimos_enviados,
+        'ultimos_respondidos_un_check': ultimos_respondidos_un_check,
+        'ultimos_respondidos_sin_check': ultimos_respondidos_sin_check,
+        'ultimos_respondidos_para_director': ultimos_respondidos_para_director,
+    })
 
 
 def _render_manual_md(text):
