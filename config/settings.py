@@ -13,6 +13,11 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+try:
+    import whitenoise  # noqa: F401
+    USE_WHITENOISE = True
+except ImportError:
+    USE_WHITENOISE = False
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -32,6 +37,11 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-!u9pt&-6nhk-r!art411ag*fv-
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
+
+# Optional URL prefix (e.g. /oficios)
+URL_PREFIX = os.getenv('APP_URL_PREFIX', '').rstrip('/')
+if URL_PREFIX:
+    FORCE_SCRIPT_NAME = URL_PREFIX
 
 
 # Configuración de hosts permitidos
@@ -99,7 +109,10 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+]
+if USE_WHITENOISE:
+    MIDDLEWARE.append('whitenoise.middleware.WhiteNoiseMiddleware')
+MIDDLEWARE += [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -174,12 +187,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = f"{URL_PREFIX}/static/" if URL_PREFIX else '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 # Carpeta de salida de archivos estáticos para producción (collectstatic)
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # Almacenamiento de estáticos optimizado (WhiteNoise)
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+if USE_WHITENOISE:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # WhiteNoise para servir estáticos en producción
 # Agregar el middleware después de SecurityMiddleware
@@ -190,7 +204,7 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Media files configuration
-MEDIA_URL = '/media/'
+MEDIA_URL = f"{URL_PREFIX}/media/" if URL_PREFIX else '/media/'
 MEDIA_ROOT = os.environ.get('MEDIA_ROOT', os.path.join(BASE_DIR, 'media'))
 
 # Configuración de sesión (24 horas)

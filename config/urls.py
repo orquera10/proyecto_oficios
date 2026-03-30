@@ -1,6 +1,7 @@
 """
 URL configuration for core project.
 """
+import os
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
@@ -8,7 +9,7 @@ from core.forms import ProfesionalBlockAuthenticationForm
 from django.conf import settings
 from django.conf.urls.static import static
 
-urlpatterns = [
+base_urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('core.urls')),
     path('oficios/', include(('oficios.urls', 'oficios'), namespace='oficios')),
@@ -21,6 +22,15 @@ urlpatterns = [
     ), name='login'),
     path('accounts/', include('django.contrib.auth.urls')),
 ]
+
+URL_PREFIX = os.getenv('APP_URL_PREFIX', '').strip('/')
+if URL_PREFIX:
+    urlpatterns = [
+        path(f"{URL_PREFIX}/", include((base_urlpatterns, 'config'))),
+        *base_urlpatterns,
+    ]
+else:
+    urlpatterns = base_urlpatterns
 
 # Configuraciones de autenticacion
 LOGIN_REDIRECT_URL = 'oficios:list'
