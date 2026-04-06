@@ -99,6 +99,15 @@ html[data-theme="dark"] .navbar.bg-primary {
     background-color: var(--surface-1);
 }
 
+.login-card {
+    overflow: hidden;
+}
+
+.login-card .card-header {
+    border-top-left-radius: 18px;
+    border-top-right-radius: 18px;
+}
+
 .oficio-form-card {
     background: linear-gradient(180deg, #f2f7fc 0%, #e7eef7 100%);
 }
