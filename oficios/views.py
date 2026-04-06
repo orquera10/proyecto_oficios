@@ -587,7 +587,13 @@ class RespuestaCreateView(LoginRequiredMixin, CreateView):
             detalle_mov = obj.respuesta.strip()[:200] if obj.respuesta else 'Se respondio el oficio'
             detalle_mov = (detalle_mov or '').upper()
             devolver = form.cleaned_data.get('devolver')
-            nuevo_estado = 'devuelto' if devolver else 'respondido'
+            derivar = form.cleaned_data.get('derivar')
+            if derivar:
+                nuevo_estado = 'derivado'
+            elif devolver:
+                nuevo_estado = 'devuelto'
+            else:
+                nuevo_estado = 'respondido'
 
             MovimientoOficio.objects.create(
                 oficio=self.oficio,
@@ -600,9 +606,12 @@ class RespuestaCreateView(LoginRequiredMixin, CreateView):
                 detalle=detalle_mov,
             )
 
-            # Actualizar estado: devuelto si se devuelve, si no, respondido
+            # Actualizar estado segun opcion: derivado, devuelto o respondido
             update_fields = []
-            if devolver:
+            if derivar:
+                self.oficio.estado = 'derivado'
+                update_fields.append('estado')
+            elif devolver:
                 self.oficio.estado = 'devuelto'
                 update_fields.append('estado')
             else:
@@ -617,7 +626,9 @@ class RespuestaCreateView(LoginRequiredMixin, CreateView):
             # No bloquear el flujo por un error en el movimiento
             pass
 
-        if form.cleaned_data.get('devolver'):
+        if form.cleaned_data.get('derivar'):
+            messages.success(self.request, 'La respuesta se registra y el oficio pasara a Derivado.')
+        elif form.cleaned_data.get('devolver'):
             messages.success(self.request, 'La respuesta se registra y el oficio pasara a Devuelto.')
         else:
             messages.success(self.request, 'Se marco el oficio como Respondido.')

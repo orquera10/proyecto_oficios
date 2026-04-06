@@ -145,6 +145,7 @@ class Oficio(models.Model):
     ESTADO_CHOICES = [
         ('cargado', 'Cargado'),
         ('asignado', 'Asignado'),
+        ('derivado', 'Derivado'),
         ('respondido', 'Respondido'),
         ('enviado', 'Enviado'),
         ('devuelto', 'Devuelto'),
@@ -350,6 +351,7 @@ class Oficio(models.Model):
         estado_map = {
             'cargado': 'secondary',      # gris claro
             'asignado': 'warning',       # naranja
+            'derivado': 'info',          # celeste
             'respondido': 'primary',     # azul
             'enviado': 'success',        # verde
             'devuelto': 'violet',        # violeta (custom)
@@ -396,6 +398,7 @@ class MovimientoOficio(models.Model):
     ESTADO_CHOICES = [
         ('cargado', 'Cargado'),
         ('asignado', 'Asignado'),
+        ('derivado', 'Derivado'),
         ('respondido', 'Respondido'),
         ('enviado', 'Enviado'),
         ('devuelto', 'Devuelto'),

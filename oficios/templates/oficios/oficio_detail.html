@@ -50,8 +50,14 @@
             </button>
             {% endif %}
             {% else %}
-            {% if oficio.estado == 'cargado' or oficio.estado == 'devuelto' %}
+            {% if oficio.estado == 'cargado' %}
                 {% if not user.perfil.id_sector or not 'despacho' in user.perfil.id_sector.nombre|lower %}
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#asignarModal">
+                    <i class="fas fa-user-check me-1"></i> Asignar
+                </button>
+                {% endif %}
+            {% elif oficio.estado == 'devuelto' or oficio.estado == 'derivado' %}
+                {% if user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'coordinacion-opd' %}
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#asignarModal">
                     <i class="fas fa-user-check me-1"></i> Asignar
                 </button>
@@ -472,7 +478,7 @@
                             <td>
                                 {% if movimiento.estado_anterior %}
                                 <span class="estado-badge">
-                                    <span class="badge bg-{% if movimiento.estado_anterior == 'cargado' %}secondary{% elif movimiento.estado_anterior == 'asignado' %}warning{% elif movimiento.estado_anterior == 'respondido' %}primary{% elif movimiento.estado_anterior == 'enviado' %}success{% elif movimiento.estado_anterior == 'devuelto' %}violet{% elif movimiento.estado_anterior == 'incompetencia' %}danger{% else %}light{% endif %}">
+                                    <span class="badge bg-{% if movimiento.estado_anterior == 'cargado' %}secondary{% elif movimiento.estado_anterior == 'asignado' %}warning{% elif movimiento.estado_anterior == 'derivado' %}info{% elif movimiento.estado_anterior == 'respondido' %}primary{% elif movimiento.estado_anterior == 'enviado' %}success{% elif movimiento.estado_anterior == 'devuelto' %}violet{% elif movimiento.estado_anterior == 'incompetencia' %}danger{% else %}light{% endif %}">
                                         {{ movimiento.get_estado_anterior_display }}
                                     </span>
                                     {% if movimiento.estado_anterior == 'respondido' and movimiento.detalle %}
@@ -496,7 +502,7 @@
                             </td>
                             <td>
                                 <span class="estado-badge">
-                                    <span class="badge bg-{% if movimiento.estado_nuevo == 'cargado' %}secondary{% elif movimiento.estado_nuevo == 'asignado' %}warning{% elif movimiento.estado_nuevo == 'respondido' %}primary{% elif movimiento.estado_nuevo == 'enviado' %}success{% elif movimiento.estado_nuevo == 'devuelto' %}violet{% elif movimiento.estado_nuevo == 'incompetencia' %}danger{% else %}light{% endif %}">
+                                    <span class="badge bg-{% if movimiento.estado_nuevo == 'cargado' %}secondary{% elif movimiento.estado_nuevo == 'asignado' %}warning{% elif movimiento.estado_nuevo == 'derivado' %}info{% elif movimiento.estado_nuevo == 'respondido' %}primary{% elif movimiento.estado_nuevo == 'enviado' %}success{% elif movimiento.estado_nuevo == 'devuelto' %}violet{% elif movimiento.estado_nuevo == 'incompetencia' %}danger{% else %}light{% endif %}">
                                         {{ movimiento.get_estado_nuevo_display }}
                                     </span>
                                     {% if movimiento.estado_nuevo == 'respondido' %}

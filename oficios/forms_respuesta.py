@@ -18,6 +18,12 @@ class RespuestaForm(forms.ModelForm):
         label='Devolver',
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
     )
+    derivar = forms.BooleanField(
+        required=False,
+        initial=False,
+        label='Derivación',
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
     id_profesional = UserFullNameChoiceField(
         queryset=get_user_model().objects.none(),
         required=False,
@@ -76,3 +82,11 @@ class RespuestaForm(forms.ModelForm):
                 field.widget.attrs['class'] = (existing + ' form-select').strip()
             else:
                 field.widget.attrs['class'] = (existing + ' form-control').strip()
+
+    def clean(self):
+        cleaned = super().clean()
+        devolver = cleaned.get('devolver')
+        derivar = cleaned.get('derivar')
+        if devolver and derivar:
+            raise forms.ValidationError('Selecciona solo una opción: Devolver o Derivación.')
+        return cleaned

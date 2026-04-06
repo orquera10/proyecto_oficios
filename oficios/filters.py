@@ -9,6 +9,7 @@ class OficioFilter(django_filters.FilterSet):
         ('', 'Todos'),
         ('cargado', 'Cargado'),
         ('asignado', 'Asignado'),
+        ('derivado', 'Derivado'),
         ('respondido', 'Respondido'),
         ('enviado', 'Enviado'),
         ('devuelto', 'Devuelto'),

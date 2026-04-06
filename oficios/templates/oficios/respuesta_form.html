@@ -18,10 +18,19 @@
     <div class="card-body">
       <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger" role="alert">
+          {{ form.non_field_errors }}
+        </div>
+        {% endif %}
 
         <div class="form-check form-switch mb-3">
           {{ form.devolver }}
           <label class="form-check-label" for="id_devolver">{{ form.fields.devolver.label }}</label>
+        </div>
+        <div class="form-check form-switch mb-3">
+          {{ form.derivar }}
+          <label class="form-check-label" for="id_derivar">{{ form.fields.derivar.label }}</label>
         </div>
 
         <div class="mb-3">

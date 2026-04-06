@@ -280,6 +280,26 @@ html[data-theme="dark"] .home-card .card-body {
     color: #ffffff !important;
 }
 
+.bg-violet {
+    background-color: #6a5acd !important;
+}
+
+.card.bg-violet.bg-opacity-25 {
+    color: #1f1b2e;
+}
+
+.card.bg-violet.bg-opacity-25 .text-muted {
+    color: #3b3150 !important;
+}
+
+html[data-theme="dark"] .card.bg-violet.bg-opacity-25 {
+    color: #e9e6ff;
+}
+
+html[data-theme="dark"] .card.bg-violet.bg-opacity-25 .text-muted {
+    color: #cfc7ff !important;
+}
+
 .btn-warning {
     background: linear-gradient(120deg, #f6c74a, #e6a61f);
     border-color: transparent;
