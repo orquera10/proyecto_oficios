@@ -4,6 +4,7 @@ from django.views.generic import ListView, CreateView, DetailView, UpdateView, D
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.shortcuts import redirect
+from django.db.models import Q
 
 from core.models import UsuarioPerfil
 from .forms_profesional import ProfesionalForm
@@ -19,11 +20,20 @@ class ProfesionalListView(LoginRequiredMixin, ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        return (
+        qs = (
             User.objects.filter(perfil__es_profesional=True)
-            .select_related('perfil')
+            .select_related('perfil', 'perfil__id_institucion')
             .order_by('first_name', 'last_name', 'username')
         )
+        q = (self.request.GET.get('q') or '').strip()
+        if q:
+            qs = qs.filter(
+                Q(username__icontains=q) |
+                Q(first_name__icontains=q) |
+                Q(last_name__icontains=q) |
+                Q(perfil__id_institucion__nombre__icontains=q)
+            )
+        return qs
 
 
 class ProfesionalCreateView(LoginRequiredMixin, CreateView):
@@ -81,4 +91,3 @@ class ProfesionalDeleteView(LoginRequiredMixin, DeleteView):
             return redirect('oficios:profesional_detail', pk=self.object.pk)
         messages.success(request, 'El profesional fue eliminado correctamente.')
         return super().post(request, *args, **kwargs)
-

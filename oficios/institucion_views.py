@@ -3,6 +3,7 @@ from django.urls import reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models.deletion import ProtectedError
+from django.db.models import Q
 from django.shortcuts import redirect
 
 from .models import Institucion
@@ -16,6 +17,17 @@ class InstitucionListView(CoordinacionOPDContextMixin, LoginRequiredMixin, ListV
     context_object_name = 'instituciones'
     paginate_by = 10
     ordering = ['nombre']
+
+    def get_queryset(self):
+        qs = super().get_queryset().order_by('nombre')
+        q = (self.request.GET.get('q') or '').strip()
+        if q:
+            qs = qs.filter(
+                Q(nombre__icontains=q) |
+                Q(email__icontains=q) |
+                Q(direccion__icontains=q)
+            )
+        return qs
 
 
 class InstitucionCreateView(CoordinacionOPDWriteBlockMixin, LoginRequiredMixin, CreateView):

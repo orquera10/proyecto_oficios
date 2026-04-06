@@ -180,6 +180,8 @@ class OficioCreateView(LoginRequiredMixin, CreateView):
                     usuario=self.request.user,
                     estado_anterior=None,
                     estado_nuevo='cargado',
+                    validado_coord=obj.validado_coord,
+                    validado_director=obj.validado_director,
                     detalle='OFICIO CREADO',
                     institucion=obj.institucion
                 )
@@ -212,6 +214,8 @@ class OficioCreateView(LoginRequiredMixin, CreateView):
                         usuario=self.request.user,
                         estado_anterior=None,
                         estado_nuevo='cargado',
+                        validado_coord=obj.validado_coord,
+                        validado_director=obj.validado_director,
                         detalle='OFICIO CREADO',
                         institucion=obj.institucion
                     )
@@ -327,6 +331,7 @@ class OficioEnviarView(LoginRequiredMixin, View):
         institucion_id = request.POST.get('institucion')
         detalle = request.POST.get('detalle', '').strip()
         archivo_pdf = request.FILES.get('archivo_pdf')
+        incompetencia = request.POST.get('incompetencia')
         
         # Validar que el nuevo estado sea vÃƒÂ¡lido
         if nuevo_estado not in dict(oficio.ESTADO_CHOICES):
@@ -339,14 +344,24 @@ class OficioEnviarView(LoginRequiredMixin, View):
             return redirect('oficios:detail', pk=oficio.pk)
 
         try:
-            # Obtener la institucion (si no viene, usar la del oficio)
-            institucion = None
-            if institucion_id:
-                institucion = Institucion.objects.get(pk=institucion_id)
+            # Resolver institucion por incompetencia (si aplica)
+            es_incompetencia = incompetencia is not None and str(incompetencia).lower() in ('1', 'true', 'on', 'yes', 'si')
+            if es_incompetencia:
+                nuevo_estado = 'incompetencia'
+                detalle = 'EL OFICIO SE MARCO COMO INCOMPETENCIA'
+                try:
+                    institucion = Institucion.objects.get(nombre__iexact='O.P.D.N.N.A. SEDE')
+                except Institucion.DoesNotExist:
+                    messages.error(request, 'No se encontro la institucion O.P.D.N.N.A. SEDE.')
+                    return redirect('oficios:detail', pk=oficio.pk)
             else:
-                institucion = oficio.institucion
+                # Obtener la institucion (si no viene, usar la del oficio)
+                if institucion_id:
+                    institucion = Institucion.objects.get(pk=institucion_id)
+                else:
+                    institucion = oficio.institucion
 
-            if not institucion and nuevo_estado in ('asignado', 'enviado'):
+            if not institucion and nuevo_estado in ('asignado', 'enviado', 'incompetencia'):
                 messages.error(request, 'Debe seleccionar una institucion.')
                 return redirect('oficios:detail', pk=oficio.pk)
             
@@ -354,6 +369,8 @@ class OficioEnviarView(LoginRequiredMixin, View):
             if not detalle:
                 if nuevo_estado == 'asignado':
                     detalle_final = 'Se asignó a institucion'
+                elif nuevo_estado == 'incompetencia':
+                    detalle_final = 'El oficio se marco como incompetencia'
                 elif nuevo_estado == 'enviado':
                     detalle_final = 'Oficio enviado a agente'
                 else:
@@ -372,6 +389,8 @@ class OficioEnviarView(LoginRequiredMixin, View):
                 usuario=request.user,
                 estado_anterior=oficio.estado,
                 estado_nuevo=nuevo_estado,
+                validado_coord=oficio.validado_coord,
+                validado_director=oficio.validado_director,
                 institucion=institucion,
                 detalle=detalle_final,
                 archivo_pdf=archivo_pdf if archivo_pdf else None,
@@ -382,6 +401,9 @@ class OficioEnviarView(LoginRequiredMixin, View):
             oficio.estado = nuevo_estado
             oficio.institucion = institucion
             update_fields = ['estado', 'institucion']
+            if incompetencia is not None:
+                oficio.incompetencia = str(incompetencia).lower() in ('1', 'true', 'on', 'yes', 'si')
+                update_fields.append('incompetencia')
             if nuevo_estado == 'enviado' and not getattr(oficio, 'fecha_envio', None):
                 oficio.fecha_envio = timezone.now()
                 update_fields.append('fecha_envio')
@@ -439,13 +461,24 @@ class OficioValidarCoordView(LoginRequiredMixin, View):
         oficio.validado_coord = not oficio.validado_coord
         oficio.save(update_fields=['validado_coord'])
         try:
-            detalle = 'VALIDACION COORDINACION: OK' if oficio.validado_coord else 'VALIDACION COORDINACION: REVOCADA'
+            detalle_input = (request.POST.get('detalle') or '').strip()
+            if oficio.validado_coord:
+                default_detalle = 'VALIDACION COORDINACION: OK'
+                prefix = '✓'
+            else:
+                default_detalle = 'VALIDACION COORDINACION: REVOCADA'
+                prefix = ''
+            detalle_body = detalle_input if detalle_input else default_detalle
+            detalle = (f'{prefix} {detalle_body}'.strip() if prefix else detalle_body)
+            detalle = (detalle or '').upper()
             MovimientoOficio.objects.create(
                 oficio=oficio,
                 usuario=request.user,
                 estado_anterior=oficio.estado,
                 estado_nuevo=oficio.estado,
                 institucion=oficio.institucion,
+                validado_coord=oficio.validado_coord,
+                validado_director=oficio.validado_director,
                 detalle=detalle,
             )
         except Exception:
@@ -466,13 +499,24 @@ class OficioValidarDirectorView(LoginRequiredMixin, View):
         oficio.validado_director = not oficio.validado_director
         oficio.save(update_fields=['validado_director'])
         try:
-            detalle = 'VALIDACION DIRECCION: OK' if oficio.validado_director else 'VALIDACION DIRECCION: REVOCADA'
+            detalle_input = (request.POST.get('detalle') or '').strip()
+            if oficio.validado_director:
+                default_detalle = 'VALIDACION DIRECCION: OK'
+                prefix = '✓✓'
+            else:
+                default_detalle = 'VALIDACION DIRECCION: REVOCADA'
+                prefix = ''
+            detalle_body = detalle_input if detalle_input else default_detalle
+            detalle = (f'{prefix} {detalle_body}'.strip() if prefix else detalle_body)
+            detalle = (detalle or '').upper()
             MovimientoOficio.objects.create(
                 oficio=oficio,
                 usuario=request.user,
                 estado_anterior=oficio.estado,
                 estado_nuevo=oficio.estado,
                 institucion=oficio.institucion,
+                validado_coord=oficio.validado_coord,
+                validado_director=oficio.validado_director,
                 detalle=detalle,
             )
         except Exception:
@@ -550,6 +594,8 @@ class RespuestaCreateView(LoginRequiredMixin, CreateView):
                 usuario=self.request.user,
                 estado_anterior=self.oficio.estado,
                 estado_nuevo=nuevo_estado,
+                validado_coord=self.oficio.validado_coord,
+                validado_director=self.oficio.validado_director,
                 institucion=institucion_mov,
                 detalle=detalle_mov,
             )

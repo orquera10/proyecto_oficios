@@ -332,6 +332,120 @@ html[data-theme="dark"] .table {
     border-radius: 14px;
 }
 
+.estado-badge {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.estado-badge .estado-tildes {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    justify-content: center;
+}
+
+/* SweetAlert2 */
+.swal2-popup.oficios-swal {
+    background: var(--surface-1);
+    color: var(--text-900);
+    border: 1px solid var(--border-200);
+    border-radius: 18px;
+    box-shadow: var(--shadow-soft);
+    padding: 1.5rem 1.75rem 1.75rem;
+}
+
+.swal2-title.oficios-swal__title {
+    font-family: "Space Grotesk", "Segoe UI", sans-serif;
+    color: var(--text-900);
+}
+
+.swal2-html-container.oficios-swal__text {
+    color: var(--text-700);
+}
+
+.swal2-icon.swal2-warning.oficios-swal__icon,
+.swal2-icon.swal2-info.oficios-swal__icon {
+    border-color: var(--accent-500);
+    color: var(--accent-500);
+}
+
+.swal2-icon.swal2-success.oficios-swal__icon {
+    border-color: #1f9d8a;
+    color: #1f9d8a;
+}
+
+.swal2-icon.swal2-error.oficios-swal__icon {
+    border-color: #d64545;
+    color: #d64545;
+}
+
+.swal2-actions .swal2-confirm.oficios-swal__confirm {
+    background: linear-gradient(120deg, var(--brand-700), var(--brand-500));
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    box-shadow: 0 10px 18px rgba(31, 85, 120, 0.25);
+}
+
+.swal2-actions .swal2-confirm.oficios-swal__confirm:hover,
+.swal2-actions .swal2-confirm.oficios-swal__confirm:focus {
+    background: linear-gradient(120deg, var(--brand-800), var(--brand-700));
+}
+
+.swal2-actions .swal2-cancel.oficios-swal__cancel {
+    background-color: #f7f9fc;
+    border: 1px solid var(--border-200);
+    color: var(--text-700);
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+.swal2-actions .swal2-cancel.oficios-swal__cancel:hover,
+.swal2-actions .swal2-cancel.oficios-swal__cancel:focus {
+    background-color: #edf2f7;
+    color: var(--text-900);
+}
+
+.oficios-swal .swal2-textarea::placeholder,
+.oficios-swal .swal2-input::placeholder {
+    color: #556579;
+    opacity: 1;
+}
+
+.swal2-actions.oficios-swal__actions {
+    display: flex;
+    gap: 0.6rem;
+}
+
+html[data-theme="dark"] .swal2-popup.oficios-swal {
+    background: #121d2b;
+    border-color: var(--border-200);
+    color: var(--text-900);
+    box-shadow: 0 20px 55px rgba(0, 0, 0, 0.45);
+}
+
+html[data-theme="dark"] .swal2-html-container.oficios-swal__text {
+    color: var(--text-700);
+}
+
+html[data-theme="dark"] .swal2-actions .swal2-cancel.oficios-swal__cancel {
+    background-color: #101a28;
+    border-color: var(--border-200);
+    color: var(--text-700);
+}
+
+html[data-theme="dark"] .swal2-actions .swal2-cancel.oficios-swal__cancel:hover,
+html[data-theme="dark"] .swal2-actions .swal2-cancel.oficios-swal__cancel:focus {
+    background-color: #1a2738;
+    color: var(--text-900);
+}
+
+html[data-theme="dark"] .swal2-actions .swal2-confirm.oficios-swal__confirm {
+    color: #ffffff;
+}
+
 html[data-theme="dark"] .alert {
     background-color: #131f2f;
     border: 1px solid #22344a;

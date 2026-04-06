@@ -11,6 +11,8 @@ class OficioFilter(django_filters.FilterSet):
         ('asignado', 'Asignado'),
         ('respondido', 'Respondido'),
         ('enviado', 'Enviado'),
+        ('devuelto', 'Devuelto'),
+        ('incompetencia', 'Incompetencia'),
     ]
     
     # Filtro de búsqueda general

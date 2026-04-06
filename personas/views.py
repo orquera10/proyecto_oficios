@@ -102,11 +102,28 @@ class NinoDeleteView(CoordinacionOPDWriteBlockMixin, DeleteView):
     model = Nino
     template_name = 'personas/nino_confirm_delete.html'
     success_url = reverse_lazy('personas:nino_list')
-    success_message = _("El niño ha sido eliminado exitosamente.")
-    
-    def delete(self, request, *args, **kwargs):
+    success_message = _("El ni??o ha sido eliminado exitosamente.")
+
+    def _tiene_caso(self, obj):
+        try:
+            from casos.models import CasoNino
+            return CasoNino.objects.filter(nino=obj).exists()
+        except Exception:
+            return obj.casos.exists()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        self.object = self.get_object()
+        context['tiene_caso'] = self._tiene_caso(self.object)
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if self._tiene_caso(self.object):
+            messages.error(self.request, 'No se puede eliminar el nino porque esta asociado a un caso.')
+            return redirect('personas:nino_detail', pk=self.object.pk)
         messages.success(self.request, self.success_message)
-        return super().delete(request, *args, **kwargs)
+        return super().post(request, *args, **kwargs)
 
 # Vistas para el modelo Parte
 class ParteListView(ListView):
@@ -171,7 +188,24 @@ class ParteDeleteView(CoordinacionOPDWriteBlockMixin, DeleteView):
     template_name = 'personas/parte_confirm_delete.html'
     success_url = reverse_lazy('personas:parte_list')
     success_message = _("La parte ha sido eliminada exitosamente.")
-    
-    def delete(self, request, *args, **kwargs):
+
+    def _tiene_caso(self, obj):
+        try:
+            from casos.models import CasoParte
+            return CasoParte.objects.filter(parte=obj).exists()
+        except Exception:
+            return obj.casos.exists()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        self.object = self.get_object()
+        context['tiene_caso'] = self._tiene_caso(self.object)
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if self._tiene_caso(self.object):
+            messages.error(self.request, 'No se puede eliminar la parte porque esta asociada a un caso.')
+            return redirect('personas:parte_detail', pk=self.object.pk)
         messages.success(self.request, self.success_message)
-        return super().delete(request, *args, **kwargs)
+        return super().post(request, *args, **kwargs)

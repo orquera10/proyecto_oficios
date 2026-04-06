@@ -11,6 +11,15 @@
     {% endif %}
   </div>
 
+  <form class="row mb-3" method="get">
+    <div class="col-lg-6">
+      <div class="input-group">
+        <span class="input-group-text"><i class="fas fa-search"></i></span>
+        <input name="q" type="text" class="form-control" placeholder="Buscar por nombre, telefono, direccion o categoria" value="{{ request.GET.q|default:'' }}">
+      </div>
+    </div>
+  </form>
+
   <style>
     .table-actions { white-space: nowrap; width: 1%; }
     .table-actions .btn { padding: .25rem .5rem; }
@@ -61,13 +70,13 @@
   <nav class="mt-3">
     <ul class="pagination">
       {% if page_obj.has_previous %}
-      <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a></li>
+      <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}">Anterior</a></li>
       {% else %}
       <li class="page-item disabled"><span class="page-link">Anterior</span></li>
       {% endif %}
       <li class="page-item disabled"><span class="page-link">Página {{ page_obj.number }} de {{ paginator.num_pages }}</span></li>
       {% if page_obj.has_next %}
-      <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Siguiente</a></li>
+      <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}">Siguiente</a></li>
       {% else %}
       <li class="page-item disabled"><span class="page-link">Siguiente</span></li>
       {% endif %}
@@ -76,3 +85,4 @@
   {% endif %}
 </div>
 {% endblock %}
+

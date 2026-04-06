@@ -148,6 +148,7 @@ class Oficio(models.Model):
         ('respondido', 'Respondido'),
         ('enviado', 'Enviado'),
         ('devuelto', 'Devuelto'),
+        ('incompetencia', 'Incompetencia'),
     ]
     nro_oficio = models.CharField(
         max_length=50,
@@ -241,6 +242,10 @@ class Oficio(models.Model):
     validado_director = models.BooleanField(
         default=False,
         verbose_name='Validado por director'
+    )
+    incompetencia = models.BooleanField(
+        default=False,
+        verbose_name='Incompetencia'
     )
     history = HistoricalRecords()
     creado = models.DateTimeField(
@@ -348,6 +353,7 @@ class Oficio(models.Model):
             'respondido': 'primary',     # azul
             'enviado': 'success',        # verde
             'devuelto': 'violet',        # violeta (custom)
+            'incompetencia': 'danger',   # rojo
         }
         return estado_map.get(self.estado, 'light')
 
@@ -393,6 +399,7 @@ class MovimientoOficio(models.Model):
         ('respondido', 'Respondido'),
         ('enviado', 'Enviado'),
         ('devuelto', 'Devuelto'),
+        ('incompetencia', 'Incompetencia'),
     ]
     
     oficio = models.ForeignKey(
@@ -423,6 +430,16 @@ class MovimientoOficio(models.Model):
         max_length=20,
         choices=ESTADO_CHOICES,
         verbose_name='Nuevo Estado'
+    )
+
+    validado_coord = models.BooleanField(
+        default=False,
+        verbose_name='Validado por coordinación'
+    )
+
+    validado_director = models.BooleanField(
+        default=False,
+        verbose_name='Validado por director'
     )
     
     detalle = models.TextField(

@@ -27,7 +27,7 @@
             </a>
             {% elif user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'coordinador' %}
             {% if oficio.estado == 'respondido' %}
-            <form method="post" action="{% url 'oficios:validar_coord' oficio.pk %}" class="d-inline">
+            <form method="post" action="{% url 'oficios:validar_coord' oficio.pk %}" class="d-inline js-validar-oficio" data-validar-tipo="coordinación" data-accion="{% if oficio.validado_coord %}quitar{% else %}validar{% endif %}">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-primary">
                     {% if oficio.validado_coord %}Quitar validación coordinación{% else %}Validar coordinación{% endif %}
@@ -36,7 +36,7 @@
             {% endif %}
             {% elif user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'director-ninez' or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'director-de-ninez' %}
             {% if oficio.estado == 'respondido' and oficio.validado_coord %}
-            <form method="post" action="{% url 'oficios:validar_director' oficio.pk %}" class="d-inline">
+            <form method="post" action="{% url 'oficios:validar_director' oficio.pk %}" class="d-inline js-validar-oficio" data-validar-tipo="dirección" data-accion="{% if oficio.validado_director %}quitar{% else %}validar{% endif %}">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-primary">
                     {% if oficio.validado_director %}Quitar validación director{% else %}Validar director{% endif %}
@@ -57,10 +57,15 @@
                 </button>
                 {% endif %}
             {% endif %}
-            {% if user.perfil.id_sector and not 'despacho' in user.perfil.id_sector.nombre|lower and oficio.estado == 'asignado' %}
+            {% if user.perfil.id_sector and not 'despacho' in user.perfil.id_sector.nombre|lower and oficio.estado == 'asignado' or user.perfil.id_sector and not 'despacho' in user.perfil.id_sector.nombre|lower and oficio.estado == 'incompetencia' %}
             <a href="{% url 'oficios:responder' oficio.pk %}" class="btn btn-success" id="btnResponder">
                 <i class="fas fa-reply me-1"></i> Responder
             </a>
+            {% endif %}
+            {% if user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'coordinacion-opd' and oficio.incompetencia and oficio.estado == 'respondido' and oficio.validado_coord and oficio.validado_director %}
+            <button type="button" id="btnEnviarOficio" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#enviarModal">
+                <i class="fas fa-paper-plane me-1"></i> Enviar
+            </button>
             {% endif %}
             {% if user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'despacho-de-ninez' or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'despacho-ninez' and oficio.estado == 'respondido' and oficio.validado_coord and oficio.validado_director %}
             <button type="button" id="btnEnviarOficio" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#enviarModal">
@@ -466,16 +471,44 @@
                             </td>
                             <td>
                                 {% if movimiento.estado_anterior %}
-                                <span class="badge bg-{% if movimiento.estado_anterior == 'cargado' %}secondary{% elif movimiento.estado_anterior == 'asignado' %}warning{% elif movimiento.estado_anterior == 'respondido' %}primary{% elif movimiento.estado_anterior == 'enviado' %}success{% elif movimiento.estado_anterior == 'devuelto' %}violet{% else %}light{% endif %}">
-                                    {{ movimiento.get_estado_anterior_display }}
+                                <span class="estado-badge">
+                                    <span class="badge bg-{% if movimiento.estado_anterior == 'cargado' %}secondary{% elif movimiento.estado_anterior == 'asignado' %}warning{% elif movimiento.estado_anterior == 'respondido' %}primary{% elif movimiento.estado_anterior == 'enviado' %}success{% elif movimiento.estado_anterior == 'devuelto' %}violet{% elif movimiento.estado_anterior == 'incompetencia' %}danger{% else %}light{% endif %}">
+                                        {{ movimiento.get_estado_anterior_display }}
+                                    </span>
+                                    {% if movimiento.estado_anterior == 'respondido' and movimiento.detalle %}
+                                        <span class="estado-tildes">
+                                            {% if 'VALIDACION COORDINACION: REVOCADA' in movimiento.detalle %}
+                                                <i class="bi bi-check-circle-fill text-success" title="Validado coordinación"></i>
+                                            {% endif %}
+                                            {% if 'VALIDACION DIRECCION: REVOCADA' in movimiento.detalle %}
+                                                <i class="bi bi-check-circle-fill text-success" title="Validado coordinación"></i>
+                                                <i class="bi bi-check-circle-fill text-success" title="Validado director"></i>
+                                            {% endif %}
+                                            {% if 'VALIDACION DIRECCION: OK' in movimiento.detalle %}
+                                                <i class="bi bi-check-circle-fill text-success" title="Validado coordinación"></i>
+                                            {% endif %}
+                                        </span>
+                                    {% endif %}
                                 </span>
                                 {% else %}
                                 <span class="badge bg-light text-dark">-</span>
                                 {% endif %}
                             </td>
                             <td>
-                                <span class="badge bg-{% if movimiento.estado_nuevo == 'cargado' %}secondary{% elif movimiento.estado_nuevo == 'asignado' %}warning{% elif movimiento.estado_nuevo == 'respondido' %}primary{% elif movimiento.estado_nuevo == 'enviado' %}success{% elif movimiento.estado_nuevo == 'devuelto' %}violet{% else %}light{% endif %}">
-                                    {{ movimiento.get_estado_nuevo_display }}
+                                <span class="estado-badge">
+                                    <span class="badge bg-{% if movimiento.estado_nuevo == 'cargado' %}secondary{% elif movimiento.estado_nuevo == 'asignado' %}warning{% elif movimiento.estado_nuevo == 'respondido' %}primary{% elif movimiento.estado_nuevo == 'enviado' %}success{% elif movimiento.estado_nuevo == 'devuelto' %}violet{% elif movimiento.estado_nuevo == 'incompetencia' %}danger{% else %}light{% endif %}">
+                                        {{ movimiento.get_estado_nuevo_display }}
+                                    </span>
+                                    {% if movimiento.estado_nuevo == 'respondido' %}
+                                        <span class="estado-tildes">
+                                            {% if movimiento.validado_coord %}
+                                                <i class="bi bi-check-circle-fill text-success" title="Validado coordinación"></i>
+                                            {% endif %}
+                                            {% if movimiento.validado_director %}
+                                                <i class="bi bi-check-circle-fill text-success" title="Validado director"></i>
+                                            {% endif %}
+                                        </span>
+                                    {% endif %}
                                 </span>
                             </td>
                             <td>{{ movimiento.institucion.nombre|default:"-" }}</td>
@@ -612,13 +645,13 @@
                     </div>
                     <form method="post" action="{% url 'oficios:enviar' oficio.pk %}" enctype="multipart/form-data" id="asignarForm">
                         {% csrf_token %}
-                        <input type="hidden" name="nuevo_estado" value="asignado">
+                        <input type="hidden" name="nuevo_estado" value="asignado" id="nuevo_estado_asignar">
                         <div class="modal-body">
                             <div class="mb-3">
                                 <label for="institucion_asignar" class="form-label">Institución</label>
                                 <select class="form-select" id="institucion_asignar" name="institucion" required>
                                     {% for institucion in instituciones %}
-                                        <option value="{{ institucion.id }}" data-email="{{ institucion.email|default:'' }}" {% if oficio.institucion and institucion.id == oficio.institucion.id %}selected{% endif %}>{{ institucion.nombre }}</option>
+                                        <option value="{{ institucion.id }}" data-email="{{ institucion.email|default:'' }}" data-name="{{ institucion.nombre }}" {% if oficio.institucion and institucion.id == oficio.institucion.id %}selected{% endif %}>{{ institucion.nombre }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -628,7 +661,14 @@
                             </div>
                             <div class="mb-3">
                                 <label for="detalle_asignar" class="form-label">Detalle</label>
-                                <textarea class="form-control" id="detalle_asignar" name="detalle" rows="3" required>EL OFICIO SE ASIGNO CORRECTAMENTE A UNA OPD</textarea>
+                                <textarea class="form-control" id="detalle_asignar" name="detalle" rows="3" required data-default="EL OFICIO SE ASIGNO CORRECTAMENTE A UNA OPD">EL OFICIO SE ASIGNO CORRECTAMENTE A UNA OPD</textarea>
+                            </div>
+                            <input type="hidden" name="incompetencia" value="0">
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="checkbox" id="incompetencia_asignar" name="incompetencia" value="1">
+                                <label class="form-check-label" for="incompetencia_asignar">
+                                    Marcar como incompetencia
+                                </label>
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -671,6 +711,8 @@
 {% block extra_js %}
 {{ block.super }}
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
 (function () {
     const select = document.getElementById('institucion_asignar');
@@ -685,6 +727,124 @@
 
     select.addEventListener('change', updateEmail);
     updateEmail();
+})();
+</script>
+
+<script>
+(function () {
+    const checkbox = document.getElementById('incompetencia_asignar');
+    const select = document.getElementById('institucion_asignar');
+    const detalle = document.getElementById('detalle_asignar');
+    const estadoHidden = document.getElementById('nuevo_estado_asignar');
+    if (!checkbox || !select || !detalle || !estadoHidden) return;
+
+    const defaultDetalle = detalle.getAttribute('data-default') || detalle.value;
+    const incompetenciaDetalle = 'EL OFICIO SE MARCO COMO INCOMPETENCIA';
+
+    function findOpdSedeOption() {
+        const options = Array.from(select.options);
+        return options.find(opt => (opt.getAttribute('data-name') || '').toLowerCase() === 'o.p.d.n.n.a. sede');
+    }
+
+    function applyIncompetencia(checked) {
+        if (checked) {
+            const opt = findOpdSedeOption();
+            if (opt) {
+                select.value = opt.value;
+                select.dispatchEvent(new Event('change'));
+            }
+            detalle.value = incompetenciaDetalle;
+            estadoHidden.value = 'incompetencia';
+        } else {
+            detalle.value = defaultDetalle;
+            estadoHidden.value = 'asignado';
+        }
+    }
+
+    checkbox.addEventListener('change', function () {
+        applyIncompetencia(checkbox.checked);
+    });
+
+    applyIncompetencia(checkbox.checked);
+})();
+</script>
+
+<script>
+(function () {
+    const forms = document.querySelectorAll('.js-validar-oficio');
+    if (!forms.length) return;
+
+    function buildMessage(tipo, accion) {
+        if (accion === 'quitar') {
+            return {
+                title: 'Quitar validación informe de oficio',
+                text: 'Se quitará la validación de ' + tipo + '.',
+                confirmText: 'Sí, quitar'
+            };
+        }
+        return {
+            title: 'Validar informe de oficio',
+            text: 'Se validará por ' + tipo + '.',
+            confirmText: 'Sí, validar'
+        };
+    }
+
+    forms.forEach(function (form) {
+        form.addEventListener('submit', function (e) {
+            if (form.dataset.submitting === 'true') return;
+            e.preventDefault();
+
+            const tipo = form.dataset.validarTipo || 'validación';
+            const accion = form.dataset.accion || 'validar';
+            const msg = buildMessage(tipo, accion);
+
+            if (window.Swal && typeof window.Swal.fire === 'function') {
+                window.Swal.fire({
+                    title: msg.title,
+                    text: msg.text,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: msg.confirmText,
+                    cancelButtonText: 'Cancelar',
+                    buttonsStyling: false,
+                    input: 'textarea',
+                    
+                    inputPlaceholder: 'Detalle del movimiento',
+                    inputAttributes: { 'aria-label': 'Detalle del movimiento' },
+                    customClass: {
+                        popup: 'oficios-swal',
+                        title: 'oficios-swal__title',
+                        htmlContainer: 'oficios-swal__text',
+                        actions: 'oficios-swal__actions',
+                        confirmButton: 'oficios-swal__confirm',
+                        cancelButton: 'oficios-swal__cancel',
+                        icon: 'oficios-swal__icon'
+                    }
+                }).then(function (result) {
+                    if (result.isConfirmed) {
+                        const detalle = (result.value || '').toString().trim();
+                        if (detalle) {
+                            let hidden = form.querySelector('input[name="detalle"]');
+                            if (!hidden) {
+                                hidden = document.createElement('input');
+                                hidden.type = 'hidden';
+                                hidden.name = 'detalle';
+                                form.appendChild(hidden);
+                            }
+                            hidden.value = detalle;
+                        }
+                        form.dataset.submitting = 'true';
+                        form.submit();
+                    }
+                });
+            } else {
+                if (window.confirm(msg.text)) {
+                    form.dataset.submitting = 'true';
+                    form.submit();
+                }
+            }
+        });
+    });
 })();
 </script>
 

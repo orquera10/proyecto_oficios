@@ -2,6 +2,7 @@ from django.views.generic import ListView, CreateView, DetailView, UpdateView, D
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Q
 
 from .models import CategoriaJuzgado
 from .forms_categoria import CategoriaJuzgadoForm
@@ -14,6 +15,13 @@ class CategoriaListView(CoordinacionOPDContextMixin, LoginRequiredMixin, ListVie
     context_object_name = 'categorias'
     ordering = ['nombre']
     paginate_by = 10
+
+    def get_queryset(self):
+        qs = super().get_queryset().order_by('nombre')
+        q = (self.request.GET.get('q') or '').strip()
+        if q:
+            qs = qs.filter(Q(nombre__icontains=q))
+        return qs
 
 
 class CategoriaCreateView(CoordinacionOPDWriteBlockMixin, LoginRequiredMixin, CreateView):
