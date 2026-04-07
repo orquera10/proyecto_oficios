@@ -45,6 +45,8 @@ def home(request):
     is_coordinador = 'coordinador' in sector_nombre
     ultimos_cargados = []
     ultimos_asignados = []
+    ultimos_devueltos = []
+    ultimos_incompetencia = []
     ultimos_enviados = []
     ultimos_respondidos_un_check = []
     ultimos_respondidos_sin_check = []
@@ -56,7 +58,17 @@ def home(request):
             .order_by('-creado')[:8]
         )
         ultimos_asignados = list(
-            Oficio.objects.filter(estado='respondido')
+            Oficio.objects.filter(estado='asignado')
+            .select_related('institucion', 'juzgado', 'caso')
+            .order_by('-creado')[:8]
+        )
+        ultimos_devueltos = list(
+            Oficio.objects.filter(estado='devuelto')
+            .select_related('institucion', 'juzgado', 'caso')
+            .order_by('-creado')[:8]
+        )
+        ultimos_incompetencia = list(
+            Oficio.objects.filter(estado='incompetencia')
             .select_related('institucion', 'juzgado', 'caso')
             .order_by('-creado')[:8]
         )
@@ -117,6 +129,8 @@ def home(request):
         'is_coordinador': is_coordinador,
         'ultimos_cargados': ultimos_cargados,
         'ultimos_asignados': ultimos_asignados,
+        'ultimos_devueltos': ultimos_devueltos,
+        'ultimos_incompetencia': ultimos_incompetencia,
         'ultimos_enviados': ultimos_enviados,
         'ultimos_respondidos_un_check': ultimos_respondidos_un_check,
         'ultimos_respondidos_sin_check': ultimos_respondidos_sin_check,
