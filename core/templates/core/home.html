@@ -260,9 +260,9 @@
                         {% for oficio in ultimos_asignados %}
                             <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-start" href="{% url 'oficios:detail' oficio.pk %}">
                                 <div class="me-3">
-                                    <div class="fw-semibold">#{{ oficio.pk }} Â· {{ oficio.caratula_oficio|default:"Sin carÃ¡tula" }}</div>
+                                    <div class="fw-semibold">#{{ oficio.pk }} · {{ oficio.caratula_oficio|default:"Sin carátula" }}</div>
                                     <div class="text-muted small">
-                                        {% if oficio.caso %}Caso: {{ oficio.caso.expte|default:oficio.caso.pk }} Â· {% endif %}
+                                        {% if oficio.caso %}Caso: {{ oficio.caso.expte|default:oficio.caso.pk }} · {% endif %}
                                         Inst.: {{ oficio.institucion.nombre|default:"-" }}
                                     </div>
                                 </div>
@@ -282,7 +282,7 @@
         <div class="card h-100">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h5 class="card-title mb-0"><i class="fas fa-paper-plane me-2"></i>Ãšltimos enviados</h5>
+                    <h5 class="card-title mb-0"><i class="fas fa-paper-plane me-2"></i>Últimos enviados</h5>
                     <a href="{% url 'oficios:list_by_estado' 'enviado' %}" class="btn btn-sm btn-outline-primary">Ver todos</a>
                 </div>
                 {% if ultimos_enviados %}
@@ -290,9 +290,9 @@
                         {% for oficio in ultimos_enviados %}
                             <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-start" href="{% url 'oficios:detail' oficio.pk %}">
                                 <div class="me-3">
-                                    <div class="fw-semibold">#{{ oficio.pk }} Â· {{ oficio.caratula_oficio|default:"Sin carÃ¡tula" }}</div>
+                                    <div class="fw-semibold">#{{ oficio.pk }} · {{ oficio.caratula_oficio|default:"Sin carátula" }}</div>
                                     <div class="text-muted small">
-                                        {% if oficio.caso %}Caso: {{ oficio.caso.expte|default:oficio.caso.pk }} Â· {% endif %}
+                                        {% if oficio.caso %}Caso: {{ oficio.caso.expte|default:oficio.caso.pk }} · {% endif %}
                                         Inst.: {{ oficio.institucion.nombre|default:"-" }}
                                     </div>
                                 </div>
