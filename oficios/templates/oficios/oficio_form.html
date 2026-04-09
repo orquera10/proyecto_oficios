@@ -60,8 +60,7 @@
                                         {% endif %}
                                     </div>
                                     <div class="col-12 col-md-4 ps-md-1">
-                                        <label class="form-label">Fecha de vencimiento (estimada)</label>
-                                        <input type="datetime-local" class="form-control" id="fecha_vencimiento_preview" readonly>
+                                        {{ form.fecha_vencimiento|as_crispy_field }}
                                     </div>
                                     <div class="col-12 col-md-6">
                                         {{ form.juzgado|as_crispy_field }}
@@ -140,35 +139,66 @@ $(document).ready(function() {
         return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
     }
 
+    function sumarDiasHabiles(baseDate, cantidadDias) {
+        const fecha = new Date(baseDate.getTime());
+        let agregados = 0;
+
+        while (agregados < cantidadDias) {
+            fecha.setDate(fecha.getDate() + 1);
+            const diaSemana = fecha.getDay();
+            if (diaSemana !== 0 && diaSemana !== 6) {
+                agregados += 1;
+            }
+        }
+
+        return fecha;
+    }
+
     function updateFechaVencimientoPreview() {
         const plazoInput = document.getElementById('id_plazo_horas');
         const fechaEmisionInput = document.getElementById('id_fecha_emision');
-        const preview = document.getElementById('fecha_vencimiento_preview');
-        if (!plazoInput || !fechaEmisionInput || !preview) return;
+        const vencimientoInput = document.getElementById('id_fecha_vencimiento');
+        if (!plazoInput || !fechaEmisionInput || !vencimientoInput) return;
 
         const plazoValor = parseFloat(plazoInput.value);
         if (!plazoValor || plazoValor <= 0) {
-            preview.value = '';
+            if (!vencimientoInput.dataset.manual) {
+                vencimientoInput.value = '';
+            }
             return;
         }
 
         const fechaValor = fechaEmisionInput.value;
         if (!fechaValor) {
-            preview.value = '';
+            if (!vencimientoInput.dataset.manual) {
+                vencimientoInput.value = '';
+            }
             return;
         }
 
         const unidad = document.querySelector('input[name="plazo_unidad"]:checked')?.value || 'horas';
-        const horas = unidad === 'dias' ? plazoValor * 24 : plazoValor;
         const base = new Date(fechaValor);
         if (isNaN(base.getTime())) {
             preview.value = '';
             return;
         }
-        base.setHours(base.getHours() + horas);
-        preview.value = formatLocalDateTime(base);
+
+        let vencimiento;
+        if (unidad === 'dias') {
+            vencimiento = sumarDiasHabiles(base, Math.trunc(plazoValor));
+        } else {
+            vencimiento = new Date(base.getTime());
+            vencimiento.setHours(vencimiento.getHours() + plazoValor);
+        }
+
+        if (!vencimientoInput.dataset.manual) {
+            vencimientoInput.value = formatLocalDateTime(vencimiento);
+        }
     }
 
+    document.getElementById('id_fecha_vencimiento')?.addEventListener('input', function () {
+        this.dataset.manual = this.value ? 'true' : '';
+    });
     document.getElementById('id_plazo_horas')?.addEventListener('input', updateFechaVencimientoPreview);
     document.getElementById('id_fecha_emision')?.addEventListener('input', updateFechaVencimientoPreview);
     document.querySelectorAll('input[name="plazo_unidad"]').forEach((el) => {

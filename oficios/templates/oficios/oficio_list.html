@@ -133,11 +133,11 @@
                                     {% if oficio.fecha_vencimiento and oficio.fecha_vencimiento < now and oficio.estado != 'enviado' %}
                                         <span class="badge bg-danger me-2">Vencido</span>
                                     {% endif %}
-                                    <strong class="me-2">#{{ oficio.id }}</strong>
-                                    <span class="text-muted">{{ oficio.get_tipo_display }}</span>
+                                    <strong class="me-2">{{ oficio.codigo|default:"-" }}</strong>
+                                    <span class="text-muted">ID #{{ oficio.id }}</span>
                                 </div>
                                 <div class="text-muted small">
-                                    Expte: {{ oficio.expte|default:"-" }} · Institución: {{ oficio.institucion.nombre|default:"-" }} · Agente: {{ oficio.juzgado.nombre|default:"-" }}
+                                    Nro. oficio: {{ oficio.nro_oficio|default:"-" }} · Institución: {{ oficio.institucion.nombre|default:"-" }} · Agente: {{ oficio.juzgado.nombre|default:"-" }}
                                 </div>
                                 <div class="mt-1 small">
                                     Emisión: {{ oficio.fecha_emision|date:"d/m/Y H:i" }} · Vence:

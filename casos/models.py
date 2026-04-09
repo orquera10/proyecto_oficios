@@ -105,6 +105,14 @@ class Caso(models.Model):
         choices=TIPO_CHOICES,
         default='MPA'
     )
+
+    codigo = models.CharField(
+        'Código',
+        max_length=20,
+        unique=True,
+        blank=True,
+        null=True
+    )
     
     expte = models.CharField('Expediente', max_length=50, unique=True, blank=True, null=True)
     
@@ -150,11 +158,38 @@ class Caso(models.Model):
         ordering = ['-creado']
     
     def __str__(self):
-        return f"{self.get_tipo_display()} - {self.expte}"
+        referencia = self.codigo or self.expte or self.pk
+        return f"{self.get_tipo_display()} - {referencia}"
+
+    def _generar_codigo(self):
+        anio = (self.creado.year if self.creado else timezone.now().year)
+        ultimo = (
+            Caso.objects
+            .filter(codigo__startswith='CS-', codigo__endswith=f'-{anio}')
+            .exclude(pk=self.pk)
+            .order_by('-codigo')
+            .first()
+        )
+        siguiente = 1
+
+        if ultimo and ultimo.codigo:
+            try:
+                siguiente = int(ultimo.codigo.split('-')[1]) + 1
+            except (IndexError, ValueError):
+                siguiente = 1
+
+        return f"CS-{siguiente:05d}-{anio}"
 
     def save(self, *args, **kwargs):
         if self.expte:
             self.expte = self.expte.upper()
+        codigo_en_uso = (
+            not self.pk
+            and self.codigo
+            and Caso.objects.filter(codigo=self.codigo).exists()
+        )
+        if not self.codigo or codigo_en_uso:
+            self.codigo = self._generar_codigo()
         super().save(*args, **kwargs)
         
     def get_all_movimientos(self):

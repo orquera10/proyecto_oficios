@@ -1,5 +1,6 @@
 ﻿import os
 import uuid
+from datetime import timedelta
 from django.db import models
 from django.db.models import Q
 from django.core.exceptions import ValidationError
@@ -33,6 +34,21 @@ def movimiento_upload_path(instance, filename):
     return f'movimientos/oficio_{oficio_id}/{filename}'
 
 User = get_user_model()
+
+
+def sumar_dias_habiles(fecha_base, dias_habiles):
+    if dias_habiles <= 0:
+        return fecha_base
+
+    fecha_resultado = fecha_base
+    dias_sumados = 0
+
+    while dias_sumados < dias_habiles:
+        fecha_resultado += timedelta(days=1)
+        if fecha_resultado.weekday() < 5:
+            dias_sumados += 1
+
+    return fecha_resultado
 
 # Se han eliminado los modelos intermedios OficioParte y OficioNino
 # ya que la relación ahora se manejará a través del modelo Caso
@@ -158,6 +174,13 @@ class Oficio(models.Model):
         blank=True,
         null=True
     )
+    codigo = models.CharField(
+        max_length=20,
+        verbose_name='Código interno',
+        unique=True,
+        blank=True,
+        null=True
+    )
     denuncia = models.CharField(
         max_length=50,
         verbose_name='Número de Denuncia',
@@ -279,24 +302,82 @@ class Oficio(models.Model):
         # Validar que si se proporciona un número de denuncia, no exista otro con el mismo número
         # Validar que si se proporciona un número de legajo, no exista otro con el mismo número
 
+    def _generar_codigo(self):
+        fecha_base = self.fecha_emision or timezone.now()
+        if timezone.is_aware(fecha_base):
+            fecha_base = timezone.localtime(fecha_base)
+        anio = fecha_base.year
+        ultimo = (
+            Oficio.objects
+            .filter(codigo__startswith='OF-', codigo__endswith=f'-{anio}')
+            .exclude(pk=self.pk)
+            .order_by('-codigo')
+            .first()
+        )
+        siguiente = 1
+
+        if ultimo and ultimo.codigo:
+            try:
+                siguiente = int(ultimo.codigo.split('-')[1]) + 1
+            except (IndexError, ValueError):
+                siguiente = 1
+
+        return f"OF-{siguiente:05d}-{anio}"
+
+    def _calcular_fecha_vencimiento(self):
+        if not self.plazo_horas:
+            return None
+
+        fecha_base = self.fecha_emision or timezone.now()
+        if timezone.is_aware(fecha_base):
+            fecha_base = timezone.localtime(fecha_base)
+
+        plazo_unidad = getattr(self, '_plazo_unidad', 'horas')
+        if plazo_unidad == 'dias' and self.plazo_horas % 24 == 0:
+            dias_habiles = self.plazo_horas // 24
+            return sumar_dias_habiles(fecha_base, dias_habiles)
+
+        return fecha_base + timedelta(hours=self.plazo_horas)
+
+    def _resolver_fecha_vencimiento(self):
+        fecha_manual = getattr(self, '_fecha_vencimiento_manual', None)
+        if fecha_manual:
+            if timezone.is_aware(fecha_manual):
+                return timezone.localtime(fecha_manual)
+            return timezone.make_aware(fecha_manual, timezone.get_current_timezone())
+        return self._calcular_fecha_vencimiento()
+
     def save(self, *args, **kwargs):
         if self.legajo:
             self.legajo = self.legajo.upper()
         if self.caratula_oficio:
             self.caratula_oficio = self.caratula_oficio.upper()
+        codigo_en_uso = (
+            not self.pk
+            and self.codigo
+            and Oficio.objects.filter(codigo=self.codigo).exists()
+        )
+        if not self.codigo or codigo_en_uso:
+            self.codigo = self._generar_codigo()
         # Validar el modelo antes de guardar
         self.full_clean()
         
         # Si es un oficio nuevo (no tiene ID) y tiene plazo_horas, calcula la fecha de vencimiento
         if not self.id and self.plazo_horas:
-            self.fecha_vencimiento = timezone.now() + timezone.timedelta(hours=self.plazo_horas)
+            self.fecha_vencimiento = self._resolver_fecha_vencimiento()
         
         # Si el oficio ya existe, verifica si se modificó el plazo_horas
         elif self.id and self.plazo_horas:
             # Obtener el oficio actual de la base de datos
             old_instance = Oficio.objects.get(pk=self.id)
-            if old_instance.plazo_horas != self.plazo_horas:
-                self.fecha_vencimiento = timezone.now() + timezone.timedelta(hours=self.plazo_horas)
+            if (
+                old_instance.plazo_horas != self.plazo_horas
+                or old_instance.fecha_emision != self.fecha_emision
+                or getattr(self, '_fecha_vencimiento_manual', None) is not None
+            ):
+                self.fecha_vencimiento = self._resolver_fecha_vencimiento()
+        elif getattr(self, '_fecha_vencimiento_manual', None) is not None:
+            self.fecha_vencimiento = self._resolver_fecha_vencimiento()
         
         # Si no se especifica un usuario, usar el usuario actual
 
@@ -374,7 +455,8 @@ class Oficio(models.Model):
     )
 
     def __str__(self):
-        return f"Oficio {self.id}"
+        referencia = self.codigo or self.id
+        return f"Oficio {referencia}"
 
     # Nota: Se removió el segundo save duplicado que sobrescribía el cálculo de fecha_vencimiento
 

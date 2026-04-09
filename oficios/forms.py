@@ -27,12 +27,16 @@ class OficioForm(forms.ModelForm):
         model = Oficio
         fields = [
             'nro_oficio', 'denuncia', 'legajo', 'juzgado',
-            'plazo_horas', 'fecha_emision', 'caratula',
+            'plazo_horas', 'fecha_emision', 'fecha_vencimiento', 'caratula',
             'caratula_oficio', 'archivo_pdf', 'caso',
             'instituciones'
         ]
         widgets = {
             'fecha_emision': forms.DateTimeInput(
+                attrs={'type': 'datetime-local', 'placeholder': 'YYYY-MM-DD HH:MM'},
+                format='%Y-%m-%dT%H:%M'
+            ),
+            'fecha_vencimiento': forms.DateTimeInput(
                 attrs={'type': 'datetime-local', 'placeholder': 'YYYY-MM-DD HH:MM'},
                 format='%Y-%m-%dT%H:%M'
             ),
@@ -70,6 +74,9 @@ class OficioForm(forms.ModelForm):
             self.initial['fecha_emision'] = local_now.strftime('%Y-%m-%dT%H:%M')
         self.initial.setdefault('plazo_unidad', 'dias')
         self.initial.setdefault('plazo_horas', 5)
+        if self.instance.pk and self.instance.fecha_vencimiento:
+            local_vencimiento = timezone.localtime(self.instance.fecha_vencimiento)
+            self.initial['fecha_vencimiento'] = local_vencimiento.strftime('%Y-%m-%dT%H:%M')
 
         # Configurar campos opcionales
         self.fields['nro_oficio'].required = False
@@ -78,9 +85,15 @@ class OficioForm(forms.ModelForm):
         self.fields['juzgado'].required = False
         self.fields['plazo_horas'].required = False
         self.fields['plazo_unidad'].required = False
+        self.fields['fecha_vencimiento'].required = False
         self.fields['caratula'].required = False
         self.fields['caratula_oficio'].required = False
         self.fields['archivo_pdf'].required = False
+        if (
+            (self.is_bound and self.data.get('fecha_vencimiento'))
+            or (self.instance.pk and self.instance.fecha_vencimiento)
+        ):
+            self.fields['fecha_vencimiento'].widget.attrs['data-manual'] = 'true'
 
         # Quitar ayudas en campos con placeholder para evitar redundancia
         for field_name in ('denuncia', 'legajo'):
@@ -117,3 +130,12 @@ class OficioForm(forms.ModelForm):
         if plazo_horas and plazo_unidad == 'dias':
             cleaned['plazo_horas'] = plazo_horas * 24
         return cleaned
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance._plazo_unidad = self.cleaned_data.get('plazo_unidad') or 'horas'
+        instance._fecha_vencimiento_manual = self.cleaned_data.get('fecha_vencimiento')
+        if commit:
+            instance.save()
+            self.save_m2m()
+        return instance

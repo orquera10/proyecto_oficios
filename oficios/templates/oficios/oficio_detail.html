@@ -6,7 +6,7 @@
             <a href="{% url 'oficios:list' %}" class="btn btn-outline-secondary d-inline-flex align-items-center shadow-sm mb-2">
                 <i class="fas fa-arrow-left me-1"></i> Volver al listado
             </a>
-            <h2 class="mb-0">Detalle del Oficio #{{ oficio.id }}</h2>
+            <h2 class="mb-0">Detalle del Oficio {{ oficio.codigo|default:oficio.id }}</h2>
         </div>
         <div class="btn-group">
             {% if user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'informatica' %}
@@ -272,6 +272,9 @@
                 <div class="col-md-12">
                     <h5>Datos del Caso</h5>
                     <dl class="row">
+                        <dt class="col-sm-4">Código:</dt>
+                        <dd class="col-sm-8"><span class="fw-semibold">{{ oficio.caso.codigo|default:"-" }}</span></dd>
+
                         <dt class="col-sm-4">Expediente:</dt>
                         <dd class="col-sm-8">{{ oficio.caso.expte|default:"-" }}</dd>
 

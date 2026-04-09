@@ -2,7 +2,7 @@
 {% load oficio_filters %}
 {% load caso_filters %}
 
-{% block page_title %}Detalle del Caso #{{ object.id }}{% endblock %}
+{% block page_title %}Detalle del Caso {{ object.codigo|default:object.id }}{% endblock %}
 
 {% block page_actions %}
     {% if user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'informatica' or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'coordinador' or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'director-ninez' %}
@@ -147,6 +147,7 @@
             <table class="table table-sm table-hover">
                 <thead class="table-light">
                     <tr>
+                        <th>Código</th>
                         <th>ID Oficio</th>
                         <th>Nro. Oficio</th>
                         <th>Denuncia</th>
@@ -159,6 +160,7 @@
                 <tbody>
                     {% for oficio in object.oficios.all %}
                     <tr>
+                        <td><span class="fw-semibold">{{ oficio.codigo|default:"-" }}</span></td>
                         <td>{{ oficio.id }}</td>
                         <td>{{ oficio.nro_oficio|default:"-" }}</td>
                         <td>{{ oficio.denuncia|default:"-" }}</td>
