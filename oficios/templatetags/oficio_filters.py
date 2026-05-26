@@ -11,5 +11,6 @@ def estado_badge_class(estado):
         'respondido': 'primary',     # azul
         'enviado': 'success',        # verde
         'devuelto': 'violet',        # violeta (custom)
+        'incompetencia': 'danger',   # rojo
     }
     return estado_map.get(estado, 'light')

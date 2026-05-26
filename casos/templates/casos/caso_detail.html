@@ -236,7 +236,7 @@
                             <td>
                                 {% if movimiento.estado_anterior %}
                                 {% with e=movimiento.estado_anterior %}
-                                <span class="badge bg-{% if e == 'cargado' %}secondary{% elif e == 'asignado' %}warning{% elif e == 'respondido' %}primary{% elif e == 'enviado' %}success{% elif e == 'devuelto' %}violet{% else %}light{% endif %}">
+                                <span class="badge bg-{% if e == 'cargado' %}secondary{% elif e == 'asignado' %}warning{% elif e == 'respondido' %}primary{% elif e == 'enviado' %}success{% elif e == 'devuelto' %}violet{% elif e == 'incompetencia' %}danger{% else %}light{% endif %}">
                                     {{ movimiento.get_estado_anterior_display }}
                                 </span>
                                 {% endwith %}
@@ -246,7 +246,7 @@
                             </td>
                             <td>
                                 {% with e=movimiento.estado_nuevo %}
-                                <span class="badge bg-{% if e == 'cargado' %}secondary{% elif e == 'asignado' %}warning{% elif e == 'respondido' %}primary{% elif e == 'enviado' %}success{% elif e == 'devuelto' %}violet{% else %}light{% endif %}">
+                                <span class="badge bg-{% if e == 'cargado' %}secondary{% elif e == 'asignado' %}warning{% elif e == 'respondido' %}primary{% elif e == 'enviado' %}success{% elif e == 'devuelto' %}violet{% elif e == 'incompetencia' %}danger{% else %}light{% endif %}">
                                     {{ movimiento.get_estado_nuevo_display }}
                                 </span>
                                 {% endwith %}
