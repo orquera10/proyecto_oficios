@@ -7,7 +7,14 @@
         <div class="col-12">
             <div class="card oficio-form-card">
                 <div class="card-header">
-                    <h4>{{ titulo }}</h4>
+                    <div class="d-flex justify-content-between align-items-center gap-3">
+                        <h4 class="mb-0">{{ titulo }}</h4>
+                        {% if selector_url %}
+                        <a href="{{ selector_url }}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-arrow-left-right"></i> Cambiar tipo
+                        </a>
+                        {% endif %}
+                    </div>
                 </div>
                 <div class="card-body">
                     <form method="post" id="oficio-form" enctype="multipart/form-data">
@@ -25,7 +32,7 @@
                         <!-- Datos principales del oficio -->
                         <div class="card mb-4">
                             <div class="card-header bg-light">
-                                <h5 class="mb-0">Datos del Oficio</h5>
+                                <h5 class="mb-0">Datos del Documento</h5>
                             </div>
                             <div class="card-body">
                                 {{ form.caso }}
@@ -33,12 +40,21 @@
                                     <div class="col-12 col-md-4">
                                         {{ form.nro_oficio|as_crispy_field }}
                                     </div>
+                                    {% if form.expediente %}
+                                    <div class="col-12 col-md-4">
+                                        {{ form.expediente|as_crispy_field }}
+                                    </div>
+                                    {% endif %}
+                                    {% if form.denuncia %}
                                     <div class="col-12 col-md-4">
                                         {{ form.denuncia|as_crispy_field }}
                                     </div>
+                                    {% endif %}
+                                    {% if form.legajo %}
                                     <div class="col-12 col-md-4">
                                         {{ form.legajo|as_crispy_field }}
                                     </div>
+                                    {% endif %}
                                     <div class="col-12 col-md-4">
                                         {{ form.fecha_emision|as_crispy_field }}
                                     </div>

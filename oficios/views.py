@@ -15,10 +15,10 @@ from django.utils.decorators import method_decorator
 from django.shortcuts import render
 
 from .models import (
-    Oficio, Institucion, Caratula, Juzgado, MovimientoOficio, Respuesta
+    Oficio, OficioMPA, OficioJudicial, Nota, Institucion, Caratula, Juzgado, MovimientoOficio, Respuesta
 )
 from casos.models import Caso
-from .forms import OficioForm
+from .forms import OficioForm, OficioMPAForm, OficioJudicialForm, NotaForm
 from .forms_respuesta import RespuestaForm
 from .filters import OficioFilter
 from .permissions import is_coordinacion_opd
@@ -134,10 +134,87 @@ class OficioEstadoListView(LoginRequiredMixin, ListView):
             context['total_enviados'] = 0
         return context
 
+class DocumentoTipoSelectView(LoginRequiredMixin, View):
+    template_name = 'oficios/documento_tipo_select.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        perfil = getattr(request.user, 'perfil', None)
+        raw_nombre = getattr(getattr(perfil, 'id_sector', None), 'nombre', '') or ''
+        norm = unicodedata.normalize('NFKD', raw_nombre)
+        sector_nombre = ''.join(c for c in norm if not unicodedata.combining(c)).lower()
+        if 'coordinacion opd' in sector_nombre:
+            messages.error(request, 'No tiene permisos para crear documentos.')
+            return redirect('oficios:list')
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        caso_id = request.GET.get('caso')
+        tipos = [
+            {
+                'key': 'mpa',
+                'label': 'Oficio MPA',
+                'icon': 'fas fa-scale-balanced',
+                'enabled': True,
+                'url': self._tipo_url('mpa', caso_id),
+            },
+            {
+                'key': 'judicial',
+                'label': 'Oficio Judicial',
+                'icon': 'fas fa-gavel',
+                'enabled': True,
+                'url': self._tipo_url('judicial', caso_id),
+            },
+            {
+                'key': 'nacional',
+                'label': 'Oficio Nacional',
+                'icon': 'fas fa-landmark',
+                'enabled': False,
+                'url': '#',
+            },
+            {
+                'key': 'nota',
+                'label': 'Nota',
+                'icon': 'fas fa-file-lines',
+                'enabled': True,
+                'url': self._tipo_url('nota', caso_id),
+            },
+        ]
+        return render(request, self.template_name, {'tipos': tipos, 'caso_id': caso_id})
+
+    def _tipo_url(self, tipo, caso_id=None):
+        url = reverse('oficios:create_tipo', kwargs={'tipo': tipo})
+        if caso_id:
+            url = f'{url}?caso={caso_id}'
+        return url
+
+
 class OficioCreateView(LoginRequiredMixin, CreateView):
     model = Oficio
     form_class = OficioForm
     template_name = 'oficios/oficio_form.html'
+    tipo_config = {
+        'mpa': {
+            'model': OficioMPA,
+            'form': OficioMPAForm,
+            'titulo': 'Nuevo Oficio MPA',
+            'detalle': 'OFICIO MPA CREADO',
+            'success': 'El oficio MPA se ha creado correctamente.',
+        },
+        'judicial': {
+            'model': OficioJudicial,
+            'form': OficioJudicialForm,
+            'titulo': 'Nuevo Oficio Judicial',
+            'detalle': 'OFICIO JUDICIAL CREADO',
+            'success': 'El oficio judicial se ha creado correctamente.',
+        },
+        'nota': {
+            'model': Nota,
+            'form': NotaForm,
+            'titulo': 'Nueva Nota',
+            'detalle': 'NOTA CREADA',
+            'success': 'La nota se ha creado correctamente.',
+        },
+    }
     
     def dispatch(self, request, *args, **kwargs):
         perfil = getattr(request.user, 'perfil', None)
@@ -147,7 +224,25 @@ class OficioCreateView(LoginRequiredMixin, CreateView):
         if 'coordinacion opd' in sector_nombre:
             messages.error(request, 'No tiene permisos para crear oficios.')
             return redirect('oficios:list')
+        if self.get_tipo_documento() not in self.tipo_config:
+            return redirect(self.get_tipo_selector_url())
         return super().dispatch(request, *args, **kwargs)
+
+    def get_tipo_documento(self):
+        return self.kwargs.get('tipo')
+
+    def get_tipo_selector_url(self):
+        url = reverse('oficios:create')
+        caso_id = self.request.GET.get('caso')
+        if caso_id:
+            url = f'{url}?caso={caso_id}'
+        return url
+
+    def get_model_config(self):
+        return self.tipo_config[self.get_tipo_documento()]
+
+    def get_form_class(self):
+        return self.get_model_config()['form']
     
     def get_initial(self):
         initial = super().get_initial()
@@ -161,7 +256,9 @@ class OficioCreateView(LoginRequiredMixin, CreateView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['titulo'] = 'Nuevo Oficio'
+        context['titulo'] = self.get_model_config()['titulo']
+        context['tipo_documento'] = self.get_tipo_documento()
+        context['selector_url'] = self.get_tipo_selector_url()
         return context
     def form_valid(self, form):
         instituciones = list(form.cleaned_data.get("instituciones") or [])
@@ -182,7 +279,7 @@ class OficioCreateView(LoginRequiredMixin, CreateView):
                     estado_nuevo='cargado',
                     validado_coord=obj.validado_coord,
                     validado_director=obj.validado_director,
-                    detalle='OFICIO CREADO',
+                    detalle=self.get_model_config()['detalle'],
                     institucion=obj.institucion
                 )
             except Exception:
@@ -216,7 +313,7 @@ class OficioCreateView(LoginRequiredMixin, CreateView):
                         estado_nuevo='cargado',
                         validado_coord=obj.validado_coord,
                         validado_director=obj.validado_director,
-                        detalle='OFICIO CREADO',
+                        detalle=self.get_model_config()['detalle'],
                         institucion=obj.institucion
                     )
                 except Exception:
@@ -232,7 +329,7 @@ class OficioCreateView(LoginRequiredMixin, CreateView):
 
         if len(creados) == 1:
             self.object = creados[0]
-            messages.success(self.request, 'El oficio se ha creado correctamente.')
+            messages.success(self.request, self.get_model_config()['success'])
             return HttpResponseRedirect(reverse('oficios:detail', kwargs={'pk': self.object.pk}))
         else:
             # Redirigir al caso si existe, si no al listado

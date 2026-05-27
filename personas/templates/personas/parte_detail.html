@@ -42,8 +42,7 @@
                                     <table class="table table-hover">
                                         <thead class="table-light">
                                             <tr>
-                                                <th>Expediente</th>
-                                                <th>Tipo</th>
+                                                <th>Código</th>
                                                 <th>Estado</th>
                                                 <th>Creado</th>
                                                 <th>Usuario</th>
@@ -53,8 +52,7 @@
                                         <tbody>
                                             {% for caso in casos %}
                                             <tr>
-                                                <td>{{ caso.expte|default:"S/N" }}</td>
-                                                <td>{{ caso.get_tipo_display }}</td>
+                                                <td>{{ caso.codigo|default:"S/N" }}</td>
                                                 <td>
                                                     <span class="badge {% if caso.estado|lower == 'abierto' %}bg-success{% elif caso.estado|lower == 'en_proceso' %}bg-warning{% else %}bg-secondary{% endif %}">
                                                         {{ caso.get_estado_display }}

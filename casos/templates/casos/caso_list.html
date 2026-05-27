@@ -21,6 +21,16 @@
     .select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__choice {
         margin: 0.2rem 0.2rem 0 0;
     }
+
+    .caso-list-row {
+        cursor: pointer;
+        transition: background-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .caso-list-row:hover,
+    .caso-list-row:focus {
+        box-shadow: inset 4px 0 0 var(--brand-500);
+    }
 </style>
 {% endblock %}
 
@@ -40,11 +50,6 @@
                 <div class="col-md-4">
                     <label for="{{ filter.form.busqueda.id_for_label }}" class="form-label">{{ filter.form.busqueda.label }}</label>
                     {{ filter.form.busqueda|add_class:'form-control' }}
-                </div>
-                
-                <div class="col-md-4">
-                    <label for="{{ filter.form.tipo.id_for_label }}" class="form-label">{{ filter.form.tipo.label }}</label>
-                    {{ filter.form.tipo|add_class:'form-select select2' }}
                 </div>
                 
                 <div class="col-md-4">
@@ -105,8 +110,6 @@
                 <thead class="table-light">
                     <tr>
                         <th>Código</th>
-                        <th>Expediente</th>
-                        <th>Tipo</th>
                         <th>Estado</th>
                         <th>Usuario</th>
                         <th>Fecha de creación</th>
@@ -115,10 +118,12 @@
                 </thead>
                 <tbody>
                     {% for caso in object_list %}
-                    <tr>
+                    <tr class="caso-list-row"
+                        data-detail-url="{% url 'casos:detail' caso.pk %}"
+                        role="link"
+                        tabindex="0"
+                        aria-label="Ver detalle de {{ caso.codigo|default:'caso' }}">
                         <td><span class="fw-semibold">{{ caso.codigo|default:"-" }}</span></td>
-                        <td>{{ caso.expte }}</td>
-                        <td>{{ caso.get_tipo_display }}</td>
                         <td>
                             <span class="badge bg-{{ caso.estado|estado_badge_class }}">
                                 {{ caso.get_estado_display }}
@@ -128,9 +133,6 @@
                         <td>{{ caso.creado|date:"d/m/Y H:i" }}</td>
                         <td>
                             <div class="btn-group" role="group">
-                                <a href="{% url 'casos:detail' caso.pk %}" class="btn btn-sm btn-info" title="Ver">
-                                    <i class="bi bi-eye-fill"></i>
-                                </a>
                                 {% if user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'informatica' or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'coordinador' or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'director-ninez' %}
                                 <a href="{% url 'casos:update' caso.pk %}" class="btn btn-sm btn-warning" title="Editar">
                                     <i class="bi bi-pencil-square"></i>
@@ -141,6 +143,7 @@
                                     </a>
                                 {% endif %}
                                 {% endif %}
+                            </div>
                         </td>
                     </tr>
                     {% empty %}
@@ -149,7 +152,6 @@
                     </tr>
                     {% endfor %}
                 </tbody>
-            </table>
                 </table>
             </div>
             
@@ -224,6 +226,21 @@
     // Enfocar el campo de búsqueda al abrir el desplegable
     $(document).on('select2:open', () => {
         document.querySelector('.select2-search__field').focus();
+    });
+
+    $('.caso-list-row').on('click keydown', function(event) {
+        const isKeyboard = event.type === 'keydown';
+        if (isKeyboard && event.key !== 'Enter' && event.key !== ' ') {
+            return;
+        }
+        if ($(event.target).closest('a, button, .btn-group').length) {
+            return;
+        }
+        event.preventDefault();
+        const url = $(this).data('detail-url');
+        if (url) {
+            window.location.href = url;
+        }
     });
 </script>
 {% endblock %}

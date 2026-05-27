@@ -1,7 +1,7 @@
 from django import forms
 from django.utils import timezone
 from .models import (
-    Oficio, Institucion, Caratula, Juzgado, CaratulaOficio
+    Oficio, OficioMPA, OficioJudicial, Nota, Institucion, Caratula, Juzgado, CaratulaOficio
 )
 
 
@@ -50,8 +50,9 @@ class OficioForm(forms.ModelForm):
         }
         labels = {
             'juzgado': 'Agente emisor',
-            'archivo_pdf': 'Archivo PDF del Oficio',
-            'nro_oficio': 'Numero de Oficio'
+            'archivo_pdf': 'Archivo PDF',
+            'nro_oficio': 'Numero de Oficio',
+            'caratula_oficio': 'Caratula de Documento'
         }
         help_texts = {
             'archivo_pdf': 'Sube el archivo PDF del oficio. Tamano maximo: 10MB.',
@@ -79,16 +80,13 @@ class OficioForm(forms.ModelForm):
             self.initial['fecha_vencimiento'] = local_vencimiento.strftime('%Y-%m-%dT%H:%M')
 
         # Configurar campos opcionales
-        self.fields['nro_oficio'].required = False
-        self.fields['denuncia'].required = False
-        self.fields['legajo'].required = False
-        self.fields['juzgado'].required = False
-        self.fields['plazo_horas'].required = False
-        self.fields['plazo_unidad'].required = False
-        self.fields['fecha_vencimiento'].required = False
-        self.fields['caratula'].required = False
-        self.fields['caratula_oficio'].required = False
-        self.fields['archivo_pdf'].required = False
+        for field_name in (
+            'nro_oficio', 'denuncia', 'legajo', 'expediente', 'juzgado',
+            'plazo_horas', 'plazo_unidad', 'fecha_vencimiento', 'caratula',
+            'caratula_oficio', 'archivo_pdf'
+        ):
+            if field_name in self.fields:
+                self.fields[field_name].required = False
         if (
             (self.is_bound and self.data.get('fecha_vencimiento'))
             or (self.instance.pk and self.instance.fecha_vencimiento)
@@ -139,3 +137,83 @@ class OficioForm(forms.ModelForm):
             instance.save()
             self.save_m2m()
         return instance
+
+
+class OficioMPAForm(OficioForm):
+    class Meta(OficioForm.Meta):
+        model = OficioMPA
+        fields = [
+            'nro_oficio', 'denuncia', 'legajo', 'juzgado',
+            'plazo_horas', 'fecha_emision', 'fecha_vencimiento', 'caratula',
+            'caratula_oficio', 'archivo_pdf', 'caso',
+            'instituciones'
+        ]
+        widgets = {
+            **OficioForm.Meta.widgets,
+            'nro_oficio': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: 401/25'}),
+            'denuncia': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: 12345'}),
+            'legajo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: P-28547/2025'}),
+        }
+        labels = {
+            **OficioForm.Meta.labels,
+            'nro_oficio': 'Numero de Oficio MPA',
+            'denuncia': 'Numero de Denuncia',
+            'legajo': 'Numero de Legajo',
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['nro_oficio'].required = True
+        self.fields['nro_oficio'].help_text = 'Formato: 401/25'
+        self.fields['legajo'].help_text = 'Formato: P-28547/2025'
+
+
+class OficioJudicialForm(OficioForm):
+    class Meta(OficioForm.Meta):
+        model = OficioJudicial
+        fields = [
+            'nro_oficio', 'expediente', 'juzgado',
+            'plazo_horas', 'fecha_emision', 'fecha_vencimiento', 'caratula',
+            'caratula_oficio', 'archivo_pdf', 'caso',
+            'instituciones'
+        ]
+        widgets = {
+            **OficioForm.Meta.widgets,
+            'nro_oficio': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: 1864007'}),
+            'expediente': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: C-244216/2024'}),
+        }
+        labels = {
+            **OficioForm.Meta.labels,
+            'nro_oficio': 'Numero de Oficio Judicial',
+            'expediente': 'Numero de Expediente',
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['expediente'].required = True
+        self.fields['nro_oficio'].help_text = 'Formato: 1864007'
+        self.fields['expediente'].help_text = 'Formato: C-244216/2024'
+
+
+class NotaForm(OficioForm):
+    class Meta(OficioForm.Meta):
+        model = Nota
+        fields = [
+            'nro_oficio', 'juzgado',
+            'plazo_horas', 'fecha_emision', 'fecha_vencimiento', 'caratula',
+            'caratula_oficio', 'archivo_pdf', 'caso',
+            'instituciones'
+        ]
+        widgets = {
+            **OficioForm.Meta.widgets,
+            'nro_oficio': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: Nota 12/2026'}),
+        }
+        labels = {
+            **OficioForm.Meta.labels,
+            'nro_oficio': 'Numero de Nota',
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['nro_oficio'].required = False
+        self.fields['nro_oficio'].help_text = 'Opcional. Completar solo si la nota tiene numero.'

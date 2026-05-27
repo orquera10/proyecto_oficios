@@ -5,7 +5,7 @@ from django.db import models
 from django.db.models import Q
 from django.core.exceptions import ValidationError
 from django.utils import timezone
-from django.core.validators import MinValueValidator, FileExtensionValidator
+from django.core.validators import MinValueValidator, FileExtensionValidator, RegexValidator
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from simple_history.models import HistoricalRecords
@@ -34,6 +34,24 @@ def movimiento_upload_path(instance, filename):
     return f'movimientos/oficio_{oficio_id}/{filename}'
 
 User = get_user_model()
+
+
+numero_oficio_mpa_validator = RegexValidator(
+    regex=r'^\d+/\d{2}$',
+    message='El número de oficio MPA debe tener el formato 401/25.'
+)
+legajo_mpa_validator = RegexValidator(
+    regex=r'^P-\d+/\d{4}$',
+    message='El legajo MPA debe tener el formato P-28547/2025.'
+)
+numero_oficio_judicial_validator = RegexValidator(
+    regex=r'^\d+$',
+    message='El número de oficio judicial debe contener solo números. Ej: 1864007.'
+)
+expediente_judicial_validator = RegexValidator(
+    regex=r'^C-\d+/\d{4}$',
+    message='El expediente judicial debe tener el formato C-244216/2024.'
+)
 
 
 def sumar_dias_habiles(fecha_base, dias_habiles):
@@ -158,6 +176,18 @@ class CategoriaJuzgado(models.Model):
         super().save(*args, **kwargs)
 
 class Oficio(models.Model):
+    TIPO_DOCUMENTO_LEGACY = 'oficio'
+    TIPO_DOCUMENTO_JUDICIAL = 'judicial'
+    TIPO_DOCUMENTO_MPA = 'mpa'
+    TIPO_DOCUMENTO_NACIONAL = 'nacional'
+    TIPO_DOCUMENTO_NOTA = 'nota'
+    TIPO_DOCUMENTO_CHOICES = [
+        (TIPO_DOCUMENTO_LEGACY, 'Oficio'),
+        (TIPO_DOCUMENTO_JUDICIAL, 'Oficio Judicial'),
+        (TIPO_DOCUMENTO_MPA, 'Oficio MPA'),
+        (TIPO_DOCUMENTO_NACIONAL, 'Oficio Nacional'),
+        (TIPO_DOCUMENTO_NOTA, 'Nota'),
+    ]
     ESTADO_CHOICES = [
         ('cargado', 'Cargado'),
         ('asignado', 'Asignado'),
@@ -167,6 +197,12 @@ class Oficio(models.Model):
         ('devuelto', 'Devuelto'),
         ('incompetencia', 'Incompetencia'),
     ]
+    tipo_documento = models.CharField(
+        max_length=20,
+        choices=TIPO_DOCUMENTO_CHOICES,
+        default=TIPO_DOCUMENTO_LEGACY,
+        verbose_name='Tipo de documento'
+    )
     nro_oficio = models.CharField(
         max_length=50,
         verbose_name='Número de Oficio',
@@ -194,6 +230,13 @@ class Oficio(models.Model):
         blank=True,
         null=True,
         help_text='Número de legajo relacionado al oficio'
+    )
+    expediente = models.CharField(
+        max_length=50,
+        verbose_name='Número de Expediente',
+        blank=True,
+        null=True,
+        help_text='Número de expediente relacionado al documento'
     )
     institucion = models.ForeignKey(
         Institucion,
@@ -299,8 +342,31 @@ class Oficio(models.Model):
 
     def clean(self):
         super().clean()
-        # Validar que si se proporciona un número de denuncia, no exista otro con el mismo número
-        # Validar que si se proporciona un número de legajo, no exista otro con el mismo número
+        if self.tipo_documento == self.TIPO_DOCUMENTO_MPA:
+            if not self.nro_oficio:
+                raise ValidationError({'nro_oficio': 'El número de oficio es obligatorio para oficios MPA.'})
+            try:
+                numero_oficio_mpa_validator(self.nro_oficio)
+            except ValidationError as exc:
+                raise ValidationError({'nro_oficio': exc.messages})
+            if self.legajo:
+                try:
+                    legajo_mpa_validator(self.legajo)
+                except ValidationError as exc:
+                    raise ValidationError({'legajo': exc.messages})
+
+        if self.tipo_documento == self.TIPO_DOCUMENTO_JUDICIAL:
+            if self.nro_oficio:
+                try:
+                    numero_oficio_judicial_validator(self.nro_oficio)
+                except ValidationError as exc:
+                    raise ValidationError({'nro_oficio': exc.messages})
+            if not self.expediente:
+                raise ValidationError({'expediente': 'El número de expediente es obligatorio para oficios judiciales.'})
+            try:
+                expediente_judicial_validator(self.expediente)
+            except ValidationError as exc:
+                raise ValidationError({'expediente': exc.messages})
 
     def _generar_codigo(self):
         fecha_base = self.fecha_emision or timezone.now()
@@ -350,6 +416,8 @@ class Oficio(models.Model):
     def save(self, *args, **kwargs):
         if self.legajo:
             self.legajo = self.legajo.upper()
+        if self.expediente:
+            self.expediente = self.expediente.upper()
         if self.caratula_oficio:
             self.caratula_oficio = self.caratula_oficio.upper()
         codigo_en_uso = (
@@ -470,6 +538,51 @@ class Oficio(models.Model):
                 if os.path.exists(directory) and not os.listdir(directory):
                     os.rmdir(directory)
         super().delete(*args, **kwargs)
+
+
+class OficioMPA(Oficio):
+    class Meta:
+        verbose_name = 'Oficio MPA'
+        verbose_name_plural = 'Oficios MPA'
+        ordering = ['-fecha_emision']
+
+    def clean(self):
+        self.tipo_documento = self.TIPO_DOCUMENTO_MPA
+        super().clean()
+
+    def save(self, *args, **kwargs):
+        self.tipo_documento = self.TIPO_DOCUMENTO_MPA
+        super().save(*args, **kwargs)
+
+
+class OficioJudicial(Oficio):
+    class Meta:
+        verbose_name = 'Oficio Judicial'
+        verbose_name_plural = 'Oficios Judiciales'
+        ordering = ['-fecha_emision']
+
+    def clean(self):
+        self.tipo_documento = self.TIPO_DOCUMENTO_JUDICIAL
+        super().clean()
+
+    def save(self, *args, **kwargs):
+        self.tipo_documento = self.TIPO_DOCUMENTO_JUDICIAL
+        super().save(*args, **kwargs)
+
+
+class Nota(Oficio):
+    class Meta:
+        verbose_name = 'Nota'
+        verbose_name_plural = 'Notas'
+        ordering = ['-fecha_emision']
+
+    def clean(self):
+        self.tipo_documento = self.TIPO_DOCUMENTO_NOTA
+        super().clean()
+
+    def save(self, *args, **kwargs):
+        self.tipo_documento = self.TIPO_DOCUMENTO_NOTA
+        super().save(*args, **kwargs)
 
 
 class MovimientoOficio(models.Model):

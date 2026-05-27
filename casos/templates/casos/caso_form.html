@@ -1,9 +1,112 @@
 {% extends 'casos/base_casos.html' %}
 
-{% block page_title %}{% if object %}Editar{% else %}Nuevo{% endif %} Caso{% endblock %}
+{% block page_title %}{% if object.pk %}Editar{% else %}Nuevo{% endif %} Caso{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<style>
+    .caso-form-shell {
+        border: 0;
+        box-shadow: 0 0.5rem 1.5rem rgba(24, 39, 75, 0.08);
+    }
+
+    .caso-code-band {
+        background: #f7f9fc;
+        border: 1px solid #d9e2ec;
+        border-radius: 8px;
+        padding: 1rem;
+    }
+
+    .caso-code-band .form-control:disabled {
+        background-color: #e9eef5;
+        color: #607080;
+        font-weight: 700;
+        letter-spacing: 0;
+        opacity: 1;
+    }
+
+    .caso-relation-panel {
+        border: 1px solid #d9e2ec;
+        border-radius: 8px;
+        min-height: 260px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .caso-relation-panel__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        padding: 1rem;
+        border-bottom: 1px solid #e7edf4;
+        background: #fbfcfe;
+    }
+
+    .caso-relation-panel__title {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        min-width: 0;
+    }
+
+    .caso-relation-panel__icon {
+        width: 2.25rem;
+        height: 2.25rem;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #e8f1fb;
+        color: #2a7bb0;
+        flex: 0 0 auto;
+    }
+
+    .caso-relation-panel__body {
+        padding: 1rem;
+        flex: 1 1 auto;
+    }
+
+    .caso-empty-state {
+        border: 1px dashed #c7d3df;
+        border-radius: 8px;
+        min-height: 124px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        color: #6c7a89;
+        background: #fbfcfe;
+        margin: 0;
+        padding: 1rem;
+    }
+
+    .caso-selected-list .list-group-item {
+        border-color: #e1e8f0;
+        padding: 0.85rem 0.9rem;
+    }
+
+    .caso-form-actions {
+        border-top: 1px solid #e7edf4;
+        padding-top: 1rem;
+        margin-top: 1.25rem;
+    }
+
+    @media (max-width: 575.98px) {
+        .caso-relation-panel__header {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .caso-relation-panel__header .btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block casos_content %}
-<div class="card">
+<div class="card caso-form-shell">
     <div class="card-body">
         <form method="post" id="caso-form">
             {% csrf_token %}
@@ -16,69 +119,68 @@
                 <div id="parte-forms"></div>
             </div>
             
-            <div class="row mb-4">
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">Datos del Caso</h5>
-                        </div>
-                        <div class="card-body">
-                            {% for field in form %}
-                                <div class="mb-3">
-                                    <label for="{{ field.id_for_label }}" class="form-label">
-                                        {{ field.label }}{% if field.field.required %}<span class="text-danger">*</span>{% endif %}
-                                    </label>
-                                    {{ field }}
-                                    {% if field.help_text %}
-                                        <div class="form-text">{{ field.help_text }}</div>
-                                    {% endif %}
-                                    {% if field.errors %}
-                                        <div class="invalid-feedback d-block">
-                                            {% for error in field.errors %}
-                                                <span class="text-danger">{{ error }}</span>
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
-                                </div>
-                            {% endfor %}
-                        </div>
+            <div class="caso-code-band mb-4">
+                <div class="row align-items-end g-3">
+                    <div class="col-md-5 col-lg-4">
+                        <label for="codigo-caso-preview" class="form-label mb-1">Código de caso</label>
+                        <input type="text" id="codigo-caso-preview" class="form-control" value="{{ codigo_preview|default:'Se generará al guardar' }}" disabled>
                     </div>
-                </div>
-                
-                <div class="col-md-6">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">Niños Relacionados</h5>
-                        </div>
-                        <div class="card-body">
-                            <button type="button" class="btn btn-outline-primary" id="add-nino-modal" data-bs-toggle="modal" data-bs-target="#ninosModal">
-                                <i class="fas fa-plus"></i> Agregar Niño
-                            </button>
-                            <!-- Contenedor para los niños seleccionados -->
-                            <div id="ninos-seleccionados-display" class="mt-3">
-                                <!-- Aquí se agregarán los niños seleccionados -->
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">Partes Relacionadas</h5>
-                        </div>
-                        <div class="card-body">
-                            <button type="button" class="btn btn-outline-primary" id="add-parte-modal" data-bs-toggle="modal" data-bs-target="#partesModal">
-                                <i class="fas fa-plus"></i> Agregar Parte
-                            </button>
-                            <div id="partes-seleccionadas-display" class="mt-3">
-                                <!-- Aquí se agregarán las partes seleccionadas -->
-                            </div>
+                    <div class="col-md-7 col-lg-8">
+                        <div class="text-muted small">
+                            El caso se identifica por este código y se completa vinculando niños y partes relacionadas.
                         </div>
                     </div>
                 </div>
             </div>
+
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <section class="caso-relation-panel">
+                        <div class="caso-relation-panel__header">
+                            <div class="caso-relation-panel__title">
+                                <span class="caso-relation-panel__icon"><i class="fas fa-child"></i></span>
+                                <div>
+                                    <h5 class="mb-0">Niños relacionados</h5>
+                                    <div class="text-muted small">Personas menores vinculadas al caso</div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-outline-primary" id="add-nino-modal" data-bs-toggle="modal" data-bs-target="#ninosModal">
+                                <i class="fas fa-plus me-1"></i> Agregar niño
+                            </button>
+                        </div>
+                        <div class="caso-relation-panel__body">
+                            <div id="ninos-seleccionados-display">
+                                <p class="caso-empty-state">No hay niños seleccionados.</p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <div class="col-lg-6">
+                    <section class="caso-relation-panel">
+                        <div class="caso-relation-panel__header">
+                            <div class="caso-relation-panel__title">
+                                <span class="caso-relation-panel__icon"><i class="fas fa-user-tie"></i></span>
+                                <div>
+                                    <h5 class="mb-0">Partes relacionadas</h5>
+                                    <div class="text-muted small">Adultos, referentes o representantes vinculados</div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-outline-primary" id="add-parte-modal" data-bs-toggle="modal" data-bs-target="#partesModal">
+                                <i class="fas fa-plus me-1"></i> Agregar parte
+                            </button>
+                        </div>
+                        <div class="caso-relation-panel__body">
+                            <div id="partes-seleccionadas-display">
+                                <p class="caso-empty-state">No hay partes seleccionadas.</p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
             
-            <div class="d-flex justify-content-between">
-                <a href="{% if object %}{% url 'casos:detail' object.pk %}{% else %}{% url 'casos:list' %}{% endif %}" 
+            <div class="caso-form-actions d-flex justify-content-between">
+                <a href="{% if object.pk %}{% url 'casos:detail' object.pk %}{% else %}{% url 'casos:list' %}{% endif %}" 
                    class="btn btn-secondary">
                     <i class="bi bi-arrow-left"></i> Cancelar
                 </a>
@@ -122,10 +224,10 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="mt-3" id="ninos-empty-actions" style="display: none;">
-                    <a class="btn btn-outline-primary" href="{% url 'personas:nino_create' %}">
-                        <i class="fas fa-plus"></i> Agregar Niño
-                    </a>
+                <div class="mt-3" id="ninos-empty-actions">
+                    <button type="button" class="btn btn-outline-primary" id="open-nino-quick-create">
+                        <i class="fas fa-plus"></i> Agregar niño
+                    </button>
                 </div>
             </div>
             <div class="modal-footer">
@@ -169,16 +271,117 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="mt-3" id="partes-empty-actions" style="display: none;">
-                    <a class="btn btn-outline-primary" href="{% url 'personas:parte_create' %}">
-                        <i class="fas fa-plus"></i> Agregar Parte
-                    </a>
+                <div class="mt-3" id="partes-empty-actions">
+                    <button type="button" class="btn btn-outline-primary" id="open-parte-quick-create">
+                        <i class="fas fa-plus"></i> Agregar parte
+                    </button>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                 <button type="button" class="btn btn-primary" id="confirmarPartes">Confirmar selección</button>
             </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ninoQuickCreateModal" tabindex="-1" aria-labelledby="ninoQuickCreateModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form id="nino-quick-create-form">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ninoQuickCreateModalLabel">Agregar niño</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger d-none" id="nino-quick-errors"></div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label" for="quick_nino_nombre">Nombre</label>
+                            <input type="text" class="form-control" id="quick_nino_nombre" name="nombre" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="quick_nino_apellido">Apellido</label>
+                            <input type="text" class="form-control" id="quick_nino_apellido" name="apellido" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="quick_nino_dni">DNI</label>
+                            <input type="text" class="form-control" id="quick_nino_dni" name="dni">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="quick_nino_fecha_nac">Fecha de nacimiento</label>
+                            <input type="date" class="form-control" id="quick_nino_fecha_nac" name="fecha_nac">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="quick_nino_edad">Edad</label>
+                            <input type="number" min="0" class="form-control" id="quick_nino_edad" name="edad">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="quick_nino_domicilio_principal">Domicilio principal</label>
+                            <textarea class="form-control" id="quick_nino_domicilio_principal" name="domicilio_principal" rows="2"></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="quick_nino_domicilio_secundario">Domicilio secundario</label>
+                            <textarea class="form-control" id="quick_nino_domicilio_secundario" name="domicilio_secundario" rows="2"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar niño</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="parteQuickCreateModal" tabindex="-1" aria-labelledby="parteQuickCreateModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form id="parte-quick-create-form">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="parteQuickCreateModalLabel">Agregar parte</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger d-none" id="parte-quick-errors"></div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label" for="quick_parte_nombre">Nombre</label>
+                            <input type="text" class="form-control" id="quick_parte_nombre" name="nombre" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="quick_parte_apellido">Apellido</label>
+                            <input type="text" class="form-control" id="quick_parte_apellido" name="apellido" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="quick_parte_dni">DNI</label>
+                            <input type="text" class="form-control" id="quick_parte_dni" name="dni">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="quick_parte_telefono">Teléfono</label>
+                            <input type="text" class="form-control" id="quick_parte_telefono" name="telefono">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="quick_parte_vinculo">Vínculo</label>
+                            <select class="form-select" id="quick_parte_vinculo">
+                                <option value="PADRE/MADRE" selected>PADRE/MADRE</option>
+                                <option value="TUTOR">TUTOR</option>
+                                <option value="ABUELO/A">ABUELO/A</option>
+                                <option value="OTRO">OTRO</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label" for="quick_parte_direccion">Dirección</label>
+                            <textarea class="form-control" id="quick_parte_direccion" name="direccion" rows="2"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar parte</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -195,6 +398,34 @@
 {% block extra_js %}
 <script>
 $(document).ready(function() {
+    function getCookie(name) {
+        const cookies = document.cookie ? document.cookie.split(';') : [];
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                return decodeURIComponent(cookie.substring(name.length + 1));
+            }
+        }
+        return '';
+    }
+
+    function renderQuickErrors(containerSelector, errors) {
+        const container = $(containerSelector);
+        const lines = [];
+        Object.keys(errors || {}).forEach(field => {
+            const messages = Array.isArray(errors[field]) ? errors[field] : [errors[field]];
+            messages.forEach(message => lines.push(message));
+        });
+        container
+            .removeClass('d-none')
+            .html(lines.length ? lines.join('<br>') : 'No se pudo guardar. Revisá los datos cargados.');
+    }
+
+    function resetQuickForm(formSelector, errorsSelector) {
+        $(formSelector)[0].reset();
+        $(errorsSelector).addClass('d-none').empty();
+    }
+
     // NIÑOS
     let ninosDisponibles = [];
     let ninosSeleccionados = [];
@@ -220,10 +451,8 @@ $(document).ready(function() {
         tbody.empty();
         if (ninosDisponibles.length === 0) {
             tbody.html('<tr><td colspan="4" class="text-center">No se encontraron niños.</td></tr>');
-            $('#ninos-empty-actions').show();
             return;
         }
-        $('#ninos-empty-actions').hide();
         ninosDisponibles.forEach(nino => {
             const isSelected = ninosSeleccionados.some(n => n.id === nino.id && !n.deleted);
             const tr = $(`
@@ -265,6 +494,44 @@ $(document).ready(function() {
     $('#btnBuscarNino').on('click', () => cargarNinos($('#buscarNino').val()));
     $('#buscarNino').on('keypress', e => { if (e.which === 13) { e.preventDefault(); $('#btnBuscarNino').trigger('click'); } });
 
+    $('#open-nino-quick-create').on('click', function() {
+        resetQuickForm('#nino-quick-create-form', '#nino-quick-errors');
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('ninosModal')).hide();
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('ninoQuickCreateModal')).show();
+    });
+
+    $('#nino-quick-create-form').on('submit', function(e) {
+        e.preventDefault();
+        $('#nino-quick-errors').addClass('d-none').empty();
+
+        $.ajax({
+            url: '{% url "personas:api_ninos" %}',
+            method: 'POST',
+            data: $(this).serialize(),
+            headers: { 'X-CSRFToken': getCookie('csrftoken') },
+            success: function(response) {
+                const nino = response.item;
+                if (nino && !ninosSeleccionados.some(item => item.id === nino.id)) {
+                    ninosSeleccionados.push(nino);
+                }
+                actualizarNinosDisplay();
+                actualizarNinoFormset();
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('ninoQuickCreateModal')).hide();
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('ninosModal')).show();
+                cargarNinos($('#buscarNino').val());
+            },
+            error: function(xhr) {
+                renderQuickErrors('#nino-quick-errors', xhr.responseJSON && xhr.responseJSON.errors);
+            }
+        });
+    });
+
+    $('#ninoQuickCreateModal').on('hidden.bs.modal', function() {
+        if (!$('.modal.show').length) {
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('ninosModal')).show();
+        }
+    });
+
     $('#confirmarNinos').on('click', function() {
         $('input[name="seleccionNino"]:checked').each(function() {
             const ninoId = parseInt($(this).val());
@@ -295,16 +562,19 @@ $(document).ready(function() {
         const ninosActivos = ninosSeleccionados.filter(nino => !nino.deleted);
         
         if (ninosActivos.length === 0) {
-            container.html('<p class="text-muted">No hay niños seleccionados.</p>');
+            container.html('<p class="caso-empty-state">No hay niños seleccionados.</p>');
             return;
         }
         
-        const ul = $('<ul class="list-group"></ul>');
+        const ul = $('<ul class="list-group caso-selected-list"></ul>');
         
         ninosActivos.forEach(nino => {
             const item = $(`
                 <li class="list-group-item d-flex justify-content-between align-items-center" data-nino-id="${nino.id}">
-                    ${nino.apellido}, ${nino.nombre} (DNI: ${nino.dni || 'Sin DNI'})
+                    <div>
+                        <strong>${nino.apellido}, ${nino.nombre}</strong><br>
+                        <small class="text-muted">DNI: ${nino.dni || 'Sin DNI'}</small>
+                    </div>
                     <button type="button" class="btn btn-sm btn-outline-danger btn-remove-nino">
                         <i class="fas fa-times"></i>
                     </button>
@@ -333,11 +603,7 @@ $(document).ready(function() {
             container.append(form);
         });
         
-        // Actualizar el formulario de gestión
         $('#id_ninos-TOTAL_FORMS').val(ninosSeleccionados.length);
-        
-        // Actualizar el contador de formularios para el formset
-        $('input[name$="-TOTAL_FORMS"]').val(ninosSeleccionados.length);
     }
 
     // PARTES
@@ -366,10 +632,8 @@ $(document).ready(function() {
         
         if (partesDisponibles.length === 0) {
             tbody.html('<tr><td colspan="5" class="text-center">No se encontraron partes.</td></tr>');
-            $('#partes-empty-actions').show();
             return;
         }
-        $('#partes-empty-actions').hide();
         
         partesDisponibles.forEach(parte => {
             const selectedParte = partesSeleccionadas.find(p => p.id === parte.id && !p.deleted) || null;
@@ -401,6 +665,57 @@ $(document).ready(function() {
     // Search handlers for partes
     $('#btnBuscarParte').on('click', () => cargarPartes($('#buscarParte').val()));
     $('#buscarParte').on('keypress', e => { if (e.which === 13) { e.preventDefault(); $('#btnBuscarParte').trigger('click'); } });
+
+    $('#open-parte-quick-create').on('click', function() {
+        resetQuickForm('#parte-quick-create-form', '#parte-quick-errors');
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('partesModal')).hide();
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('parteQuickCreateModal')).show();
+    });
+
+    $('#parte-quick-create-form').on('submit', function(e) {
+        e.preventDefault();
+        $('#parte-quick-errors').addClass('d-none').empty();
+
+        $.ajax({
+            url: '{% url "personas:api_partes" %}',
+            method: 'POST',
+            data: $(this).serialize(),
+            headers: { 'X-CSRFToken': getCookie('csrftoken') },
+            success: function(response) {
+                const parte = response.item;
+                if (parte) {
+                    const vinculo = $('#quick_parte_vinculo').val() || 'No especificado';
+                    const existente = partesSeleccionadas.find(item => item.id === parte.id);
+                    if (existente) {
+                        existente.deleted = false;
+                        existente.vinculo = vinculo;
+                    } else {
+                        partesSeleccionadas.push({
+                            id: parte.id,
+                            nombre: parte.nombre,
+                            apellido: parte.apellido,
+                            dni: parte.dni,
+                            vinculo: vinculo
+                        });
+                    }
+                    actualizarPartesDisplay();
+                    actualizarParteFormset();
+                }
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('parteQuickCreateModal')).hide();
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('partesModal')).show();
+                cargarPartes($('#buscarParte').val());
+            },
+            error: function(xhr) {
+                renderQuickErrors('#parte-quick-errors', xhr.responseJSON && xhr.responseJSON.errors);
+            }
+        });
+    });
+
+    $('#parteQuickCreateModal').on('hidden.bs.modal', function() {
+        if (!$('.modal.show').length) {
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('partesModal')).show();
+        }
+    });
 
     $('#confirmarPartes').on('click', function() {
         $('input[name="seleccionParte"]:checked').each(function() {
@@ -439,11 +754,11 @@ $(document).ready(function() {
         const partesActivas = partesSeleccionadas.filter(parte => !parte.deleted);
 
         if (partesActivas.length === 0) {
-            container.html('<p class="text-muted">No hay partes seleccionadas.</p>');
+            container.html('<p class="caso-empty-state">No hay partes seleccionadas.</p>');
             return;
         }
         
-        const ul = $('<ul class="list-group"></ul>');
+        const ul = $('<ul class="list-group caso-selected-list"></ul>');
         
         partesActivas.forEach(parte => {
             const li = $(`
@@ -483,11 +798,7 @@ $(document).ready(function() {
             container.append(form);
         });
         
-        // Actualizar el formulario de gestión
         $('#id_partes-TOTAL_FORMS').val(partesSeleccionadas.length);
-        
-        // Actualizar el contador de formularios para el formset
-        $('input[name$="-TOTAL_FORMS"]').val(partesSeleccionadas.length);
     }
 
     // Delegación de eventos para eliminar niños

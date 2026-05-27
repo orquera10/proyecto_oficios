@@ -9,9 +9,8 @@
         
         <div class="card mb-4">
             <div class="card-body">
-                <h5 class="card-title">{{ object.expte }}</h5>
+                <h5 class="card-title">{{ object.codigo|default:"Caso sin código" }}</h5>
                 <p class="card-text">
-                    <strong>Tipo:</strong> {{ object.get_tipo_display }}<br>
                     <strong>Estado:</strong> {{ object.get_estado_display }}<br>
                     <strong>Creado:</strong> {{ object.creado|date:"d/m/Y H:i" }}
                 </p>

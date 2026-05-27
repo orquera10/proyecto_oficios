@@ -14,8 +14,224 @@
         <i class="bi bi-arrow-left"></i> Volver al listado
     </a>
 {% endblock %}
+
+{% block extra_css %}
+<style>
+    .case-detail-top .card {
+        overflow: hidden;
+    }
+
+    .case-detail-top .card-header {
+        border-bottom: 0;
+        padding: 0.95rem 1.1rem;
+    }
+
+    .case-detail-top .card-header.bg-primary,
+    .case-detail-top .card-header.bg-primary .card-title {
+        color: #ffffff;
+    }
+
+    .case-detail-top .card-header.bg-primary {
+        background: linear-gradient(120deg, var(--brand-900), var(--brand-700)) !important;
+    }
+
+    .case-detail-top .card-header.bg-info,
+    .case-detail-top .card-header.bg-info .card-title {
+        color: #102a43;
+    }
+
+    .case-detail-top .card-body {
+        padding: 1rem;
+    }
+
+    .case-detail-top dl.row {
+        display: grid;
+        grid-template-columns: minmax(128px, 0.55fr) minmax(0, 1fr);
+        margin: 0;
+        overflow: hidden;
+        border: 1px solid var(--border-200);
+        border-radius: 14px;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(247, 250, 255, 0.92));
+    }
+
+    .case-detail-top dl.row dt,
+    .case-detail-top dl.row dd {
+        border-bottom: 1px solid var(--border-200);
+        margin: 0;
+        min-height: 54px;
+        padding: 0.85rem;
+        width: auto;
+    }
+
+    .case-detail-top dl.row dt {
+        align-items: center;
+        background-color: rgba(42, 123, 176, 0.06);
+        color: var(--text-600);
+        display: flex;
+        font-size: 0.76rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0;
+    }
+
+    .case-detail-top dl.row dd {
+        align-items: center;
+        color: var(--text-900);
+        display: flex;
+        font-weight: 700;
+        overflow-wrap: anywhere;
+    }
+
+    .case-detail-top dl.row dt:last-of-type,
+    .case-detail-top dl.row dd:last-of-type {
+        border-bottom: 0;
+    }
+
+    .case-detail-top .table-responsive {
+        border: 1px solid var(--border-200);
+        border-radius: 14px;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(247, 250, 255, 0.92));
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+        overflow: hidden;
+    }
+
+    .case-detail-top .table {
+        margin: 0;
+    }
+
+    .case-detail-top .table thead th {
+        border-bottom: 1px solid var(--border-200);
+        color: var(--text-600);
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0;
+        white-space: nowrap;
+    }
+
+    .case-detail-top .table tbody td {
+        border-color: var(--border-200);
+        color: var(--text-900);
+        padding: 0.85rem 0.7rem;
+        vertical-align: middle;
+    }
+
+    .case-detail-top .table tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .case-detail-top .table tbody tr:hover td {
+        background-color: rgba(42, 123, 176, 0.05);
+    }
+
+    .case-detail-top .table tbody td:first-child {
+        font-weight: 700;
+        overflow-wrap: anywhere;
+    }
+
+    .case-detail-top .table tbody td:nth-child(2),
+    .case-detail-top .table tbody td:nth-child(3) {
+        color: var(--text-700);
+        font-weight: 600;
+    }
+
+    .case-detail-top .table tbody td:nth-child(4) {
+        color: var(--text-700);
+        font-size: 0.9rem;
+        max-width: 220px;
+    }
+
+    .case-detail-top .text-muted.small {
+        border: 1px dashed var(--border-200);
+        border-radius: 14px;
+        padding: 0.9rem;
+    }
+
+    html[data-theme="dark"] .case-detail-top dl.row,
+    html[data-theme="dark"] .case-detail-top .table-responsive {
+        background: linear-gradient(180deg, #121d2b 0%, #0f1a28 100%);
+    }
+
+    html[data-theme="dark"] .case-detail-top dl.row dt {
+        background-color: rgba(42, 123, 176, 0.14);
+    }
+
+    html[data-theme="dark"] .case-detail-top .table tbody tr:hover td {
+        background-color: rgba(42, 123, 176, 0.12);
+    }
+
+    @media (min-width: 768px) {
+        .case-detail-top > .col-md-6:first-child {
+            display: flex;
+        }
+
+        .case-detail-top > .col-md-6:first-child > .card {
+            height: 100%;
+            margin-bottom: 0 !important;
+            width: 100%;
+        }
+
+        .case-detail-top > .col-md-6:first-child > .card > .card-body {
+            align-items: center;
+            display: flex;
+        }
+
+        .case-detail-top > .col-md-6:first-child dl.row {
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .case-detail-top dl.row {
+            grid-template-columns: 1fr;
+        }
+
+        .case-detail-top dl.row dt {
+            border-bottom: 0;
+            min-height: auto;
+            padding-bottom: 0.2rem;
+        }
+
+        .case-detail-top dl.row dd {
+            min-height: auto;
+            padding-top: 0.2rem;
+        }
+
+        .case-detail-top .table thead {
+            display: none;
+        }
+
+        .case-detail-top .table,
+        .case-detail-top .table tbody,
+        .case-detail-top .table tr,
+        .case-detail-top .table td {
+            display: block;
+            width: 100%;
+        }
+
+        .case-detail-top .table tbody {
+            padding: 0.4rem 0;
+        }
+
+        .case-detail-top .table tr {
+            border-bottom: 1px solid var(--border-200);
+            padding: 0.65rem 0;
+        }
+
+        .case-detail-top .table tr:last-child {
+            border-bottom: 0;
+        }
+
+        .case-detail-top .table tbody td {
+            border-bottom: 0;
+            padding: 0.2rem 0.85rem;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block casos_content %}
-<div class="row">
+<div class="row case-detail-top">
     <div class="col-md-6">
         <div class="card mb-4">
             <div class="card-header bg-primary">
@@ -23,11 +239,8 @@
             </div>
             <div class="card-body">
                 <dl class="row">
-                    <dt class="col-sm-4">Expediente:</dt>
-                    <dd class="col-sm-8">{{ object.expte }}</dd>
-                    
-                    <dt class="col-sm-4">Tipo:</dt>
-                    <dd class="col-sm-8">{{ object.get_tipo_display }}</dd>
+                    <dt class="col-sm-4">Código:</dt>
+                    <dd class="col-sm-8"><span class="fw-semibold">{{ object.codigo|default:"-" }}</span></dd>
                     
                     <dt class="col-sm-4">Estado:</dt>
                     <dd class="col-sm-8">
@@ -136,7 +349,7 @@
             {% if user.perfil.id_sector and 'despacho' in user.perfil.id_sector.nombre|lower or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'informatica' or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'coordinador' or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'director-ninez' %}
             <a href="{% url 'oficios:create' %}?caso={{ object.pk }}" class="btn btn-sm btn-outline-secondary d-flex align-items-center">
                 <i class="fas fa-plus-circle me-1"></i>
-                <span class="fw-semibold">Nuevo Oficio</span>
+                <span class="fw-semibold">Nuevo Documento</span>
             </a>
             {% endif %}
         {% endif %}

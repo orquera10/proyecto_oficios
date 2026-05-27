@@ -86,26 +86,12 @@ class CasoParte(models.Model):
 
 
 class Caso(models.Model):
-    TIPO_CHOICES = [
-        ('MPA', 'MPA'),
-        ('JUDICIAL', 'Judicial'),
-        ('PROVINCIAL', 'Provincial'),
-        ('NOTA', 'Nota'),
-    ]
-    
     ESTADO_CHOICES = [
         ('ABIERTO', 'Abierto'),
         ('EN_PROCESO', 'En Proceso'),
         ('CERRADO', 'Cerrado'),
     ]
     
-    tipo = models.CharField(
-        'Tipo de Caso',
-        max_length=10,
-        choices=TIPO_CHOICES,
-        default='MPA'
-    )
-
     codigo = models.CharField(
         'Código',
         max_length=20,
@@ -113,8 +99,6 @@ class Caso(models.Model):
         blank=True,
         null=True
     )
-    
-    expte = models.CharField('Expediente', max_length=50, unique=True, blank=True, null=True)
     
     estado = models.CharField(
         'Estado',
@@ -158,18 +142,16 @@ class Caso(models.Model):
         ordering = ['-creado']
     
     def __str__(self):
-        referencia = self.codigo or self.expte or self.pk
-        return f"{self.get_tipo_display()} - {referencia}"
+        referencia = self.codigo or self.pk
+        return f"Caso {referencia}"
 
-    def _generar_codigo(self):
-        anio = (self.creado.year if self.creado else timezone.now().year)
-        ultimo = (
-            Caso.objects
-            .filter(codigo__startswith='CS-', codigo__endswith=f'-{anio}')
-            .exclude(pk=self.pk)
-            .order_by('-codigo')
-            .first()
-        )
+    @classmethod
+    def generar_codigo_disponible(cls, anio=None, exclude_pk=None):
+        anio = anio or timezone.now().year
+        queryset = cls.objects.filter(codigo__startswith='CS-', codigo__endswith=f'-{anio}')
+        if exclude_pk:
+            queryset = queryset.exclude(pk=exclude_pk)
+        ultimo = queryset.order_by('-codigo').first()
         siguiente = 1
 
         if ultimo and ultimo.codigo:
@@ -180,13 +162,15 @@ class Caso(models.Model):
 
         return f"CS-{siguiente:05d}-{anio}"
 
+    def _generar_codigo(self):
+        anio = (self.creado.year if self.creado else timezone.now().year)
+        return self.generar_codigo_disponible(anio=anio, exclude_pk=self.pk)
+
     def save(self, *args, **kwargs):
-        if self.expte:
-            self.expte = self.expte.upper()
         codigo_en_uso = (
             not self.pk
             and self.codigo
-            and Caso.objects.filter(codigo=self.codigo).exists()
+            and type(self).objects.filter(codigo=self.codigo).exists()
         )
         if not self.codigo or codigo_en_uso:
             self.codigo = self._generar_codigo()

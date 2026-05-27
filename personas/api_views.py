@@ -2,6 +2,7 @@ from django.views import View
 from django.http import JsonResponse
 from django.db.models import Q
 from .models import Nino, Parte
+from .forms import NinoForm, ParteForm
 
 class NinoAPIView(View):
     """API view para obtener la lista de niños con búsqueda"""
@@ -30,6 +31,22 @@ class NinoAPIView(View):
         
         return JsonResponse(data, safe=False)
 
+    def post(self, request, *args, **kwargs):
+        form = NinoForm(request.POST)
+        if not form.is_valid():
+            return JsonResponse({'ok': False, 'errors': form.errors}, status=400)
+
+        nino = form.save()
+        return JsonResponse({
+            'ok': True,
+            'item': {
+                'id': nino.id_ninos,
+                'nombre': nino.nombre,
+                'apellido': nino.apellido,
+                'dni': nino.dni or '',
+            }
+        }, status=201)
+
 class ParteAPIView(View):
     """API view para obtener la lista de partes con búsqueda"""
     def get(self, request, *args, **kwargs):
@@ -53,3 +70,19 @@ class ParteAPIView(View):
         } for parte in partes]
 
         return JsonResponse(data, safe=False)
+
+    def post(self, request, *args, **kwargs):
+        form = ParteForm(request.POST)
+        if not form.is_valid():
+            return JsonResponse({'ok': False, 'errors': form.errors}, status=400)
+
+        parte = form.save()
+        return JsonResponse({
+            'ok': True,
+            'item': {
+                'id': parte.id_partes,
+                'nombre': parte.nombre,
+                'apellido': parte.apellido,
+                'dni': parte.dni or '',
+            }
+        }, status=201)
