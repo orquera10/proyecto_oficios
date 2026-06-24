@@ -297,32 +297,42 @@
                     <div class="alert alert-danger d-none" id="nino-quick-errors"></div>
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label" for="quick_nino_nombre">Nombre</label>
+                            <label class="form-label fw-semibold" for="quick_nino_nombre">Nombre</label>
                             <input type="text" class="form-control" id="quick_nino_nombre" name="nombre" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label" for="quick_nino_apellido">Apellido</label>
+                            <label class="form-label fw-semibold" for="quick_nino_apellido">Apellido</label>
                             <input type="text" class="form-control" id="quick_nino_apellido" name="apellido" required>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label" for="quick_nino_dni">DNI</label>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold" for="quick_nino_dni">DNI</label>
                             <input type="text" class="form-control" id="quick_nino_dni" name="dni">
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label" for="quick_nino_fecha_nac">Fecha de nacimiento</label>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold" for="quick_nino_telefono">Teléfono</label>
+                            <input type="text" class="form-control" id="quick_nino_telefono" name="telefono">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold" for="quick_nino_fecha_nac">Fecha de nacimiento</label>
                             <input type="date" class="form-control" id="quick_nino_fecha_nac" name="fecha_nac">
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label" for="quick_nino_edad">Edad</label>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold" for="quick_nino_edad">Edad</label>
                             <input type="number" min="0" class="form-control" id="quick_nino_edad" name="edad">
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label" for="quick_nino_domicilio_principal">Domicilio principal</label>
-                            <textarea class="form-control" id="quick_nino_domicilio_principal" name="domicilio_principal" rows="2"></textarea>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label" for="quick_nino_domicilio_secundario">Domicilio secundario</label>
-                            <textarea class="form-control" id="quick_nino_domicilio_secundario" name="domicilio_secundario" rows="2"></textarea>
+                        <div class="col-12">
+                            <div class="border rounded p-3 bg-light">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold" for="quick_nino_domicilio_principal">Domicilio principal</label>
+                                        <textarea class="form-control" id="quick_nino_domicilio_principal" name="domicilio_principal" rows="2"></textarea>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold" for="quick_nino_domicilio_secundario">Domicilio secundario</label>
+                                        <textarea class="form-control" id="quick_nino_domicilio_secundario" name="domicilio_secundario" rows="2"></textarea>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -347,33 +357,42 @@
                     <div class="alert alert-danger d-none" id="parte-quick-errors"></div>
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label" for="quick_parte_nombre">Nombre</label>
+                            <label class="form-label fw-semibold" for="quick_parte_nombre">Nombre</label>
                             <input type="text" class="form-control" id="quick_parte_nombre" name="nombre" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label" for="quick_parte_apellido">Apellido</label>
+                            <label class="form-label fw-semibold" for="quick_parte_apellido">Apellido</label>
                             <input type="text" class="form-control" id="quick_parte_apellido" name="apellido" required>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label" for="quick_parte_dni">DNI</label>
+                            <label class="form-label fw-semibold" for="quick_parte_dni">DNI</label>
                             <input type="text" class="form-control" id="quick_parte_dni" name="dni">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label" for="quick_parte_telefono">Teléfono</label>
+                            <label class="form-label fw-semibold" for="quick_parte_telefono">Teléfono</label>
                             <input type="text" class="form-control" id="quick_parte_telefono" name="telefono">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label" for="quick_parte_vinculo">Vínculo</label>
-                            <select class="form-select" id="quick_parte_vinculo">
-                                <option value="PADRE/MADRE" selected>PADRE/MADRE</option>
-                                <option value="TUTOR">TUTOR</option>
-                                <option value="ABUELO/A">ABUELO/A</option>
-                                <option value="OTRO">OTRO</option>
-                            </select>
+                            <label class="form-label fw-semibold" for="quick_parte_vinculo">Vínculo</label>
+                            <div class="d-flex align-items-start gap-2">
+                                <select class="form-select" id="quick_parte_vinculo">
+                                    <option value="PADRE" selected>PADRE</option>
+                                    <option value="MADRE">MADRE</option>
+                                    <option value="TUTOR">TUTOR</option>
+                                    <option value="ABUELO/A">ABUELO/A</option>
+                                    <option value="REFERENTE_RESGUARDO">REFERENTE DE RESGUARDO</option>
+                                    <option value="OTRO">OTRO</option>
+                                </select>
+                                <div id="referente-personalizado-container" class="flex-grow-1 d-none">
+                                    <input type="text" class="form-control" id="quick_parte_referente_personalizado" name="referente_personalizado" placeholder="Ingresá el nombre del referente">
+                                </div>
+                            </div>
                         </div>
                         <div class="col-12">
-                            <label class="form-label" for="quick_parte_direccion">Dirección</label>
-                            <textarea class="form-control" id="quick_parte_direccion" name="direccion" rows="2"></textarea>
+                            <div class="border rounded p-3 bg-light">
+                                <label class="form-label fw-semibold" for="quick_parte_direccion">Dirección</label>
+                                <textarea class="form-control" id="quick_parte_direccion" name="direccion" rows="2"></textarea>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -650,11 +669,14 @@ $(document).ready(function() {
                     <td>
                         <select class="form-select form-select-sm" id="vinculo-${parte.id}">
                             <option value="">Seleccionar...</option>
-                            <option value="PADRE/MADRE" ${(!selectedParte || selectedParte.vinculo === 'PADRE/MADRE') ? 'selected' : ''}>PADRE/MADRE</option>
+                            <option value="PADRE" ${(!selectedParte || selectedParte.vinculo === 'PADRE' || selectedParte.vinculo === 'PADRE/MADRE') ? 'selected' : ''}>PADRE</option>
+                            <option value="MADRE" ${selectedParte && (selectedParte.vinculo === 'MADRE' || selectedParte.vinculo === 'PADRE/MADRE') ? 'selected' : ''}>MADRE</option>
                             <option value="TUTOR" ${selectedParte && selectedParte.vinculo === 'TUTOR' ? 'selected' : ''}>TUTOR</option>
                             <option value="ABUELO/A" ${selectedParte && selectedParte.vinculo === 'ABUELO/A' ? 'selected' : ''}>ABUELO/A</option>
+                            <option value="REFERENTE_RESGUARDO" ${selectedParte && selectedParte.vinculo && selectedParte.vinculo.startsWith('REFERENTE_RESGUARDO') ? 'selected' : ''}>REFERENTE DE RESGUARDO</option>
                             <option value="OTRO" ${selectedParte && selectedParte.vinculo === 'OTRO' ? 'selected' : ''}>OTRO</option>
                         </select>
+                        <input type="text" class="form-control form-control-sm mt-1 ${selectedParte && selectedParte.vinculo && selectedParte.vinculo.startsWith('REFERENTE_RESGUARDO') ? '' : 'd-none'}" id="vinculo-custom-${parte.id}" placeholder="Especificar referente..." value="${selectedParte && selectedParte.observaciones ? selectedParte.observaciones : (selectedParte && selectedParte.vinculo && selectedParte.vinculo.startsWith('REFERENTE_RESGUARDO: ') ? selectedParte.vinculo.replace('REFERENTE_RESGUARDO: ', '') : '')}">
                     </td>
                 </tr>
             `);
@@ -668,13 +690,28 @@ $(document).ready(function() {
 
     $('#open-parte-quick-create').on('click', function() {
         resetQuickForm('#parte-quick-create-form', '#parte-quick-errors');
+        $('#referente-personalizado-container').hide();
         bootstrap.Modal.getOrCreateInstance(document.getElementById('partesModal')).hide();
         bootstrap.Modal.getOrCreateInstance(document.getElementById('parteQuickCreateModal')).show();
+    });
+
+    $('#quick_parte_vinculo').on('change', function() {
+        if ($(this).val() === 'REFERENTE_RESGUARDO') {
+            $('#referente-personalizado-container').removeClass('d-none');
+        } else {
+            $('#referente-personalizado-container').addClass('d-none');
+        }
     });
 
     $('#parte-quick-create-form').on('submit', function(e) {
         e.preventDefault();
         $('#parte-quick-errors').addClass('d-none').empty();
+
+        let vinculo = $('#quick_parte_vinculo').val() || 'No especificado';
+        let observaciones = '';
+        if (vinculo === 'REFERENTE_RESGUARDO') {
+            observaciones = ($('#quick_parte_referente_personalizado').val() || '').toUpperCase();
+        }
 
         $.ajax({
             url: '{% url "personas:api_partes" %}',
@@ -684,18 +721,19 @@ $(document).ready(function() {
             success: function(response) {
                 const parte = response.item;
                 if (parte) {
-                    const vinculo = $('#quick_parte_vinculo').val() || 'No especificado';
                     const existente = partesSeleccionadas.find(item => item.id === parte.id);
                     if (existente) {
                         existente.deleted = false;
                         existente.vinculo = vinculo;
+                        existente.observaciones = observaciones;
                     } else {
                         partesSeleccionadas.push({
                             id: parte.id,
                             nombre: parte.nombre,
                             apellido: parte.apellido,
                             dni: parte.dni,
-                            vinculo: vinculo
+                            vinculo: vinculo,
+                            observaciones: observaciones
                         });
                     }
                     actualizarPartesDisplay();
@@ -720,7 +758,11 @@ $(document).ready(function() {
     $('#confirmarPartes').on('click', function() {
         $('input[name="seleccionParte"]:checked').each(function() {
             const parteId = parseInt($(this).val());
-            const vinculo = $(`#vinculo-${parteId}`).val() || 'No especificado';
+            let vinculo = $(`#vinculo-${parteId}`).val() || 'No especificado';
+            let observaciones = '';
+            if (vinculo === 'REFERENTE_RESGUARDO') {
+                observaciones = $(`#vinculo-custom-${parteId}`).val().toUpperCase() || '';
+            }
             const parte = partesDisponibles.find(p => p.id === parteId);
             const existente = partesSeleccionadas.find(p => p.id === parteId);
 
@@ -730,11 +772,13 @@ $(document).ready(function() {
                     nombre: parte.nombre,
                     apellido: parte.apellido,
                     dni: parte.dni,
-                    vinculo: vinculo
+                    vinculo: vinculo,
+                    observaciones: observaciones
                 });
             } else if (existente) {
                 existente.deleted = false;
                 existente.vinculo = vinculo;
+                existente.observaciones = observaciones;
             }
         });
         
@@ -745,6 +789,15 @@ $(document).ready(function() {
         // Limpiar búsqueda y selección
         $('#buscarParte').val('');
         $('input[name="seleccionParte"]').prop('checked', false);
+    });
+
+    $(document).on('change', '[id^="vinculo-"][id!="quick_parte_vinculo"]', function() {
+        const parteId = this.id.replace('vinculo-', '');
+        if ($(this).val() === 'REFERENTE_RESGUARDO') {
+            $(`#vinculo-custom-${parteId}`).removeClass('d-none');
+        } else {
+            $(`#vinculo-custom-${parteId}`).addClass('d-none');
+        }
     });
 
     function actualizarPartesDisplay() {
@@ -761,12 +814,15 @@ $(document).ready(function() {
         const ul = $('<ul class="list-group caso-selected-list"></ul>');
         
         partesActivas.forEach(parte => {
+            const vinculoDisplay = parte.vinculo === 'REFERENTE_RESGUARDO' && parte.observaciones
+                ? parte.observaciones
+                : parte.vinculo;
             const li = $(`
                 <li class="list-group-item" data-parte-id="${parte.id}">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <strong>${parte.nombre} ${parte.apellido} (DNI: ${parte.dni})</strong><br>
-                            <small class="text-muted">Vínculo: ${parte.vinculo || 'No especificado'}</small>
+                            <small class="text-muted">Vínculo: ${vinculoDisplay || 'No especificado'}</small>
                         </div>
                         <button type="button" class="btn btn-sm btn-outline-danger btn-remove-parte">
                             <i class="fas fa-times"></i>
@@ -791,7 +847,7 @@ $(document).ready(function() {
                     <input type="hidden" name="partes-${index}-caso" id="id_partes-${index}-caso" value="{{ object.id|default:'' }}">
                     <input type="hidden" name="partes-${index}-parte" id="id_partes-${index}-parte" value="${parte.id}">
                     <input type="hidden" name="partes-${index}-tipo_relacion" id="id_partes-${index}-tipo_relacion" value="${parte.vinculo || ''}">
-                    <input type="hidden" name="partes-${index}-observaciones" id="id_partes-${index}-observaciones" value="">
+                    <input type="hidden" name="partes-${index}-observaciones" id="id_partes-${index}-observaciones" value="${parte.observaciones || ''}">
                     <input type="hidden" name="partes-${index}-DELETE" id="id_partes-${index}-DELETE" value="${parte.deleted ? 'on' : ''}">
                 </div>
             `);

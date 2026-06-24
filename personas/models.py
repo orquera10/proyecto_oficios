@@ -8,6 +8,7 @@ class Nino(models.Model):
     domicilio_principal = models.CharField(max_length=200, blank=True, null=True)
     domicilio_secundario = models.CharField(max_length=200, blank=True, null=True)
     dni = models.CharField(max_length=20, unique=True, blank=True, null=True)
+    telefono = models.CharField('Teléfono', max_length=20, blank=True, null=True)
     fecha_nac = models.DateField(blank=True, null=True)
     edad = models.PositiveIntegerField(blank=True, null=True, help_text='Edad en años, si no se conoce la fecha de nacimiento')
 

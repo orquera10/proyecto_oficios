@@ -53,7 +53,7 @@ class CasoParteForm(ModelForm):
         model = CasoParte
         fields = ['parte', 'tipo_relacion', 'observaciones']
         widgets = {
-            'tipo_relacion': forms.TextInput(attrs={'class': 'form-control'}),
+            'tipo_relacion': forms.Select(attrs={'class': 'form-select'}),
             'observaciones': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
         }
 

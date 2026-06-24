@@ -14,7 +14,7 @@ def _normalize_nombre(value: str) -> str:
 class NinoForm(forms.ModelForm):
     class Meta:
         model = Nino
-        fields = ['nombre', 'apellido', 'dni', 'fecha_nac', 'edad', 'domicilio_principal', 'domicilio_secundario']
+        fields = ['nombre', 'apellido', 'dni', 'telefono', 'fecha_nac', 'edad', 'domicilio_principal', 'domicilio_secundario']
         widgets = {
             'nombre': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -29,6 +29,10 @@ class NinoForm(forms.ModelForm):
             'dni': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': _('Ingrese el DNI (opcional)')
+            }),
+            'telefono': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': _('Ingrese el teléfono (opcional)')
             }),
             'fecha_nac': forms.DateInput(attrs={
                 'class': 'form-control',
@@ -55,6 +59,7 @@ class NinoForm(forms.ModelForm):
             'nombre': _('Nombre *'),
             'apellido': _('Apellido *'),
             'dni': _('DNI (opcional)'),
+            'telefono': _('Teléfono (opcional)'),
             'fecha_nac': _('Fecha de Nacimiento (opcional)'),
             'edad': _('Edad (opcional)'),
             'domicilio_principal': _('Domicilio principal (opcional)'),
@@ -85,6 +90,7 @@ class NinoForm(forms.ModelForm):
         self.fields['nombre'].required = True
         self.fields['apellido'].required = True
         self.fields['dni'].required = False
+        self.fields['telefono'].required = False
         self.fields['fecha_nac'].required = False
         self.fields['edad'].required = False
         self.fields['domicilio_principal'].required = False

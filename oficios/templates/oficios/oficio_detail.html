@@ -38,10 +38,13 @@
             <button type="button" id="btnEnviarOficio" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#enviarModal">
                 <i class="fas fa-paper-plane me-1"></i> Enviar
             </button>
+            {% endif %}
+            {% if user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'informatica' or user.perfil.id_sector and 'despacho' in user.perfil.id_sector.nombre|lower %}
             <a href="{% url 'oficios:update' oficio.pk %}" class="btn btn-warning">
                 <i class="bi bi-pencil-square me-1"></i> Editar
             </a>
-            {% elif user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'coordinador' %}
+            {% endif %}
+            {% if user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'coordinador' %}
             {% if oficio.estado == 'respondido' %}
             <form method="post" action="{% url 'oficios:validar_coord' oficio.pk %}" class="d-inline js-validar-oficio" data-validar-tipo="coordinación" data-accion="{% if oficio.validado_coord %}quitar{% else %}validar{% endif %}">
                 {% csrf_token %}
@@ -89,10 +92,13 @@
                 <i class="fas fa-paper-plane me-1"></i> Enviar
             </button>
             {% endif %}
-            {% if user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'despacho-de-ninez' or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'despacho-ninez' and oficio.estado == 'respondido' and oficio.validado_coord and oficio.validado_director %}
+            {% if user.perfil.id_sector and 'despacho' in user.perfil.id_sector.nombre|lower %}
+                
+            {% if oficio.estado == 'respondido' and oficio.validado_coord and oficio.validado_director %}
             <button type="button" id="btnEnviarOficio" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#enviarModal">
                 <i class="fas fa-paper-plane me-1"></i> Enviar
             </button>
+            {% endif %}
             {% endif %}
             {% endif %}
         </div>
@@ -594,27 +600,43 @@
         <div class="card-body">
             {% if oficio.archivo_pdf %}
                 <div class="d-flex flex-column">
-                    <div class="mb-3">
-                        <a href="{{ oficio.archivo_pdf.url }}" 
-                           target="_blank" 
-                           class="btn btn-primary">
-                            <i class="fas fa-external-link-alt me-2"></i>Abrir en nueva pestaña
-                        </a>
-                        <a href="{{ oficio.archivo_pdf.url }}" 
-                           download
-                           class="btn btn-outline-secondary ms-2">
-                            <i class="fas fa-download me-2"></i>Descargar
-                        </a>
-                        <button type="button"
-                                class="btn btn-outline-primary ms-2"
-                                data-pdf-preview
-                                data-pdf-url="{{ oficio.archivo_pdf.url }}">
-                            <i class="fas fa-eye me-2"></i>Previsualizar
-                        </button>
-                    </div>
+                    {% with extension=oficio.archivo_pdf.name|lower|slice:"-4:" %}
+                        {% if extension == '.pdf' %}
+                            <div class="mb-3">
+                                <a href="{{ oficio.archivo_pdf.url }}" 
+                                   target="_blank" 
+                                   class="btn btn-primary">
+                                    <i class="fas fa-external-link-alt me-2"></i>Abrir en nueva pestaña
+                                </a>
+                                <a href="{{ oficio.archivo_pdf.url }}" 
+                                   download
+                                   class="btn btn-outline-secondary ms-2">
+                                    <i class="fas fa-download me-2"></i>Descargar
+                                </a>
+                                <button type="button"
+                                        class="btn btn-outline-primary ms-2"
+                                        data-pdf-preview
+                                        data-pdf-url="{{ oficio.archivo_pdf.url }}">
+                                    <i class="fas fa-eye me-2"></i>Previsualizar
+                                </button>
+                            </div>
 
-                    <div class="pdf-viewer-container mt-3 d-none" style="height: 800px;" data-pdf-container>
-                    </div>
+                            <div class="pdf-viewer-container mt-3 d-none" style="height: 800px;" data-pdf-container>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-info d-flex align-items-center mb-3" role="alert">
+                                <i class="fas fa-file-archive me-2"></i>
+                                <span>Este archivo está comprimido en formato {{ extension|upper }}. Solo se permite descargarlo.</span>
+                            </div>
+                            <div class="mb-3">
+                                <a href="{{ oficio.archivo_pdf.url }}" 
+                                   download
+                                   class="btn btn-outline-secondary">
+                                    <i class="fas fa-download me-2"></i>Descargar
+                                </a>
+                            </div>
+                        {% endif %}
+                    {% endwith %}
 
                     <div class="text-muted small mt-2">
                         <i class="fas fa-info-circle me-1"></i>
@@ -749,10 +771,12 @@
 
     <div class="mt-4 d-flex justify-content-end align-items-center flex-wrap gap-2">
         <div class="btn-group" role="group" aria-label="Acciones">
-            {% if user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'informatica' %}
+            {% if user.perfil.id_sector and 'despacho' in user.perfil.id_sector.nombre|lower or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'informatica' %}
             <a href="{% url 'oficios:update' oficio.pk %}" class="btn btn-warning" title="Editar">
                 <i class="bi bi-pencil-square me-1"></i> Editar
             </a>
+            {% endif %}
+            {% if user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'informatica' %}
             <a href="{% url 'oficios:delete' oficio.pk %}" class="btn btn-danger" title="Eliminar">
                 <i class="bi bi-trash3 me-1"></i> Eliminar
             </a>

@@ -323,8 +323,20 @@
                             <tr>
                                 <td>{{ relacion.parte.nombre }} {{ relacion.parte.apellido }}</td>
                                 <td>{{ relacion.parte.dni|default:"-" }}</td>
-                                <td>{{ relacion.tipo_relacion|default:"-" }}</td>
-                                <td>{{ relacion.observaciones|default:"-"|truncatechars:30 }}</td>
+                                <td>
+                                    {% if relacion.tipo_relacion == 'REFERENTE_RESGUARDO' and relacion.observaciones %}
+                                        <div>Referente de resguardo</div>
+                                    {% else %}
+                                        {{ relacion.tipo_relacion|default:"-" }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if relacion.tipo_relacion == 'REFERENTE_RESGUARDO' and relacion.observaciones %}
+                                        {{ relacion.observaciones }}
+                                    {% else %}
+                                        {{ relacion.observaciones|default:"-" }}
+                                    {% endif %}
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>

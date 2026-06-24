@@ -152,7 +152,7 @@
                         <td>{{ caso.creado|date:"d/m/Y H:i" }}</td>
                         <td>
                             <div class="btn-group" role="group">
-                                {% if user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'informatica' or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'coordinador' or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'director-ninez' %}
+                                {% if user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'informatica' or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'coordinador' or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'director-ninez' or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'despacho-ninez' %}
                                 <a href="{% url 'casos:update' caso.pk %}" class="btn btn-sm btn-warning" title="Editar">
                                     <i class="bi bi-pencil-square"></i>
                                 </a>

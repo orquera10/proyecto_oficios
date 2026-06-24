@@ -65,10 +65,23 @@ class CasoParte(models.Model):
         auto_now_add=True,
         verbose_name='Fecha de relación'
     )
+    
+    TIPO_RELACION_CHOICES = [
+        ('PADRE', 'Padre'),
+        ('MADRE', 'Madre'),
+        ('TUTOR', 'Tutor'),
+        ('ABUELO/A', 'Abuelo/a'),
+        ('REFERENTE_RESGUARDO', 'Referente de Resguardo'),
+        ('REPRESENTANTE_LEGAL', 'Representante Legal'),
+        ('ABOGADO', 'Abogado/a'),
+        ('FAMILIAR', 'Familiar'),
+        ('OTRO', 'Otro'),
+    ]
+    
     tipo_relacion = models.CharField(
-        max_length=100,
+        max_length=200,
         verbose_name='Tipo de relación',
-        help_text='Ej: Padre, Madre, Tutor, Representante Legal, etc.'
+        choices=TIPO_RELACION_CHOICES
     )
     observaciones = models.TextField(
         verbose_name='Observaciones',

@@ -45,17 +45,17 @@ class OficioForm(forms.ModelForm):
             'legajo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: Legajo 9012'}),
             'plazo_horas': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Horas de plazo (opcional)'}),
             'juzgado': forms.Select(attrs={'class': 'form-control'}),
-            'archivo_pdf': forms.FileInput(attrs={'class': 'form-control', 'accept': '.pdf'}),
+            'archivo_pdf': forms.FileInput(attrs={'class': 'form-control', 'accept': '.pdf,.zip,.rar'}),
             'caso': forms.HiddenInput(),
         }
         labels = {
             'juzgado': 'Agente emisor',
-            'archivo_pdf': 'Archivo PDF',
+            'archivo_pdf': 'Archivo adjunto',
             'nro_oficio': 'Numero de Oficio',
             'caratula_oficio': 'Caratula de Documento'
         }
         help_texts = {
-            'archivo_pdf': 'Sube el archivo PDF del oficio. Tamano maximo: 10MB.',
+            'archivo_pdf': 'Sube el archivo PDF, ZIP o RAR del oficio. Tamaño máximo: 10MB.',
         }
 
     def clean_archivo_pdf(self):
@@ -63,8 +63,9 @@ class OficioForm(forms.ModelForm):
         if archivo:
             if archivo.size > 10 * 1024 * 1024:  # 10MB
                 raise forms.ValidationError("El archivo es demasiado grande. El tamano maximo permitido es 10MB.")
-            if not archivo.name.lower().endswith('.pdf'):
-                raise forms.ValidationError("Solo se permiten archivos PDF.")
+            allowed_extensions = ['.pdf', '.zip', '.rar']
+            if not any(archivo.name.lower().endswith(ext) for ext in allowed_extensions):
+                raise forms.ValidationError("Solo se permiten archivos PDF, ZIP o RAR.")
         return archivo
 
     def __init__(self, *args, **kwargs):
@@ -180,7 +181,7 @@ class OficioJudicialForm(OficioForm):
         widgets = {
             **OficioForm.Meta.widgets,
             'nro_oficio': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: 1864007'}),
-            'expediente': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: C-244216/2024'}),
+            'expediente': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: X-244216/2024'}),
         }
         labels = {
             **OficioForm.Meta.labels,
@@ -192,7 +193,7 @@ class OficioJudicialForm(OficioForm):
         super().__init__(*args, **kwargs)
         self.fields['expediente'].required = True
         self.fields['nro_oficio'].help_text = 'Formato: 1864007'
-        self.fields['expediente'].help_text = 'Formato: C-244216/2024'
+        self.fields['expediente'].help_text = 'Formato: X-244216/2024'
 
 
 class NotaForm(OficioForm):

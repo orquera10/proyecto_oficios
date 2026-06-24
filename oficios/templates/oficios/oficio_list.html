@@ -190,10 +190,12 @@
                             </div>
                             <div class="ms-3">
                                 <div class="btn-group btn-group-sm" role="group">
-                                    {% if user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'informatica' or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'coordinador' or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'director-ninez' %}
+                                    {% if user.perfil.id_sector and 'despacho' in user.perfil.id_sector.nombre|lower or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'informatica' or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'coordinador' or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'director-ninez' %}
                                     <a href="{% url 'oficios:update' oficio.pk %}" class="btn btn-warning" data-bs-toggle="tooltip" title="Editar">
                                         <i class="bi bi-pencil-square"></i>
                                     </a>
+                                    {% endif %}
+                                    {% if user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'informatica' or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'coordinador' or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'director-ninez' %}
                                     <a href="{% url 'oficios:delete' oficio.pk %}" class="btn btn-danger" data-bs-toggle="tooltip" title="Eliminar">
                                         <i class="bi bi-trash3"></i>
                                     </a>

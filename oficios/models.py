@@ -49,8 +49,8 @@ numero_oficio_judicial_validator = RegexValidator(
     message='El número de oficio judicial debe contener solo números. Ej: 1864007.'
 )
 expediente_judicial_validator = RegexValidator(
-    regex=r'^C-\d+/\d{4}$',
-    message='El expediente judicial debe tener el formato C-244216/2024.'
+    regex=r'^[A-Za-z]-\d+/\d{4}$',
+    message='El expediente judicial debe tener el formato X-244216/2024.'
 )
 
 
@@ -510,16 +510,16 @@ class Oficio(models.Model):
 
     archivo_pdf = models.FileField(
         upload_to=oficio_upload_path,
-        verbose_name='Archivo PDF del oficio',
+        verbose_name='Archivo adjunto del oficio',
         null=True,
         blank=True,
         validators=[
             FileExtensionValidator(
-                allowed_extensions=['pdf'],
-                message='Solo se permiten archivos PDF.'
+                allowed_extensions=['pdf', 'zip', 'rar'],
+                message='Solo se permiten archivos PDF, ZIP o RAR.'
             )
         ],
-        help_text='Sube el archivo PDF del oficio. Tamaño máximo: 10MB.'
+        help_text='Sube el archivo PDF, ZIP o RAR del oficio. Tamaño máximo: 10MB.'
     )
 
     def __str__(self):

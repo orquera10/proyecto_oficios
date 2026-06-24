@@ -78,6 +78,7 @@ class CasoCreateView(LoginRequiredMixin, CreateView):
             context['nino_formset'] = CasoNinoFormSet(prefix='ninos')
             context['parte_formset'] = CasoParteFormSet(prefix='partes')
         context['codigo_preview'] = Caso.generar_codigo_disponible()
+        context['TIPO_RELACION_CHOICES'] = CasoParte.TIPO_RELACION_CHOICES
         return context
     
     def form_valid(self, form):
@@ -141,6 +142,7 @@ class CasoUpdateView(LoginRequiredMixin, UpdateView):
                 prefix='partes'
             )
         context['codigo_preview'] = self.object.codigo
+        context['TIPO_RELACION_CHOICES'] = CasoParte.TIPO_RELACION_CHOICES
         return context
     
     def form_valid(self, form):
