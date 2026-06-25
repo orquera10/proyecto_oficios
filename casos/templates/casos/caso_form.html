@@ -8,6 +8,14 @@
     .caso-form-shell {
         border: 0;
         box-shadow: 0 0.5rem 1.5rem rgba(24, 39, 75, 0.08);
+        background: linear-gradient(180deg, #fdfefe 0%, #f2f7fc 100%);
+        color: var(--text-900, #0b1726);
+        overflow: visible;
+    }
+
+    .caso-form-shell .card-body {
+        background: transparent;
+        overflow: visible;
     }
 
     .caso-code-band {
@@ -31,6 +39,7 @@
         min-height: 260px;
         display: flex;
         flex-direction: column;
+        overflow: hidden;
     }
 
     .caso-relation-panel__header {
@@ -86,10 +95,98 @@
         padding: 0.85rem 0.9rem;
     }
 
+    .caso-quick-section {
+        background: #f8fafc;
+        border-color: #dce4ee;
+    }
+
     .caso-form-actions {
         border-top: 1px solid #e7edf4;
         padding-top: 1rem;
         margin-top: 1.25rem;
+    }
+
+    html[data-theme="dark"] .caso-form-shell,
+    html[data-theme="dark"] .caso-code-band,
+    html[data-theme="dark"] .caso-relation-panel,
+    html[data-theme="dark"] .caso-relation-panel__header,
+    html[data-theme="dark"] .caso-relation-panel__body,
+    html[data-theme="dark"] .caso-empty-state,
+    html[data-theme="dark"] .caso-selected-list .list-group-item,
+    html[data-theme="dark"] .modal-content,
+    html[data-theme="dark"] .modal-header,
+    html[data-theme="dark"] .modal-body,
+    html[data-theme="dark"] .modal-footer {
+        background-color: #111827 !important;
+        color: #f8fafc !important;
+        border-color: rgba(255, 255, 255, 0.16) !important;
+    }
+
+    html[data-theme="dark"] .caso-form-shell {
+        background: linear-gradient(180deg, #121d2b 0%, #0f1a28 100%) !important;
+        box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.35);
+    }
+
+    html[data-theme="dark"] .caso-form-shell .card-body {
+        background: transparent;
+    }
+
+    html[data-theme="dark"] .caso-code-band {
+        background: rgba(255, 255, 255, 0.04) !important;
+    }
+
+    html[data-theme="dark"] .caso-code-band .form-control:disabled {
+        background-color: rgba(255, 255, 255, 0.08);
+        color: #f8f9fa;
+    }
+
+    html[data-theme="dark"] .caso-relation-panel__header {
+        background: #111827 !important;
+        border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    html[data-theme="dark"] .caso-relation-panel__body {
+        background: #111827 !important;
+    }
+
+    html[data-theme="dark"] .caso-relation-panel__icon {
+        background: rgba(110, 168, 255, 0.16);
+        color: #8ec5ff;
+    }
+
+    html[data-theme="dark"] .caso-empty-state {
+        background: rgba(255, 255, 255, 0.03);
+        color: #d3dce7;
+    }
+
+    html[data-theme="dark"] .caso-quick-section {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: rgba(255, 255, 255, 0.16) !important;
+    }
+
+    html[data-theme="dark"] .form-control,
+    html[data-theme="dark"] .form-select,
+    html[data-theme="dark"] .form-check-input,
+    html[data-theme="dark"] textarea.form-control {
+        background-color: var(--bs-body-bg, #111827);
+        color: var(--bs-body-color, #f8f9fa);
+        border-color: rgba(255, 255, 255, 0.16);
+    }
+
+    html[data-theme="dark"] .form-control::placeholder,
+    html[data-theme="dark"] textarea.form-control::placeholder {
+        color: rgba(248, 249, 250, 0.64);
+    }
+
+    html[data-theme="dark"] .btn-outline-primary {
+        color: #8ec5ff;
+        border-color: #8ec5ff;
+    }
+
+    html[data-theme="dark"] .btn-outline-primary:hover {
+        color: #fff;
+        background-color: #8ec5ff;
+        border-color: #8ec5ff;
     }
 
     @media (max-width: 575.98px) {
@@ -106,7 +203,7 @@
 {% endblock %}
 
 {% block casos_content %}
-<div class="card caso-form-shell">
+<div class="card caso-form-shell oficio-form-card">
     <div class="card-body">
         <form method="post" id="caso-form">
             {% csrf_token %}
@@ -321,7 +418,7 @@
                             <input type="number" min="0" class="form-control" id="quick_nino_edad" name="edad">
                         </div>
                         <div class="col-12">
-                            <div class="border rounded p-3 bg-light">
+                            <div class="border rounded p-3 caso-quick-section">
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <label class="form-label fw-semibold" for="quick_nino_domicilio_principal">Domicilio principal</label>
@@ -389,7 +486,7 @@
                             </div>
                         </div>
                         <div class="col-12">
-                            <div class="border rounded p-3 bg-light">
+                            <div class="border rounded p-3 caso-quick-section">
                                 <label class="form-label fw-semibold" for="quick_parte_direccion">Dirección</label>
                                 <textarea class="form-control" id="quick_parte_direccion" name="direccion" rows="2"></textarea>
                             </div>

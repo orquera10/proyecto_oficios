@@ -2,6 +2,71 @@
 
 {% block title %}Gestión de Casos{% endblock %}
 
+{% block extra_css %}
+{{ block.super }}
+<style>
+    html[data-theme="dark"] .card,
+    html[data-theme="dark"] .card-body,
+    html[data-theme="dark"] .card-header,
+    html[data-theme="dark"] .bg-light,
+    html[data-theme="dark"] .bg-white,
+    html[data-theme="dark"] .border,
+    html[data-theme="dark"] .dropdown-menu,
+    html[data-theme="dark"] .accordion-item,
+    html[data-theme="dark"] .accordion-body,
+    html[data-theme="dark"] .offcanvas,
+    html[data-theme="dark"] .table,
+    html[data-theme="dark"] .table-responsive,
+    html[data-theme="dark"] .table thead th,
+    html[data-theme="dark"] .table td,
+    html[data-theme="dark"] .table th,
+    html[data-theme="dark"] .table-light,
+    html[data-theme="dark"] .list-group-item,
+    html[data-theme="dark"] .modal-content,
+    html[data-theme="dark"] .modal-header,
+    html[data-theme="dark"] .modal-body,
+    html[data-theme="dark"] .modal-footer,
+    html[data-theme="dark"] .pagination .page-link {
+        background-color: #111827 !important;
+        color: #f8fafc !important;
+        border-color: rgba(255, 255, 255, 0.12) !important;
+    }
+
+    html[data-theme="dark"] .table-hover tbody tr:hover > * {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+    }
+
+    html[data-theme="dark"] .text-muted,
+    html[data-theme="dark"] .text-secondary {
+        color: #cbd5e1 !important;
+    }
+
+    html[data-theme="dark"] .form-control,
+    html[data-theme="dark"] .form-select,
+    html[data-theme="dark"] .form-check-input,
+    html[data-theme="dark"] textarea.form-control {
+        background-color: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: rgba(255, 255, 255, 0.16) !important;
+    }
+
+    html[data-theme="dark"] .form-control::placeholder,
+    html[data-theme="dark"] textarea.form-control::placeholder {
+        color: rgba(248, 249, 250, 0.7) !important;
+    }
+
+    html[data-theme="dark"] .page-item.active .page-link {
+        background-color: #2563eb;
+        border-color: #2563eb;
+        color: #fff;
+    }
+
+    html[data-theme="dark"] .btn-close {
+        filter: invert(1) grayscale(100%) brightness(200%);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
