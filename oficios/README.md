@@ -27,7 +27,7 @@ Resumen operativo y tecnico del flujo de oficios dentro de la aplicacion.
 ## Reglas y permisos
 
 - Usuarios del sector **Coordinacion OPD** no pueden crear oficios.
-- Usuarios del sector **Despacho Ninez** no pueden responder ni cambiar estados (bloqueo en update, enviar y responder).
+- Usuarios del sector **Despacho Ninez** pueden editar oficios, pero no responderlos.
 - El tamano maximo de PDF es 10 MB (validado en formularios); solo se aceptan `.pdf`.
 - Archivos se almacenan en:
   - Oficios: `MEDIA_ROOT/oficios/oficio_<id>/<archivo>`

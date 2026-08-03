@@ -1,7 +1,13 @@
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.contrib.auth import get_user_model
 from django.test import TestCase
+from django.urls import reverse
+from django.utils import timezone
+
+from core.models import Sector, UsuarioPerfil
 
 from .forms import OficioForm, OficioJudicialForm
+from .models import Oficio
 
 
 class OficioFormUploadTests(TestCase):
@@ -27,3 +33,48 @@ class OficioJudicialFormTests(TestCase):
         })
         self.assertTrue(form.is_valid())
         self.assertEqual(form.cleaned_data['expediente'], 'A-244216/2024')
+
+
+class OficioDespachoPermissionsTests(TestCase):
+    def setUp(self):
+        user_model = get_user_model()
+        self.user = user_model.objects.create_user(
+            username='despacho',
+            password='test-password',
+        )
+        sector = Sector.objects.create(nombre='Despacho Niñez')
+        UsuarioPerfil.objects.create(usuario=self.user, id_sector=sector)
+        self.oficio = Oficio.objects.create(
+            nro_oficio='100/2026',
+            usuario=self.user,
+        )
+        self.client.force_login(self.user)
+
+    def test_despacho_can_update_an_oficio(self):
+        response = self.client.post(
+            reverse('oficios:update', kwargs={'pk': self.oficio.pk}),
+            {
+                'nro_oficio': '101/2026',
+                'fecha_emision': timezone.localtime(
+                    self.oficio.fecha_emision
+                ).strftime('%Y-%m-%dT%H:%M'),
+                'plazo_unidad': 'horas',
+            },
+        )
+
+        self.assertRedirects(
+            response,
+            reverse('oficios:detail', kwargs={'pk': self.oficio.pk}),
+        )
+        self.oficio.refresh_from_db()
+        self.assertEqual(self.oficio.nro_oficio, '101/2026')
+
+    def test_despacho_still_cannot_respond_to_an_oficio(self):
+        response = self.client.get(
+            reverse('oficios:responder', kwargs={'pk': self.oficio.pk})
+        )
+
+        self.assertRedirects(
+            response,
+            reverse('oficios:detail', kwargs={'pk': self.oficio.pk}),
+        )

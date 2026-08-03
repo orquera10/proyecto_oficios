@@ -55,7 +55,7 @@ Accede en http://127.0.0.1:8000/
 ## 7. Roles y permisos (logica de negocio)
 
 - Sector Coordinacion OPD: no puede crear oficios.
-- Sector Despacho Ninez: no puede responder ni cambiar estados (enviar/actualizar).
+- Sector Despacho Ninez: puede editar oficios, pero no responderlos.
 - Sector Informatica: unico autorizado a eliminar oficios.
 - Usuarios se resuelven via `perfil.id_sector` y flags como `perfil.es_profesional`.
 

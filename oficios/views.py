@@ -399,12 +399,6 @@ class OficioUpdateView(LoginRequiredMixin, UpdateView):
     form_class = OficioForm
     template_name = 'oficios/oficio_form.html'
 
-    def dispatch(self, request, *args, **kwargs):
-        if _is_despacho(request.user):
-            messages.error(request, 'No tiene permisos para responder oficios.')
-            return redirect('oficios:detail', pk=kwargs.get('pk'))
-        return super().dispatch(request, *args, **kwargs)
-
     def get_success_url(self):
         return reverse_lazy('oficios:detail', kwargs={'pk': self.object.pk})
     def get_context_data(self, **kwargs):
