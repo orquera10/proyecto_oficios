@@ -11,12 +11,27 @@ from django.conf import settings
 from simple_history.models import HistoricalRecords
 from casos.models import Caso
 
+
+def _limited_upload_path(directory, filename, max_length=100):
+    """Construye una ruta que respeta el max_length predeterminado de FileField."""
+    filename = os.path.basename(filename)
+    stem, extension = os.path.splitext(filename)
+    # Los puntos intermedios son interpretados por Django como parte de una
+    # extensión compuesta y pueden impedir que el storage acorte el nombre.
+    stem = stem.replace('.', '_') or 'archivo'
+    available_length = max_length - len(directory) - 1 - len(extension)
+    if available_length < 1:
+        raise ValueError('El directorio de carga es demasiado largo.')
+    return f'{directory}/{stem[:available_length]}{extension}'
+
+
 def oficio_upload_path(instance, filename):
     # Guarda el archivo en: MEDIA_ROOT/oficios/<year>/<month>/oficio_<uuid>/<filename>
     fecha = instance.fecha_emision or timezone.now()
     if timezone.is_aware(fecha):
         fecha = timezone.localtime(fecha)
-    return f'oficios/{fecha:%Y}/{fecha:%m}/oficio_{uuid.uuid4()}/{filename}'
+    directory = f'oficios/{fecha:%Y}/{fecha:%m}/oficio_{uuid.uuid4()}'
+    return _limited_upload_path(directory, filename)
 
 def respuesta_upload_path(instance, filename):
     # Guarda el archivo en: MEDIA_ROOT/respuestas/oficio_<oficio_id>/<filename>
@@ -26,12 +41,12 @@ def respuesta_upload_path(instance, filename):
             instance.id_oficio.id if getattr(instance, 'id_oficio', None) else 'sin_oficio'
         )
     )
-    return f'respuestas/oficio_{oficio_id}/{filename}'
+    return _limited_upload_path(f'respuestas/oficio_{oficio_id}', filename)
 
 def movimiento_upload_path(instance, filename):
     # Guarda el archivo en: MEDIA_ROOT/movimientos/oficio_<oficio_id>/<filename>
     oficio_id = instance.oficio_id or (instance.oficio.id if getattr(instance, 'oficio', None) else 'sin_oficio')
-    return f'movimientos/oficio_{oficio_id}/{filename}'
+    return _limited_upload_path(f'movimientos/oficio_{oficio_id}', filename)
 
 User = get_user_model()
 

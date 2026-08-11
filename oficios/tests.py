@@ -1,13 +1,31 @@
+import os
+from types import SimpleNamespace
+
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.contrib.auth import get_user_model
-from django.test import TestCase
+from django.test import SimpleTestCase, TestCase
 from django.urls import reverse
 from django.utils import timezone
 
 from core.models import Sector, UsuarioPerfil
 
 from .forms import OficioForm, OficioJudicialForm
-from .models import Oficio
+from .models import Oficio, oficio_upload_path
+
+
+class OficioUploadPathTests(SimpleTestCase):
+    def test_long_filename_is_shortened_without_losing_extension(self):
+        instance = SimpleNamespace(fecha_emision=timezone.now())
+        filename = (
+            '7708_CORONEL_ARIAS.1.3884099342_SOTO_IRMA_DIRECTORA_'
+            'DOCUMENTACION_ADJUNTA_CON_NOMBRE_MUY_EXTENSO.pdf'
+        )
+
+        path = oficio_upload_path(instance, filename)
+
+        self.assertLessEqual(len(path), 100)
+        self.assertEqual(os.path.splitext(path)[1], '.pdf')
+        self.assertNotIn('.', os.path.splitext(os.path.basename(path))[0])
 
 
 class OficioFormUploadTests(TestCase):
