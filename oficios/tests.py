@@ -78,3 +78,12 @@ class OficioDespachoPermissionsTests(TestCase):
             response,
             reverse('oficios:detail', kwargs={'pk': self.oficio.pk}),
         )
+
+    def test_list_renders_when_both_caratula_fields_are_empty(self):
+        self.assertIsNone(self.oficio.caratula_oficio)
+        self.assertIsNone(self.oficio.caratula)
+
+        response = self.client.get(reverse('oficios:list'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Car&aacute;tula del documento:')

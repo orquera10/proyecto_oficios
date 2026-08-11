@@ -176,7 +176,13 @@
                                 </div>
                                 <div class="mt-1 small">
                                     <span class="fw-semibold">Car&aacute;tula del documento:</span>
-                                    {{ oficio.caratula_oficio|default:oficio.caratula.nombre|default:"-" }}
+                                    {% if oficio.caratula_oficio %}
+                                        {{ oficio.caratula_oficio }}
+                                    {% elif oficio.caratula %}
+                                        {{ oficio.caratula.nombre|default:"-" }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
                                 </div>
                                 <div class="mt-1 small">
                                     Emisión: {{ oficio.fecha_emision|date:"d/m/Y H:i" }} · Vence:
