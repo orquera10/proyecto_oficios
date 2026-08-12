@@ -52,6 +52,14 @@ class OficioJudicialFormTests(TestCase):
         self.assertTrue(form.is_valid())
         self.assertEqual(form.cleaned_data['expediente'], 'A-244216/2024')
 
+    def test_accepts_multi_letter_prefix_in_expediente(self):
+        form = OficioJudicialForm(data={
+            'fecha_emision': '2026-01-01T10:00',
+            'expediente': 'VJ-16791/2026',
+        })
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data['expediente'], 'VJ-16791/2026')
+
 
 class OficioDespachoPermissionsTests(TestCase):
     def setUp(self):

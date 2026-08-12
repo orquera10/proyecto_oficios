@@ -64,8 +64,8 @@ numero_oficio_judicial_validator = RegexValidator(
     message='El número de oficio judicial debe contener solo números. Ej: 1864007.'
 )
 expediente_judicial_validator = RegexValidator(
-    regex=r'^[A-Za-z]-\d+/\d{4}$',
-    message='El expediente judicial debe tener el formato X-244216/2024.'
+    regex=r'^[A-Za-z]+-\d+/\d{4}$',
+    message='El expediente judicial debe tener el formato X-244216/2024 o VJ-16791/2026.'
 )
 
 

@@ -181,7 +181,7 @@ class OficioJudicialForm(OficioForm):
         widgets = {
             **OficioForm.Meta.widgets,
             'nro_oficio': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: 1864007'}),
-            'expediente': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: X-244216/2024'}),
+            'expediente': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: X-244216/2024 o VJ-16791/2026'}),
         }
         labels = {
             **OficioForm.Meta.labels,
@@ -193,7 +193,7 @@ class OficioJudicialForm(OficioForm):
         super().__init__(*args, **kwargs)
         self.fields['expediente'].required = True
         self.fields['nro_oficio'].help_text = 'Formato: 1864007'
-        self.fields['expediente'].help_text = 'Formato: X-244216/2024'
+        self.fields['expediente'].help_text = 'Formato: X-244216/2024 o VJ-16791/2026'
 
 
 class NotaForm(OficioForm):
