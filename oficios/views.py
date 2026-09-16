@@ -7,6 +7,9 @@ from django.utils import timezone
 from django.http import JsonResponse, HttpResponseRedirect
 from django.conf import settings
 from django.core.mail import EmailMessage
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.db.models import Q, F
 from django.views.decorators.http import require_http_methods
 import unicodedata
@@ -260,72 +263,45 @@ class OficioCreateView(LoginRequiredMixin, CreateView):
         context['tipo_documento'] = self.get_tipo_documento()
         context['selector_url'] = self.get_tipo_selector_url()
         return context
+    @transaction.atomic
     def form_valid(self, form):
         instituciones = list(form.cleaned_data.get("instituciones") or [])
         creados = []
         archivo = form.cleaned_data.get("archivo_pdf")
-        
-        if not instituciones:
-            obj = form.save(commit=False)
+        plantilla = form.save(commit=False)
+        # Each destination needs a fresh parent and child row, not a reused
+        # multi-table inheritance instance with only its child PK cleared.
+        datos = {
+            field.attname: getattr(plantilla, field.attname)
+            for field in plantilla._meta.concrete_fields
+            if not field.primary_key and not field.auto_created
+            and field.name not in ('codigo', 'creado', 'actualizado', 'archivo_pdf')
+        }
+        for institucion in instituciones or [None]:
+            obj = type(plantilla)(**datos)
             obj.usuario = self.request.user
-            if archivo is not None:
+            obj.institucion = institucion
+            obj._plazo_unidad = plantilla._plazo_unidad
+            obj._fecha_vencimiento_manual = plantilla._fecha_vencimiento_manual
+            if archivo:
+                archivo.seek(0)
                 obj.archivo_pdf = archivo
             obj.save()
-            try:
-                MovimientoOficio.objects.create(
-                    oficio=obj,
-                    usuario=self.request.user,
-                    estado_anterior=None,
-                    estado_nuevo='cargado',
-                    validado_coord=obj.validado_coord,
-                    validado_director=obj.validado_director,
-                    detalle=self.get_model_config()['detalle'],
-                    institucion=obj.institucion
-                )
-            except Exception:
-                pass
-            try:
-                if obj.caso and getattr(obj.caso, 'estado', None) == 'ABIERTO':
-                    obj.caso.estado = 'EN_PROCESO'
-                    obj.caso.save()
-            except Exception:
-                pass
+            MovimientoOficio.objects.create(
+                oficio=obj,
+                usuario=self.request.user,
+                estado_anterior=None,
+                estado_nuevo='cargado',
+                validado_coord=obj.validado_coord,
+                validado_director=obj.validado_director,
+                detalle=self.get_model_config()['detalle'],
+                institucion=institucion,
+            )
             creados.append(obj)
-        else:
-            for inst in instituciones:
-                obj = form.save(commit=False)
-                obj.pk = None
-                obj.usuario = self.request.user
-                obj.institucion = inst
-                if archivo is not None:
-                    try:
-                        archivo.seek(0)
-                    except Exception:
-                        pass
-                    obj.archivo_pdf = archivo
-                obj.save()
 
-                try:
-                    MovimientoOficio.objects.create(
-                        oficio=obj,
-                        usuario=self.request.user,
-                        estado_anterior=None,
-                        estado_nuevo='cargado',
-                        validado_coord=obj.validado_coord,
-                        validado_director=obj.validado_director,
-                        detalle=self.get_model_config()['detalle'],
-                        institucion=obj.institucion
-                    )
-                except Exception:
-                    pass
-
-                try:
-                    if obj.caso and getattr(obj.caso, 'estado', None) == 'ABIERTO':
-                        obj.caso.estado = 'EN_PROCESO'
-                        obj.caso.save()
-                except Exception:
-                    pass
-                creados.append(obj)
+        if plantilla.caso and plantilla.caso.estado == 'ABIERTO':
+            plantilla.caso.estado = 'EN_PROCESO'
+            plantilla.caso.save()
 
         if len(creados) == 1:
             self.object = creados[0]
@@ -362,6 +338,10 @@ class OficioDetailView(LoginRequiredMixin, DetailView):
             # Casos para asignar desde modal (últimos 50)
             'casos_opciones': Caso.objects.all().order_by('-creado')[:50],
         })
+        context['puede_enviar_revision'] = _puede_enviar_revision(self.request.user, self.object)
+        context['es_coordinacion_opd'] = is_coordinacion_opd(self.request.user)
+        context['correccion_en_curso'] = self.object.revision_pendiente or self.object.estado == 'en_revision'
+        context['ultima_revision'] = self.object.movimientos.filter(estado_nuevo='en_revision').first()
         return context
 
 
@@ -415,14 +395,53 @@ class OficioEnviarView(LoginRequiredMixin, View):
     """
     Vista para manejar el movimiento de un oficio a un nuevo estado.
     """
+    def enviar_asignacion_email(self, oficio, destinatario, asunto, cuerpo):
+        try:
+            if oficio.numero_interno:
+                cuerpo = f'{cuerpo}\n\nNúmero interno: {oficio.numero_interno}'
+            correo = EmailMessage(
+                subject=asunto,
+                body=cuerpo,
+                from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', None),
+                to=[destinatario],
+            )
+            with oficio.archivo_pdf.open('rb') as adjunto:
+                correo.attach(oficio.archivo_pdf.name.rsplit('/', 1)[-1], adjunto.read())
+            if correo.send(fail_silently=False) != 1:
+                raise RuntimeError('El servidor no aceptó el correo.')
+        except Exception:
+            messages.warning(self.request, 'El oficio quedó asignado, pero no se pudo enviar el correo a la institución.')
+        else:
+            messages.success(self.request, f'Copia del oficio enviada a {destinatario}.')
+
     @method_decorator(login_required)
+    @transaction.atomic
     def post(self, request, *args, **kwargs):
-        oficio = get_object_or_404(Oficio, pk=kwargs['pk'])
+        oficio = get_object_or_404(Oficio.objects.select_for_update(), pk=kwargs['pk'])
         nuevo_estado = request.POST.get('nuevo_estado')
         institucion_id = request.POST.get('institucion')
         detalle = request.POST.get('detalle', '').strip()
         archivo_pdf = request.FILES.get('archivo_pdf')
         incompetencia = request.POST.get('incompetencia')
+        enviar_email = request.POST.get('enviar_email') == 'on'
+        asunto_email = (request.POST.get('asunto_email') or '').strip()
+        cuerpo_email = request.POST.get('cuerpo_email', f'Se adjunta una copia del oficio {oficio.codigo}.').strip()
+
+        if nuevo_estado == 'en_revision':
+            messages.error(request, 'Utilice Enviar a revisión e indique las correcciones.')
+            return redirect('oficios:detail', pk=oficio.pk)
+        if oficio.revision_pendiente or oficio.estado == 'en_revision':
+            if (not is_coordinacion_opd(request.user) or nuevo_estado != 'asignado'
+                    or oficio.estado not in ('en_revision', 'devuelto', 'derivado')
+                    or str(incompetencia).lower() in ('1', 'true', 'on', 'yes', 'si')):
+                messages.error(request, 'Solo Coordinación OPD puede reasignar el oficio para su corrección.')
+                return redirect('oficios:detail', pk=oficio.pk)
+            if not detalle:
+                revision = oficio.movimientos.filter(estado_nuevo='en_revision').first()
+                detalle = revision.detalle if revision else 'Corregir informe'
+        if nuevo_estado == 'enviado' and not (oficio.estado == 'respondido' and oficio.validado_coord and oficio.validado_director):
+            messages.error(request, 'El oficio debe contar con ambos vistos buenos antes de enviarse.')
+            return redirect('oficios:detail', pk=oficio.pk)
         
         # Validar que el nuevo estado sea vÃƒÂ¡lido
         if nuevo_estado not in dict(oficio.ESTADO_CHOICES):
@@ -455,6 +474,28 @@ class OficioEnviarView(LoginRequiredMixin, View):
             if not institucion and nuevo_estado in ('asignado', 'enviado', 'incompetencia'):
                 messages.error(request, 'Debe seleccionar una institucion.')
                 return redirect('oficios:detail', pk=oficio.pk)
+
+            if enviar_email:
+                error = None
+                destinatario = ((institucion.email or '').strip() if institucion else '')
+                if not destinatario:
+                    destinatario = (request.POST.get('email_institucion') or '').strip()
+                if nuevo_estado not in ('asignado', 'incompetencia'):
+                    error = 'El envío por correo está disponible al asignar el oficio.'
+                elif not asunto_email or len(asunto_email) > 200 or '\n' in asunto_email or '\r' in asunto_email:
+                    error = 'Ingrese un asunto de hasta 200 caracteres, en una sola línea.'
+                elif not cuerpo_email or len(cuerpo_email) > 10000:
+                    error = 'Ingrese el mensaje del correo (hasta 10000 caracteres).'
+                elif not oficio.archivo_pdf:
+                    error = 'Adjunte el archivo del oficio antes de solicitar su envío por correo.'
+                else:
+                    try:
+                        validate_email(destinatario)
+                    except ValidationError:
+                        error = 'Complete un correo válido para la institución seleccionada.'
+                if error:
+                    messages.error(request, error)
+                    return redirect('oficios:detail', pk=oficio.pk)
             
             # Definir detalle por defecto si viene vacÃ­o
             if not detalle:
@@ -503,46 +544,51 @@ class OficioEnviarView(LoginRequiredMixin, View):
             if nuevo_estado == 'enviado':
                 messages.success(request, 'Se envió correctamente.')
 
-            # Enviar email al asignar a institucion (si hay email y PDF del oficio)
-            if nuevo_estado == 'asignado':
-                if not institucion.email:
-                    messages.warning(request, 'La institucion no tiene email registrado.')
-                elif not oficio.archivo_pdf:
-                    messages.warning(request, 'El oficio no tiene PDF adjunto para enviar.')
-                else:
-                    try:
-                        subject = f'Oficio #{oficio.id} asignado'
-                        cuerpo = (
-                            f'Se asigno el oficio #{oficio.id} a la institucion {institucion.nombre}.\\n'
-                            f'Adjunto PDF del oficio.'
-                        )
-                        from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', None) or getattr(settings, 'EMAIL_HOST_USER', None)
-                        correo = EmailMessage(
-                            subject=subject,
-                            body=cuerpo,
-                            from_email=from_email,
-                            to=[institucion.email],
-                        )
-                        correo.attach_file(oficio.archivo_pdf.path)
-                        correo.send(fail_silently=False)
-                        messages.success(request, 'Se envio el oficio por email a la institucion.')
-                    except Exception:
-                        messages.warning(
-                            request,
-                            'Se asigno el oficio, pero hubo un error al enviar el email.'
-                        )
-            
+            if enviar_email:
+                transaction.on_commit(lambda: self.enviar_asignacion_email(
+                    oficio, destinatario, asunto_email, cuerpo_email,
+                ))
+            if nuevo_estado in ('asignado', 'incompetencia'):
+                messages.success(request, 'El oficio fue asignado correctamente.')
+
         except Institucion.DoesNotExist:
             messages.error(request, 'La institucion seleccionada no es valida.')
         except Exception as e:
+            transaction.set_rollback(True)
             messages.error(request, f'Ocurrio Â³ un error al procesar el movimiento: {str(e)}')
         
         return redirect('oficios:detail', pk=oficio.pk)
 
 
-class OficioValidarCoordView(LoginRequiredMixin, View):
+class OficioEnviarRevisionView(LoginRequiredMixin, View):
+    @transaction.atomic
     def post(self, request, *args, **kwargs):
-        oficio = get_object_or_404(Oficio, pk=kwargs.get('pk'))
+        oficio = get_object_or_404(Oficio.objects.select_for_update(), pk=kwargs['pk'])
+        if not _puede_enviar_revision(request.user, oficio):
+            messages.error(request, 'No tiene permisos para enviar este oficio a revisión en su estado actual.')
+            return redirect('oficios:detail', pk=oficio.pk)
+        detalle = (request.POST.get('detalle') or '').strip()
+        if not detalle:
+            messages.error(request, 'Indique las correcciones solicitadas.')
+            return redirect('oficios:detail', pk=oficio.pk)
+        oficio.estado = 'en_revision'
+        oficio.revision_pendiente = True
+        oficio.validado_coord = False
+        oficio.validado_director = False
+        oficio.save(update_fields=['estado', 'revision_pendiente', 'validado_coord', 'validado_director'])
+        MovimientoOficio.objects.create(
+            oficio=oficio, usuario=request.user, institucion=oficio.institucion,
+            estado_anterior='respondido', estado_nuevo='en_revision',
+            detalle=detalle, validado_coord=False, validado_director=False,
+        )
+        messages.success(request, 'Oficio enviado a revisión. Coordinación OPD podrá reasignarlo.')
+        return redirect('oficios:detail', pk=oficio.pk)
+
+
+class OficioValidarCoordView(LoginRequiredMixin, View):
+    @transaction.atomic
+    def post(self, request, *args, **kwargs):
+        oficio = get_object_or_404(Oficio.objects.select_for_update(), pk=kwargs.get('pk'))
         if not _is_coordinador(request.user):
             messages.error(request, 'No tiene permisos para validar este oficio.')
             return redirect('oficios:detail', pk=oficio.pk)
@@ -550,7 +596,9 @@ class OficioValidarCoordView(LoginRequiredMixin, View):
             messages.error(request, 'Solo se puede validar un oficio en estado Respondido.')
             return redirect('oficios:detail', pk=oficio.pk)
         oficio.validado_coord = not oficio.validado_coord
-        oficio.save(update_fields=['validado_coord'])
+        if not oficio.validado_coord:
+            oficio.validado_director = False
+        oficio.save(update_fields=['validado_coord', 'validado_director'])
         try:
             detalle_input = (request.POST.get('detalle') or '').strip()
             if oficio.validado_coord:
@@ -579,13 +627,17 @@ class OficioValidarCoordView(LoginRequiredMixin, View):
 
 
 class OficioValidarDirectorView(LoginRequiredMixin, View):
+    @transaction.atomic
     def post(self, request, *args, **kwargs):
-        oficio = get_object_or_404(Oficio, pk=kwargs.get('pk'))
+        oficio = get_object_or_404(Oficio.objects.select_for_update(), pk=kwargs.get('pk'))
         if not _is_director(request.user):
             messages.error(request, 'No tiene permisos para validar este oficio.')
             return redirect('oficios:detail', pk=oficio.pk)
         if oficio.estado != 'respondido':
             messages.error(request, 'Solo se puede validar un oficio en estado Respondido.')
+            return redirect('oficios:detail', pk=oficio.pk)
+        if not oficio.validado_coord:
+            messages.error(request, 'Primero debe validar coordinación.')
             return redirect('oficios:detail', pk=oficio.pk)
         oficio.validado_director = not oficio.validado_director
         oficio.save(update_fields=['validado_director'])
@@ -637,12 +689,21 @@ class RespuestaCreateView(LoginRequiredMixin, CreateView):
     form_class = RespuestaForm
     template_name = 'oficios/respuesta_form.html'
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['oficio'] = self.oficio
+        return kwargs
+
     def dispatch(self, request, *args, **kwargs):
         if _is_despacho(request.user):
             messages.error(request, 'No tiene permisos para responder oficios.')
             return redirect('oficios:detail', pk=kwargs.get('pk'))
         # Validar que el oficio exista
         self.oficio = get_object_or_404(Oficio, pk=kwargs['pk'])
+        if self.oficio.revision_pendiente or self.oficio.estado == 'en_revision':
+            if not is_coordinacion_opd(request.user) or self.oficio.estado != 'asignado':
+                messages.error(request, 'Coordinación OPD debe reasignar el oficio antes de cargar la respuesta corregida.')
+                return redirect('oficios:detail', pk=self.oficio.pk)
         return super().dispatch(request, *args, **kwargs)
 
     def get_initial(self):
@@ -656,74 +717,47 @@ class RespuestaCreateView(LoginRequiredMixin, CreateView):
         context = super().get_context_data(**kwargs)
         context['oficio'] = self.oficio
         return context
+    @transaction.atomic
     def form_valid(self, form):
+        self.oficio = get_object_or_404(Oficio.objects.select_for_update(), pk=self.oficio.pk)
+        if self.oficio.revision_pendiente or self.oficio.estado == 'en_revision':
+            if not is_coordinacion_opd(self.request.user) or self.oficio.estado != 'asignado':
+                return redirect('oficios:detail', pk=self.oficio.pk)
         obj = form.save(commit=False)
         obj.id_oficio = self.oficio
         obj.id_usuario = self.request.user
-        # Si no se envía institución, usar la del oficio por conveniencia
-        if not obj.id_institucion and self.oficio.institucion:
-            obj.id_institucion = self.oficio.institucion
-        # Autocompletar respuesta si viene vacia
-        try:
-            texto = (obj.respuesta or '').strip()
-        except Exception:
-            texto = ''
-        if not texto:
-            obj.respuesta = 'Se respondio el oficio'
+        obj.id_institucion = obj.id_institucion or self.oficio.institucion
         obj.save()
-
-        # Registrar movimiento y, segÃƒÂºn opciÃƒÂ³n, mantener estado en 'asignado' o pasar a 'devuelto'
-        try:
-            institucion_mov = obj.id_institucion or self.oficio.institucion
-            detalle_mov = obj.respuesta.strip()[:200] if obj.respuesta else 'Se respondio el oficio'
-            detalle_mov = (detalle_mov or '').upper()
-            devolver = form.cleaned_data.get('devolver')
-            derivar = form.cleaned_data.get('derivar')
-            if derivar:
-                nuevo_estado = 'derivado'
-            elif devolver:
-                nuevo_estado = 'devuelto'
-            else:
-                nuevo_estado = 'respondido'
-
-            MovimientoOficio.objects.create(
-                oficio=self.oficio,
-                usuario=self.request.user,
-                estado_anterior=self.oficio.estado,
-                estado_nuevo=nuevo_estado,
-                validado_coord=self.oficio.validado_coord,
-                validado_director=self.oficio.validado_director,
-                institucion=institucion_mov,
-                detalle=detalle_mov,
-            )
-
-            # Actualizar estado segun opcion: derivado, devuelto o respondido
-            update_fields = []
-            if derivar:
-                self.oficio.estado = 'derivado'
-                update_fields.append('estado')
-            elif devolver:
-                self.oficio.estado = 'devuelto'
-                update_fields.append('estado')
-            else:
-                self.oficio.estado = 'respondido'
-                update_fields.append('estado')
-            if institucion_mov and (self.oficio.institucion_id != getattr(institucion_mov, 'id', None)):
-                self.oficio.institucion = institucion_mov
-                update_fields.append('institucion')
-            if update_fields:
-                self.oficio.save(update_fields=update_fields)
-        except Exception:
-            # No bloquear el flujo por un error en el movimiento
-            pass
-
-        if form.cleaned_data.get('derivar'):
-            messages.success(self.request, 'La respuesta se registra y el oficio pasara a Derivado.')
-        elif form.cleaned_data.get('devolver'):
-            messages.success(self.request, 'La respuesta se registra y el oficio pasara a Devuelto.')
-        else:
-            messages.success(self.request, 'Se marco el oficio como Respondido.')
+        nuevo_estado = ('derivado' if form.cleaned_data.get('derivar') else
+                        'devuelto' if form.cleaned_data.get('devolver') else 'respondido')
+        anterior = self.oficio.estado
+        self.oficio.estado = nuevo_estado
+        self.oficio.validado_coord = False
+        self.oficio.validado_director = False
+        if nuevo_estado == 'respondido':
+            self.oficio.revision_pendiente = False
+        if obj.id_institucion:
+            self.oficio.institucion = obj.id_institucion
+        self.oficio.save(update_fields=[
+            'estado', 'institucion', 'validado_coord', 'validado_director', 'revision_pendiente',
+        ])
+        MovimientoOficio.objects.create(
+            oficio=self.oficio, usuario=self.request.user,
+            estado_anterior=anterior, estado_nuevo=nuevo_estado,
+            validado_coord=False, validado_director=False,
+            institucion=self.oficio.institucion,
+            detalle=(obj.respuesta or 'Se respondio el oficio').strip()[:200],
+        )
+        messages.success(self.request, 'Respuesta registrada. Estado: ' + self.oficio.get_estado_display())
         return HttpResponseRedirect(reverse('oficios:detail', kwargs={'pk': self.oficio.pk}))
+
+
+def _puede_enviar_revision(user, oficio):
+    return oficio.estado == 'respondido' and (
+        (_is_coordinador(user) and not oficio.validado_coord)
+        or (_is_director(user) and oficio.validado_coord and not oficio.validado_director)
+    )
+
 
 def _is_admin_like(user):
     try:

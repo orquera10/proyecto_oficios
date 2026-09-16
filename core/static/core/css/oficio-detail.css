@@ -1,0 +1,84 @@
+.oficio-detail-page {
+    --detail-surface: #fff;
+    --detail-heading: #f1f5f9;
+    --detail-border: #dde4ee;
+    --detail-text: #0b1726;
+    --detail-muted: #475569;
+    --detail-hover: #f8fafc;
+}
+
+html[data-theme="dark"] .oficio-detail-page {
+    --detail-surface: #111827;
+    --detail-heading: #182433;
+    --detail-border: rgba(255, 255, 255, 0.12);
+    --detail-text: #f8fafc;
+    --detail-muted: #cbd5e1;
+    --detail-hover: #1a2738;
+}
+
+.oficio-detail-page .card {
+    --bs-card-border-radius: 0.75rem;
+    --bs-card-inner-border-radius: calc(0.75rem - 1px);
+    background: var(--detail-surface);
+    border-color: var(--detail-border);
+    border-radius: var(--bs-card-border-radius);
+    color: var(--detail-text);
+}
+
+.oficio-detail-page .card > .card-header {
+    background: var(--detail-heading) !important;
+    color: var(--detail-text);
+    border-color: var(--detail-border);
+    border-radius: var(--bs-card-inner-border-radius) var(--bs-card-inner-border-radius) 0 0;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.oficio-detail-page .card > .card-body:last-child {
+    border-radius: 0 0 var(--bs-card-inner-border-radius) var(--bs-card-inner-border-radius);
+}
+
+.oficio-detail-page .list-group-item {
+    background: var(--detail-surface);
+    color: var(--detail-text);
+    border-color: var(--detail-border);
+}
+
+.oficio-detail-page .list-group-flush:last-child > .list-group-item:last-child {
+    border-radius: 0 0 var(--bs-card-inner-border-radius) var(--bs-card-inner-border-radius);
+}
+
+.oficio-detail-page .card-body > .border {
+    border-color: var(--detail-border) !important;
+    border-radius: 0.5rem !important;
+}
+
+.oficio-detail-page .table {
+    --bs-table-bg: var(--detail-surface);
+    --bs-table-color: var(--detail-text);
+    --bs-table-hover-bg: var(--detail-hover);
+    --bs-table-hover-color: var(--detail-text);
+    --bs-table-border-color: var(--detail-border);
+    font-size: 0.875rem;
+}
+
+.oficio-detail-page .table thead th {
+    background: var(--detail-heading);
+    color: var(--detail-muted);
+    border-color: var(--detail-border);
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.oficio-detail-page .table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.oficio-detail-page .badge.bg-warning,
+.oficio-detail-page .badge.bg-light {
+    color: #212529 !important;
+}
+
+html[data-theme="dark"] .oficio-detail-page .table a:not(.btn) {
+    color: #8ec5ff;
+}

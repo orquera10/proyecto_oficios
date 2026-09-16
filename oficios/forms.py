@@ -26,7 +26,7 @@ class OficioForm(forms.ModelForm):
     class Meta:
         model = Oficio
         fields = [
-            'nro_oficio', 'denuncia', 'legajo', 'juzgado',
+            'nro_oficio', 'numero_interno', 'denuncia', 'legajo', 'juzgado',
             'plazo_horas', 'fecha_emision', 'fecha_vencimiento', 'caratula',
             'caratula_oficio', 'archivo_pdf', 'caso',
             'instituciones'
@@ -82,7 +82,7 @@ class OficioForm(forms.ModelForm):
 
         # Configurar campos opcionales
         for field_name in (
-            'nro_oficio', 'denuncia', 'legajo', 'expediente', 'juzgado',
+            'nro_oficio', 'numero_interno', 'denuncia', 'legajo', 'expediente', 'juzgado',
             'plazo_horas', 'plazo_unidad', 'fecha_vencimiento', 'caratula',
             'caratula_oficio', 'archivo_pdf'
         ):
@@ -144,7 +144,7 @@ class OficioMPAForm(OficioForm):
     class Meta(OficioForm.Meta):
         model = OficioMPA
         fields = [
-            'nro_oficio', 'denuncia', 'legajo', 'juzgado',
+            'nro_oficio', 'numero_interno', 'denuncia', 'legajo', 'juzgado',
             'plazo_horas', 'fecha_emision', 'fecha_vencimiento', 'caratula',
             'caratula_oficio', 'archivo_pdf', 'caso',
             'instituciones'
@@ -173,7 +173,7 @@ class OficioJudicialForm(OficioForm):
     class Meta(OficioForm.Meta):
         model = OficioJudicial
         fields = [
-            'nro_oficio', 'expediente', 'juzgado',
+            'nro_oficio', 'numero_interno', 'expediente', 'juzgado',
             'plazo_horas', 'fecha_emision', 'fecha_vencimiento', 'caratula',
             'caratula_oficio', 'archivo_pdf', 'caso',
             'instituciones'
@@ -200,7 +200,7 @@ class NotaForm(OficioForm):
     class Meta(OficioForm.Meta):
         model = Nota
         fields = [
-            'nro_oficio', 'juzgado',
+            'nro_oficio', 'numero_interno', 'juzgado',
             'plazo_horas', 'fecha_emision', 'fecha_vencimiento', 'caratula',
             'caratula_oficio', 'archivo_pdf', 'caso',
             'instituciones'

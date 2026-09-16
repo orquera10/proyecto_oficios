@@ -1,4 +1,5 @@
 {% extends 'casos/base_casos.html' %}
+{% load static %}
 {% load oficio_filters %}
 {% load caso_filters %}
 
@@ -16,294 +17,52 @@
 {% endblock %}
 
 {% block extra_css %}
-<style>
-    .case-detail-top .card {
-        overflow: hidden;
-    }
-
-    .case-detail-top .card-header {
-        border-bottom: 0;
-        padding: 0.95rem 1.1rem;
-    }
-
-    .case-detail-top .card-header.bg-primary,
-    .case-detail-top .card-header.bg-primary .card-title {
-        color: #ffffff;
-    }
-
-    .case-detail-top .card-header.bg-primary {
-        background: linear-gradient(120deg, var(--brand-900), var(--brand-700)) !important;
-    }
-
-    .case-detail-top .card-header.bg-info,
-    .case-detail-top .card-header.bg-info .card-title {
-        color: #102a43;
-    }
-
-    .case-detail-top .card-body {
-        padding: 1rem;
-    }
-
-    .case-detail-top dl.row {
-        display: grid;
-        grid-template-columns: minmax(128px, 0.55fr) minmax(0, 1fr);
-        margin: 0;
-        overflow: hidden;
-        border: 1px solid var(--border-200);
-        border-radius: 14px;
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(247, 250, 255, 0.92));
-    }
-
-    .case-detail-top dl.row dt,
-    .case-detail-top dl.row dd {
-        border-bottom: 1px solid var(--border-200);
-        margin: 0;
-        min-height: 54px;
-        padding: 0.85rem;
-        width: auto;
-    }
-
-    .case-detail-top dl.row dt {
-        align-items: center;
-        background-color: rgba(42, 123, 176, 0.06);
-        color: var(--text-600);
-        display: flex;
-        font-size: 0.76rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0;
-    }
-
-    .case-detail-top dl.row dd {
-        align-items: center;
-        color: var(--text-900);
-        display: flex;
-        font-weight: 700;
-        overflow-wrap: anywhere;
-    }
-
-    .case-detail-top dl.row dt:last-of-type,
-    .case-detail-top dl.row dd:last-of-type {
-        border-bottom: 0;
-    }
-
-    .case-detail-top .table-responsive {
-        border: 1px solid var(--border-200);
-        border-radius: 14px;
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(247, 250, 255, 0.92));
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
-        overflow: hidden;
-    }
-
-    .case-detail-top .table {
-        margin: 0;
-    }
-
-    .case-detail-top .table thead th {
-        border-bottom: 1px solid var(--border-200);
-        color: var(--text-600);
-        font-size: 0.75rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0;
-        white-space: nowrap;
-    }
-
-    .case-detail-top .table tbody td {
-        border-color: var(--border-200);
-        color: var(--text-900);
-        padding: 0.85rem 0.7rem;
-        vertical-align: middle;
-    }
-
-    .case-detail-top .table tbody tr:last-child td {
-        border-bottom: 0;
-    }
-
-    .case-detail-top .table tbody tr:hover td {
-        background-color: rgba(42, 123, 176, 0.05);
-    }
-
-    .case-detail-top .table tbody td:first-child {
-        font-weight: 700;
-        overflow-wrap: anywhere;
-    }
-
-    .case-detail-top .table tbody td:nth-child(2),
-    .case-detail-top .table tbody td:nth-child(3) {
-        color: var(--text-700);
-        font-weight: 600;
-    }
-
-    .case-detail-top .table tbody td:nth-child(4) {
-        color: var(--text-700);
-        font-size: 0.9rem;
-        max-width: 220px;
-    }
-
-    .case-detail-top .text-muted.small {
-        border: 1px dashed var(--border-200);
-        border-radius: 14px;
-        padding: 0.9rem;
-    }
-
-    html[data-theme="dark"] .case-detail-top dl.row,
-    html[data-theme="dark"] .case-detail-top .table-responsive {
-        background: linear-gradient(180deg, #121d2b 0%, #0f1a28 100%);
-    }
-
-    html[data-theme="dark"] .case-detail-top dl.row dt {
-        background-color: rgba(42, 123, 176, 0.14);
-    }
-
-    html[data-theme="dark"] .case-detail-top .table tbody tr:hover td {
-        background-color: rgba(42, 123, 176, 0.12);
-    }
-
-    html[data-theme="dark"] .case-detail-top .card,
-    html[data-theme="dark"] .case-detail-top .card-body,
-    html[data-theme="dark"] .case-detail-top .card-header,
-    html[data-theme="dark"] .case-detail-top .table,
-    html[data-theme="dark"] .case-detail-top .table thead th,
-    html[data-theme="dark"] .case-detail-top .table td,
-    html[data-theme="dark"] .case-detail-top .table th,
-    html[data-theme="dark"] .case-detail-top .table-responsive,
-    html[data-theme="dark"] .case-detail-top .text-muted.small,
-    html[data-theme="dark"] .case-detail-top .card .table-responsive {
-        background-color: #111827 !important;
-        color: #f8fafc !important;
-        border-color: rgba(255, 255, 255, 0.12) !important;
-    }
-
-    html[data-theme="dark"] .case-detail-top .card-header.bg-info {
-        background-color: rgba(59, 130, 246, 0.2) !important;
-        color: #e0f2fe !important;
-    }
-
-    html[data-theme="dark"] .case-detail-top .text-muted.small {
-        background-color: rgba(255, 255, 255, 0.04) !important;
-        color: #cbd5e1 !important;
-    }
-
-    html[data-theme="dark"] .case-detail-top .table thead th {
-        background-color: rgba(255, 255, 255, 0.04) !important;
-    }
-
-    html[data-theme="dark"] .case-detail-top .table tbody tr:hover td {
-        background-color: rgba(255, 255, 255, 0.05) !important;
-    }
-
-    @media (min-width: 768px) {
-        .case-detail-top > .col-md-6:first-child {
-            display: flex;
-        }
-
-        .case-detail-top > .col-md-6:first-child > .card {
-            height: 100%;
-            margin-bottom: 0 !important;
-            width: 100%;
-        }
-
-        .case-detail-top > .col-md-6:first-child > .card > .card-body {
-            align-items: center;
-            display: flex;
-        }
-
-        .case-detail-top > .col-md-6:first-child dl.row {
-            width: 100%;
-        }
-    }
-
-    @media (max-width: 575.98px) {
-        .case-detail-top dl.row {
-            grid-template-columns: 1fr;
-        }
-
-        .case-detail-top dl.row dt {
-            border-bottom: 0;
-            min-height: auto;
-            padding-bottom: 0.2rem;
-        }
-
-        .case-detail-top dl.row dd {
-            min-height: auto;
-            padding-top: 0.2rem;
-        }
-
-        .case-detail-top .table thead {
-            display: none;
-        }
-
-        .case-detail-top .table,
-        .case-detail-top .table tbody,
-        .case-detail-top .table tr,
-        .case-detail-top .table td {
-            display: block;
-            width: 100%;
-        }
-
-        .case-detail-top .table tbody {
-            padding: 0.4rem 0;
-        }
-
-        .case-detail-top .table tr {
-            border-bottom: 1px solid var(--border-200);
-            padding: 0.65rem 0;
-        }
-
-        .case-detail-top .table tr:last-child {
-            border-bottom: 0;
-        }
-
-        .case-detail-top .table tbody td {
-            border-bottom: 0;
-            padding: 0.2rem 0.85rem;
-        }
-    }
-</style>
+{{ block.super }}
+<link href="{% static 'core/css/case-detail.css' %}" rel="stylesheet" />
 {% endblock %}
 
 {% block casos_content %}
+<div class="case-detail-page">
 <div class="row case-detail-top">
     <div class="col-md-6">
         <div class="card mb-4">
-            <div class="card-header bg-primary">
+            <div class="card-header">
                 <h5 class="card-title mb-0"><i class="fas fa-folder-open me-2"></i>Información del Caso</h5>
             </div>
             <div class="card-body">
                 <dl class="row">
                     <dt class="col-sm-4">Código:</dt>
                     <dd class="col-sm-8"><span class="fw-semibold">{{ object.codigo|default:"-" }}</span></dd>
-                    
+
                     <dt class="col-sm-4">Estado:</dt>
                     <dd class="col-sm-8">
                         <span class="badge bg-{% if object.estado == 'ABIERTO' %}primary{% elif object.estado == 'EN_PROCESO' %}warning{% elif object.estado == 'CERRADO' %}success{% else %}secondary{% endif %}">
                             {{ object.get_estado_display }}
                         </span>
                     </dd>
-                    
+
                     <dt class="col-sm-4">Creado por:</dt>
                     <dd class="col-sm-8">{{ object.usuario.get_full_name|default:object.usuario.username }}</dd>
-                    
+
                     <dt class="col-sm-4">Fecha de creación:</dt>
                     <dd class="col-sm-8">{{ object.creado|date:"d/m/Y H:i" }}</dd>
-                    
+
                     <dt class="col-sm-4">Última actualización:</dt>
                     <dd class="col-sm-8">{{ object.actualizado|date:"d/m/Y H:i" }}</dd>
                 </dl>
             </div>
         </div>
     </div>
-    
+
     <div class="col-md-6">
         <div class="card mb-4">
-            <div class="card-header bg-info">
+            <div class="card-header">
                 <h5 class="card-title mb-0"><i class="fas fa-child me-2"></i>Niños Relacionados</h5>
             </div>
             <div class="card-body">
                 {% if object.caso_ninos.all %}
                 <div class="table-responsive">
-                    <style>.bg-violet{background-color:#e0cffc!important;color:#212529!important;}</style>
+
                     <table class="table table-sm">
                         <thead class="table-light">
                             <tr>
@@ -316,7 +75,9 @@
                         <tbody>
                             {% for relacion in object.caso_ninos.all %}
                             <tr>
-                                <td>{{ relacion.nino.nombre }} {{ relacion.nino.apellido }}</td>
+                                <td>
+                                    <a href="{% url 'personas:nino_detail' relacion.nino.pk %}">{{ relacion.nino.nombre }} {{ relacion.nino.apellido }}</a>
+                                </td>
                                 <td>{{ relacion.nino.dni|default:"-" }}</td>
                                 <td>{{ relacion.nino.fecha_nac|date:"d/m/Y"|default:"-" }}</td>
                                 <td>{{ relacion.observaciones|default:"-"|truncatechars:30 }}</td>
@@ -331,12 +92,12 @@
                     Aún no hay niños relacionados con este caso.
                 </div>
                 {% endif %}
-                
+
             </div>
         </div>
-        
+
         <div class="card">
-            <div class="card-header bg-info">
+            <div class="card-header">
                 <h5 class="card-title mb-0"><i class="fas fa-users me-2"></i>Partes Relacionadas</h5>
             </div>
             <div class="card-body">
@@ -354,7 +115,9 @@
                         <tbody>
                             {% for relacion in object.caso_partes.all %}
                             <tr>
-                                <td>{{ relacion.parte.nombre }} {{ relacion.parte.apellido }}</td>
+                                <td>
+                                    <a href="{% url 'personas:parte_detail' relacion.parte.pk %}">{{ relacion.parte.nombre }} {{ relacion.parte.apellido }}</a>
+                                </td>
                                 <td>{{ relacion.parte.dni|default:"-" }}</td>
                                 <td>
                                     {% if relacion.tipo_relacion == 'REFERENTE_RESGUARDO' and relacion.observaciones %}
@@ -381,14 +144,14 @@
                     Aún no hay partes relacionadas con este caso.
                 </div>
                 {% endif %}
-                
+
             </div>
         </div>
     </div>
 </div>
 
 <div class="card mt-4">
-    <div class="card-header bg-success d-flex justify-content-between align-items-center">
+    <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="card-title mb-0"><i class="fas fa-file-alt me-2"></i>Oficios Relacionados</h5>
         {% if user.perfil.id_sector %}
             {% if user.perfil.id_sector and 'despacho' in user.perfil.id_sector.nombre|lower or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'informatica' or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'coordinador' or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'director-ninez' %}
@@ -455,13 +218,13 @@
     {% if movimientos %}
     <!-- Sección de Movimientos de Oficios -->
     <div class="card mt-4">
-        <div class="card-header bg-dark d-flex justify-content-between align-items-center">
+        <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="card-title mb-0">
                 <i class="fas fa-history me-2"></i>Historial de Movimientos
             </h5>
         </div>
         <div class="card-body p-3">
-            <div class="border rounded-3 overflow-hidden">
+            <div class="case-history-frame">
             <div class="table-responsive" style="max-height: 420px; overflow-y: auto;">
                 <table class="table table-hover mb-0 align-middle">
                     <thead class="table-light">
@@ -494,17 +257,17 @@
                             <td>
                                 {% if movimiento.estado_anterior %}
                                 {% with e=movimiento.estado_anterior %}
-                                <span class="badge bg-{% if e == 'cargado' %}secondary{% elif e == 'asignado' %}warning{% elif e == 'respondido' %}primary{% elif e == 'enviado' %}success{% elif e == 'devuelto' %}violet{% elif e == 'incompetencia' %}danger{% else %}light{% endif %}">
+                                <span class="badge bg-{% if e == 'cargado' %}secondary{% elif e == 'asignado' %}warning{% elif e == 'respondido' %}primary{% elif e == 'enviado' %}success{% elif e == 'en_revision' %}revision{% elif e == 'devuelto' %}violet{% elif e == 'incompetencia' %}danger{% else %}light{% endif %}">
                                     {{ movimiento.get_estado_anterior_display }}
                                 </span>
                                 {% endwith %}
                                 {% else %}
-                                <span class="badge bg-light text-dark">-</span>
+                                <span class="text-muted">-</span>
                                 {% endif %}
                             </td>
                             <td>
                                 {% with e=movimiento.estado_nuevo %}
-                                <span class="badge bg-{% if e == 'cargado' %}secondary{% elif e == 'asignado' %}warning{% elif e == 'respondido' %}primary{% elif e == 'enviado' %}success{% elif e == 'devuelto' %}violet{% elif e == 'incompetencia' %}danger{% else %}light{% endif %}">
+                                <span class="badge bg-{% if e == 'cargado' %}secondary{% elif e == 'asignado' %}warning{% elif e == 'respondido' %}primary{% elif e == 'enviado' %}success{% elif e == 'en_revision' %}revision{% elif e == 'devuelto' %}violet{% elif e == 'incompetencia' %}danger{% else %}light{% endif %}">
                                     {{ movimiento.get_estado_nuevo_display }}
                                 </span>
                                 {% endwith %}
@@ -537,7 +300,8 @@
         </a>
         {% endif %}
         {% endif %}
-        
+
     </div>
+</div>
 </div>
 {% endblock %}

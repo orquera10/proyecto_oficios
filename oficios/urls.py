@@ -32,6 +32,7 @@ urlpatterns = [
     
     # Acción para marcar oficio como enviado
     path('<int:pk>/enviar/', views.OficioEnviarView.as_view(), name='enviar'),
+    path('<int:pk>/enviar-revision/', views.OficioEnviarRevisionView.as_view(), name='enviar_revision'),
     path('<int:pk>/validar-coord/', views.OficioValidarCoordView.as_view(), name='validar_coord'),
     path('<int:pk>/validar-director/', views.OficioValidarDirectorView.as_view(), name='validar_director'),
     path('<int:pk>/asignar-caso/', views.OficioAsignarCasoView.as_view(), name='asignar_caso'),

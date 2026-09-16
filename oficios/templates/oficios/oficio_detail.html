@@ -1,6 +1,8 @@
 ﻿{% extends 'base.html' %}
+{% load static %}
 {% block extra_css %}
 {{ block.super }}
+<link href="{% static 'core/css/oficio-detail.css' %}" rel="stylesheet" />
 <style>
     .oficio-detail-title {
         font-size: 1.45rem;
@@ -16,15 +18,28 @@
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="container mt-4 oficio-detail-page">
+    <div class="d-flex flex-wrap gap-3 justify-content-between align-items-center mb-4">
         <div>
             <a href="{% url 'oficios:list' %}" class="btn btn-outline-secondary d-inline-flex align-items-center shadow-sm mb-2">
                 <i class="fas fa-arrow-left me-1"></i> Volver al listado
             </a>
             <h2 class="mb-0 oficio-detail-title">Detalle del {{ oficio.get_tipo_documento_display|default:"Documento" }} {{ oficio.codigo|default:oficio.id }}</h2>
         </div>
-        <div class="btn-group">
+        <div class="d-flex flex-wrap gap-2 align-items-center justify-content-end ms-auto">
+            {% if correccion_en_curso %}
+                {% if es_coordinacion_opd %}
+                    {% if oficio.estado == 'en_revision' or oficio.estado == 'devuelto' or oficio.estado == 'derivado' %}
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#asignarModal">
+                        <i class="fas fa-user-check me-1"></i> Asignar
+                    </button>
+                    {% elif oficio.estado == 'asignado' %}
+                    <a href="{% url 'oficios:responder' oficio.pk %}" class="btn btn-success" id="btnResponder">
+                        <i class="fas fa-reply me-1"></i> Responder
+                    </a>
+                    {% endif %}
+                {% endif %}
+            {% else %}
             {% if user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'informatica' %}
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#asignarModal">
                 <i class="fas fa-user-check me-1"></i> Asignar
@@ -101,6 +116,10 @@
             {% endif %}
             {% endif %}
             {% endif %}
+            {% endif %}
+            {% if puede_enviar_revision %}
+            <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#revisionModal">Enviar a revisión</button>
+            {% endif %}
         </div>
 
         <!-- Modal para mover el documento -->
@@ -118,7 +137,7 @@
                                 <label for="nuevo_estado" class="form-label">Nuevo Estado</label>
                                 <select class="form-select" id="nuevo_estado" name="nuevo_estado" required>
                                     {% for value, label in oficio.ESTADO_CHOICES %}
-                                        {% if value != oficio.estado %}
+                                        {% if value != oficio.estado and value != 'en_revision' %}
                                             <option value="{{ value }}">{{ label }}</option>
                                         {% endif %}
                                     {% endfor %}
@@ -153,6 +172,35 @@
         </div>
     </div>
 
+    {% if puede_enviar_revision %}
+    <div class="modal fade" id="revisionModal" tabindex="-1" aria-labelledby="revisionModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <form class="modal-content" method="post" action="{% url 'oficios:enviar_revision' oficio.pk %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="revisionModalLabel">Enviar a revisión</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <label for="revision_detalle" class="form-label">Correcciones solicitadas</label>
+                    <textarea id="revision_detalle" name="detalle" class="form-control" rows="4" required></textarea>
+                    <p class="small text-muted mt-2">La nueva respuesta deberá recibir nuevamente el visto bueno de coordinación y dirección.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-warning">Enviar a revisión</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+    {% if correccion_en_curso and ultima_revision %}
+    <div class="alert alert-warning">
+        <strong>Correcciones solicitadas:</strong>
+        {{ ultima_revision.detalle|linebreaksbr }}
+    </div>
+    {% endif %}
+
     <div class="card">
         <div class="card-header bg-primary">
             <h4 class="mb-0">
@@ -164,6 +212,8 @@
                 <div class="col-md-6">
                     <h5><i class="fas fa-list-ul me-2"></i>Datos Principales</h5>
                     <dl class="row">
+                        <dt class="col-sm-4">Número interno:</dt>
+                        <dd class="col-sm-8">{{ oficio.numero_interno|default:"-" }}</dd>
                         <dt class="col-sm-4">Tipo:</dt>
                         <dd class="col-sm-8">
                             <span class="badge bg-primary">{{ oficio.get_tipo_documento_display|default:"Oficio" }}</span>
@@ -527,7 +577,7 @@
                             <td>
                                 {% if movimiento.estado_anterior %}
                                 <span class="estado-badge">
-                                    <span class="badge bg-{% if movimiento.estado_anterior == 'cargado' %}secondary{% elif movimiento.estado_anterior == 'asignado' %}warning{% elif movimiento.estado_anterior == 'derivado' %}info{% elif movimiento.estado_anterior == 'respondido' %}primary{% elif movimiento.estado_anterior == 'enviado' %}success{% elif movimiento.estado_anterior == 'devuelto' %}violet{% elif movimiento.estado_anterior == 'incompetencia' %}danger{% else %}light{% endif %}">
+                                    <span class="badge bg-{% if movimiento.estado_anterior == 'cargado' %}secondary{% elif movimiento.estado_anterior == 'asignado' %}warning{% elif movimiento.estado_anterior == 'derivado' %}info{% elif movimiento.estado_anterior == 'respondido' %}primary{% elif movimiento.estado_anterior == 'enviado' %}success{% elif movimiento.estado_anterior == 'en_revision' %}revision{% elif movimiento.estado_anterior == 'devuelto' %}violet{% elif movimiento.estado_anterior == 'incompetencia' %}danger{% else %}light{% endif %}">
                                         {{ movimiento.get_estado_anterior_display }}
                                     </span>
                                     {% if movimiento.estado_anterior == 'respondido' and movimiento.detalle %}
@@ -546,12 +596,12 @@
                                     {% endif %}
                                 </span>
                                 {% else %}
-                                <span class="badge bg-light text-dark">-</span>
+                                <span class="text-muted">-</span>
                                 {% endif %}
                             </td>
                             <td>
                                 <span class="estado-badge">
-                                    <span class="badge bg-{% if movimiento.estado_nuevo == 'cargado' %}secondary{% elif movimiento.estado_nuevo == 'asignado' %}warning{% elif movimiento.estado_nuevo == 'derivado' %}info{% elif movimiento.estado_nuevo == 'respondido' %}primary{% elif movimiento.estado_nuevo == 'enviado' %}success{% elif movimiento.estado_nuevo == 'devuelto' %}violet{% elif movimiento.estado_nuevo == 'incompetencia' %}danger{% else %}light{% endif %}">
+                                    <span class="badge bg-{% if movimiento.estado_nuevo == 'cargado' %}secondary{% elif movimiento.estado_nuevo == 'asignado' %}warning{% elif movimiento.estado_nuevo == 'derivado' %}info{% elif movimiento.estado_nuevo == 'respondido' %}primary{% elif movimiento.estado_nuevo == 'enviado' %}success{% elif movimiento.estado_nuevo == 'en_revision' %}revision{% elif movimiento.estado_nuevo == 'devuelto' %}violet{% elif movimiento.estado_nuevo == 'incompetencia' %}danger{% else %}light{% endif %}">
                                         {{ movimiento.get_estado_nuevo_display }}
                                     </span>
                                     {% if movimiento.estado_nuevo == 'respondido' %}
@@ -669,7 +719,7 @@
                                     <th>Usuario</th>
                                     <th>Profesional</th>
                                     <th>Institución</th>
-                                    <th>Detalle</th>
+                                    <th>Observaciones</th>
                                     <th>Archivo</th>
                                 </tr>
                             </thead>
@@ -736,11 +786,37 @@
                                 <div id="institucion_email_asignar" class="form-control-plaintext p-0">-</div>
                             </div>
                             <div class="mb-3">
-                                <label for="detalle_asignar" class="form-label">Detalle</label>
-                                <textarea class="form-control" id="detalle_asignar" name="detalle" rows="3" required data-default="EL OFICIO SE ASIGNO CORRECTAMENTE A UNA OPD">EL OFICIO SE ASIGNO CORRECTAMENTE A UNA OPD</textarea>
+                                <label for="detalle_asignar" class="form-label">Detalle interno (no se envía por correo)</label>
+                                <textarea class="form-control" id="detalle_asignar" name="detalle" rows="3" required data-default="{% if correccion_en_curso and ultima_revision %}{{ ultima_revision.detalle }}{% else %}EL OFICIO SE ASIGNO CORRECTAMENTE A UNA OPD{% endif %}">{% if correccion_en_curso and ultima_revision %}{{ ultima_revision.detalle }}{% else %}EL OFICIO SE ASIGNO CORRECTAMENTE A UNA OPD{% endif %}</textarea>
                             </div>
+                            <fieldset class="border rounded p-3 mb-3">
+                                <legend class="float-none w-auto px-2 fs-6">Envío por correo</legend>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="enviar_email" id="enviar_email_asignar">
+                                    <label class="form-check-label" for="enviar_email_asignar">Enviar una copia del oficio a la institución</label>
+                                </div>
+                                <p class="small text-muted mt-2">Se enviará una copia del oficio al correo de la institución. El detalle interno queda únicamente en el historial del sistema.</p>
+                                <div id="email_institucion_container" class="mb-3">
+                                    <label for="email_institucion" class="form-label">Correo de la institución</label>
+                                    <input type="email" class="form-control" id="email_institucion" name="email_institucion" maxlength="254" placeholder="institucion@ejemplo.com" aria-describedby="email_institucion_ayuda">
+                                    <div class="form-text" id="email_institucion_ayuda">Si no tiene correo registrado, complete uno para este envío.</div>
+                                </div>
+                                {% if not oficio.archivo_pdf %}
+                                <p class="small text-warning">Este oficio aún no tiene un archivo adjunto para enviar.</p>
+                                {% endif %}
+                                <div id="asunto_email_asignar_container">
+                                    <label for="asunto_email_asignar" class="form-label">Asunto del correo</label>
+                                    <input type="text" class="form-control" name="asunto_email" id="asunto_email_asignar" maxlength="200" value="Asignación del oficio {{ oficio.codigo|default:oficio.id }}">
+                                    <label for="cuerpo_email_asignar" class="form-label mt-3">Mensaje del correo</label>
+                                    <textarea class="form-control" name="cuerpo_email" id="cuerpo_email_asignar" rows="5" maxlength="10000" aria-describedby="cuerpo_email_ayuda">Se adjunta una copia del oficio {{ oficio.codigo|default:oficio.id }}.</textarea>
+                                    <div class="form-text" id="cuerpo_email_ayuda">Este mensaje se enviará a la institución junto con el archivo del oficio. El detalle interno no se incluye.</div>
+                                    {% if oficio.numero_interno %}
+                                    <div class="form-text">Se agregará al final del mensaje: Número interno: {{ oficio.numero_interno }}.</div>
+                                    {% endif %}
+                                </div>
+                            </fieldset>
                             <input type="hidden" name="incompetencia" value="0">
-                            <div class="form-check mt-2">
+                            <div class="form-check mt-2" {% if correccion_en_curso %}hidden{% endif %}>
                                 <input class="form-check-input" type="checkbox" id="incompetencia_asignar" name="incompetencia" value="1">
                                 <label class="form-check-label" for="incompetencia_asignar">
                                     Marcar como incompetencia
@@ -763,7 +839,7 @@
                 <div class="modal-content">
                     <div class="modal-body text-center py-4">
                         <div class="spinner-border text-primary" role="status" aria-hidden="true"></div>
-                        <div class="mt-3 fw-semibold">El documento se esta asignando y enviando por mail...</div>
+                        <div class="mt-3 fw-semibold">Procesando la asignación del oficio...</div>
                     </div>
                 </div>
             </div>
@@ -948,6 +1024,31 @@
 
 <script>
 (function () {
+    const enviarEmail = document.getElementById('enviar_email_asignar');
+    const asuntoEmail = document.getElementById('asunto_email_asignar');
+    const cuerpoEmail = document.getElementById('cuerpo_email_asignar');
+    const asuntoContainer = document.getElementById('asunto_email_asignar_container');
+    const institucionSelect = document.getElementById('institucion_asignar');
+    const emailManual = document.getElementById('email_institucion');
+    const emailContainer = document.getElementById('email_institucion_container');
+    function actualizarEnvio() {
+        asuntoContainer.hidden = !enviarEmail.checked;
+        asuntoEmail.required = enviarEmail.checked;
+        cuerpoEmail.required = enviarEmail.checked;
+        const opcion = institucionSelect.options[institucionSelect.selectedIndex];
+        const registrado = (opcion?.getAttribute('data-email') || '').trim();
+        const faltaCorreo = Boolean(opcion?.value) && !registrado;
+        emailContainer.hidden = !faltaCorreo;
+        emailManual.disabled = !faltaCorreo || !enviarEmail.checked;
+        emailManual.required = faltaCorreo && enviarEmail.checked;
+    }
+    enviarEmail.addEventListener('change', actualizarEnvio);
+    institucionSelect.addEventListener('change', () => {
+        emailManual.value = '';
+        actualizarEnvio();
+    });
+    actualizarEnvio();
+
     const form = document.getElementById('asignarForm');
     const submitBtn = document.getElementById('btnAsignarSubmit');
     if (!form || !submitBtn) return;

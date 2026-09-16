@@ -120,9 +120,9 @@ class OficioAdmin(SimpleHistoryAdmin):
         fields = ('id_usuario', 'id_profesional', 'id_institucion', 'respuesta', 'respuesta_pdf', 'fecha_hora', 'creacion')
         readonly_fields = ('creacion', 'modificacion')
 
-    list_display = ('id', 'tipo_documento', 'nro_oficio', 'denuncia', 'legajo', 'expediente', 'institucion', 'juzgado', 'estado_badge', 'fecha_emision', 'fecha_vencimiento', 'usuario', 'creado')
+    list_display = ('id', 'tipo_documento', 'nro_oficio', 'numero_interno', 'denuncia', 'legajo', 'expediente', 'institucion', 'juzgado', 'estado_badge', 'fecha_emision', 'fecha_vencimiento', 'usuario', 'creado')
     list_filter = ('tipo_documento', 'estado', 'institucion', 'juzgado', 'usuario', 'fecha_emision', 'fecha_vencimiento')
-    search_fields = ('nro_oficio', 'denuncia', 'legajo', 'expediente', 'institucion__nombre', 'juzgado__nombre', 'usuario__username')
+    search_fields = ('nro_oficio', 'numero_interno', 'denuncia', 'legajo', 'expediente', 'institucion__nombre', 'juzgado__nombre', 'usuario__username')
     list_select_related = ('institucion', 'juzgado', 'usuario')
     readonly_fields = ('creado', 'actualizado', 'estado_badge')
     date_hierarchy = 'fecha_emision'
@@ -144,23 +144,23 @@ class OficioAdmin(SimpleHistoryAdmin):
 
 @admin.register(OficioMPA)
 class OficioMPAAdmin(OficioAdmin):
-    list_display = ('id', 'nro_oficio', 'denuncia', 'legajo', 'institucion', 'juzgado', 'estado_badge', 'fecha_emision', 'fecha_vencimiento', 'usuario', 'creado')
+    list_display = ('id', 'nro_oficio', 'numero_interno', 'denuncia', 'legajo', 'institucion', 'juzgado', 'estado_badge', 'fecha_emision', 'fecha_vencimiento', 'usuario', 'creado')
     list_filter = ('estado', 'institucion', 'juzgado', 'usuario', 'fecha_emision', 'fecha_vencimiento')
-    search_fields = ('nro_oficio', 'denuncia', 'legajo', 'institucion__nombre', 'juzgado__nombre', 'usuario__username')
+    search_fields = ('nro_oficio', 'numero_interno', 'denuncia', 'legajo', 'institucion__nombre', 'juzgado__nombre', 'usuario__username')
 
 
 @admin.register(OficioJudicial)
 class OficioJudicialAdmin(OficioAdmin):
-    list_display = ('id', 'nro_oficio', 'expediente', 'institucion', 'juzgado', 'estado_badge', 'fecha_emision', 'fecha_vencimiento', 'usuario', 'creado')
+    list_display = ('id', 'nro_oficio', 'numero_interno', 'expediente', 'institucion', 'juzgado', 'estado_badge', 'fecha_emision', 'fecha_vencimiento', 'usuario', 'creado')
     list_filter = ('estado', 'institucion', 'juzgado', 'usuario', 'fecha_emision', 'fecha_vencimiento')
-    search_fields = ('nro_oficio', 'expediente', 'institucion__nombre', 'juzgado__nombre', 'usuario__username')
+    search_fields = ('nro_oficio', 'numero_interno', 'expediente', 'institucion__nombre', 'juzgado__nombre', 'usuario__username')
 
 
 @admin.register(Nota)
 class NotaAdmin(OficioAdmin):
-    list_display = ('id', 'nro_oficio', 'institucion', 'juzgado', 'estado_badge', 'fecha_emision', 'fecha_vencimiento', 'usuario', 'creado')
+    list_display = ('id', 'nro_oficio', 'numero_interno', 'institucion', 'juzgado', 'estado_badge', 'fecha_emision', 'fecha_vencimiento', 'usuario', 'creado')
     list_filter = ('estado', 'institucion', 'juzgado', 'usuario', 'fecha_emision', 'fecha_vencimiento')
-    search_fields = ('nro_oficio', 'institucion__nombre', 'juzgado__nombre', 'usuario__username')
+    search_fields = ('nro_oficio', 'numero_interno', 'institucion__nombre', 'juzgado__nombre', 'usuario__username')
 
 
 @admin.register(Respuesta)

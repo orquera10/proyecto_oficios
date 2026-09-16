@@ -1,0 +1,176 @@
+:root .case-detail-page {
+    --detail-surface: #fff;
+    --detail-heading: #f1f5f9;
+    --detail-border: #dde4ee;
+    --detail-text: #0b1726;
+    --detail-muted: #475569;
+    --detail-hover: #f8fafc;
+}
+
+html[data-theme="dark"] .case-detail-page {
+    --detail-surface: #111827;
+    --detail-heading: #182433;
+    --detail-border: rgba(255, 255, 255, 0.12);
+    --detail-text: #f8fafc;
+    --detail-muted: #cbd5e1;
+    --detail-hover: #1a2738;
+}
+
+:root .case-detail-page .card {
+    --bs-card-border-radius: 0.75rem;
+    --bs-card-inner-border-radius: calc(0.75rem - 1px);
+    border-radius: var(--bs-card-border-radius);
+    border-color: var(--detail-border) !important;
+    background: var(--detail-surface) !important;
+}
+
+:root .case-detail-page .card-header {
+    padding: 0.9rem 1rem;
+    border-radius: var(--bs-card-inner-border-radius) var(--bs-card-inner-border-radius) 0 0;
+    background: var(--detail-heading) !important;
+    border-color: var(--detail-border) !important;
+    color: var(--detail-text) !important;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+:root .case-detail-page .card-header .card-title {
+    color: var(--detail-text) !important;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+:root .case-detail-page .card-body {
+    padding: 1rem;
+    background: var(--detail-surface) !important;
+    border-radius: 0 0 var(--bs-card-inner-border-radius) var(--bs-card-inner-border-radius);
+}
+
+:root .case-detail-page .table-responsive,
+:root .case-detail-page dl.row {
+    border: 1px solid var(--detail-border) !important;
+    border-radius: 0.5rem;
+    background: var(--detail-surface) !important;
+    box-shadow: none;
+}
+
+:root .case-detail-page .table-responsive {
+    overflow-x: auto;
+}
+
+:root .case-detail-page .table {
+    margin: 0;
+    font-size: 0.875rem;
+    --bs-table-bg: var(--detail-surface);
+    --bs-table-color: var(--detail-text);
+    --bs-table-hover-bg: var(--detail-hover);
+    --bs-table-hover-color: var(--detail-text);
+}
+
+:root .case-detail-page .table > :not(caption) > * > * {
+    padding: 0.75rem;
+    vertical-align: middle;
+    color: var(--detail-text) !important;
+    background: var(--detail-surface) !important;
+    border-color: var(--detail-border) !important;
+}
+
+:root .case-detail-page .table thead th {
+    background: var(--detail-heading) !important;
+    color: var(--detail-muted) !important;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+:root .case-detail-page .table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+:root .case-detail-page .table tbody tr:hover td {
+    background: var(--detail-hover) !important;
+}
+
+:root .case-detail-page dl.row {
+    display: grid;
+    grid-template-columns: minmax(128px, 0.55fr) minmax(0, 1fr);
+    margin: 0;
+    overflow: hidden;
+    width: 100%;
+}
+
+:root .case-detail-page dl.row dt,
+:root .case-detail-page dl.row dd {
+    display: flex;
+    align-items: center;
+    min-height: 54px;
+    width: auto;
+    margin: 0;
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--detail-border);
+    overflow-wrap: anywhere;
+}
+
+:root .case-detail-page dl.row dt {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--detail-muted);
+    background: var(--detail-heading);
+}
+
+:root .case-detail-page dl.row dd {
+    font-size: 0.875rem;
+    color: var(--detail-text);
+}
+
+:root .case-detail-page dl.row dt:last-of-type,
+:root .case-detail-page dl.row dd:last-of-type {
+    border-bottom: 0;
+}
+
+:root .case-detail-page .text-muted.small {
+    color: var(--detail-muted) !important;
+    border: 1px dashed var(--detail-border);
+    border-radius: 0.5rem;
+    padding: 0.9rem;
+}
+
+:root .case-detail-page .bg-violet {
+    background: #e0cffc !important;
+    color: #212529 !important;
+}
+
+:root .case-detail-page .badge.bg-warning,
+:root .case-detail-page .badge.bg-light {
+    color: #212529 !important;
+}
+
+:root .case-detail-page .badge.bg-light {
+    background: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .case-detail-page .table a:not(.btn) {
+    color: #8ec5ff;
+}
+
+@media (min-width: 768px) {
+    .case-detail-top > .col-md-6:first-child {
+        display: flex;
+    }
+
+    .case-detail-top > .col-md-6:first-child > .card {
+        width: 100%;
+        margin-bottom: 0 !important;
+    }
+}
+
+@media (max-width: 575.98px) {
+    :root .case-detail-page dl.row {
+        grid-template-columns: 1fr;
+    }
+
+    :root .case-detail-page dl.row dt {
+        min-height: auto;
+        border-bottom: 0;
+    }
+}

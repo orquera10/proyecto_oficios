@@ -26,6 +26,12 @@ Resumen operativo y tecnico del flujo de oficios dentro de la aplicacion.
 
 ## Reglas y permisos
 
+- En **Asignar**, el envío de correo es opcional: al marcarlo se exige asunto, correo válido de la institución y archivo adjunto del oficio. Se envía una copia del oficio después de guardar. El detalle de la asignación es interno y nunca se incluye en el correo. Si el envío falla, la asignación se conserva y se muestra un aviso. La carga de respuestas no envía correos.
+
+- **En revisión**: desde Respondido, el coordinador puede solicitar correcciones; el director puede hacerlo luego del visto bueno de coordinación. El motivo es obligatorio y queda en movimientos.
+- Solicitar correcciones reinicia ambos vistos buenos. Solo **Coordinacion OPD** puede reasignar el oficio en este circuito y, una vez Asignado, cargar la respuesta corregida. La nueva respuesta vuelve a Respondido para validar primero por coordinación y luego por dirección.
+- La creación y las respuestas se guardan junto con sus movimientos en una transacción. Cada institución seleccionada al crear recibe un oficio independiente.
+
 - Usuarios del sector **Coordinacion OPD** no pueden crear oficios.
 - Usuarios del sector **Despacho Ninez** pueden editar oficios, pero no responderlos.
 - El tamano maximo de PDF es 10 MB (validado en formularios); solo se aceptan `.pdf`.
@@ -46,5 +52,5 @@ Resumen operativo y tecnico del flujo de oficios dentro de la aplicacion.
 ## Notas para desarrollo
 
 - Cada `save` de `Oficio` recalcula `fecha_vencimiento` si cambia `plazo_horas` y ajusta el estado del `Caso`: si todos los oficios del caso estan `enviado`, el caso pasa a `CERRADO`; si se modifica desde un cerrado, vuelve a `EN_PROCESO`.
-- Los movimientos no bloquean el flujo ante errores (try/except deliberado para no impedir el guardado).
+- Los movimientos de creación, respuesta y solicitud de revisión deben guardarse junto con el cambio para mantener el seguimiento.
 - `OficioForm` espera el campo `caso` como hidden; puede recibirse por querystring `?caso=<id>` para precargarlo.

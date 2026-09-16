@@ -1,0 +1,142 @@
+    .record-filter-form .form-label {
+        color: var(--text-700);
+        font-size: 0.82rem;
+        font-weight: 700;
+        margin-bottom: 0.35rem;
+    }
+
+    .record-filter-form .form-control,
+    .record-filter-form .form-select {
+        min-height: 38px;
+        font-size: 0.875rem;
+    }
+
+    .record-child-filters {
+        min-width: 0;
+        padding: 1rem;
+        border: 1px solid var(--bs-border-color, #dee2e6);
+        border-radius: 0.5rem;
+        background: var(--bs-tertiary-bg, rgba(127, 127, 127, 0.04));
+    }
+
+    .record-child-filters legend {
+        float: none;
+        width: auto;
+        padding: 0 0.4rem;
+        margin-bottom: 0.25rem;
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: var(--text-700);
+    }
+
+    .record-filter-form .form-control,
+    .record-filter-form .form-select,
+    .record-filter-form .select2-container--bootstrap-5 .select2-selection--single {
+        box-sizing: border-box;
+        height: 38px;
+        min-height: 38px;
+        padding: 0.375rem 0.75rem;
+        font-size: 0.875rem;
+        line-height: 1.5;
+        border-radius: 0.375rem;
+    }
+
+    .record-filter-form .select2-container--bootstrap-5 .select2-selection--single {
+        display: flex;
+        align-items: center;
+        padding-right: 2.25rem;
+    }
+
+    .record-filter-form .select2-selection--single .select2-selection__rendered {
+        width: 100%;
+        line-height: 1.5;
+        padding-left: 0;
+    }
+
+    html[data-theme="dark"] .record-child-filters {
+        background: rgba(255, 255, 255, 0.03);
+        border-color: rgba(255, 255, 255, 0.16);
+    }
+
+    .record-list-card {
+        --bs-card-border-radius: 0.75rem;
+        --bs-card-inner-border-radius: calc(0.75rem - 1px);
+        border-radius: var(--bs-card-border-radius);
+    }
+
+    .record-list-card > .card-header {
+        border-radius: var(--bs-card-inner-border-radius) var(--bs-card-inner-border-radius) 0 0;
+    }
+
+    .record-list-card > .card-body:last-child {
+        border-radius: 0 0 var(--bs-card-inner-border-radius) var(--bs-card-inner-border-radius);
+    }
+
+    .record-list-card > .card-body:only-child {
+        border-radius: var(--bs-card-inner-border-radius);
+    }
+
+    html[data-theme="dark"] .record-filter-form .form-control,
+    html[data-theme="dark"] .record-filter-form .form-select,
+    html[data-theme="dark"] .record-filter-form .select2-container--bootstrap-5 .select2-selection--single {
+        background-color: #0f172a !important;
+        border-color: rgba(255, 255, 255, 0.16) !important;
+        color: #f8fafc !important;
+        color-scheme: dark;
+    }
+
+    html[data-theme="dark"] .record-filter-form .select2-selection__placeholder {
+        color: rgba(248, 250, 252, 0.7);
+    }
+
+    html[data-theme="dark"] .record-filter-form .select2-selection__rendered {
+        color: #f8fafc;
+    }
+
+    html[data-theme="dark"] .record-filter-form .select2-selection--single {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23cbd5e1' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3E%3C/svg%3E");
+    }
+
+    html[data-theme="dark"] .record-filter-form .form-control:focus,
+    html[data-theme="dark"] .record-filter-form .select2-container--focus .select2-selection--single,
+    html[data-theme="dark"] .record-filter-form .select2-container--open .select2-selection--single {
+        border-color: #6ea8fe !important;
+        box-shadow: 0 0 0 0.2rem rgba(110, 168, 254, 0.2);
+    }
+
+    .record-filter-actions {
+        align-items: center;
+        justify-content: flex-end;
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    @media (max-width: 767.98px) {
+        .record-filter-actions {
+            align-items: stretch;
+            flex-direction: column;
+        }
+    }
+
+html[data-theme="dark"] .record-filter-card,
+html[data-theme="dark"] .record-filter-card > .card-body {
+    background: #111827 !important;
+    color: #f8fafc !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+html[data-theme="dark"] .record-filter-card > .card-header {
+    background: linear-gradient(180deg, #182433 0%, #141f2e 100%) !important;
+    color: #f8fafc !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+html[data-theme="dark"] .record-filter-form .form-control::placeholder,
+html[data-theme="dark"] .record-filter-form .select2-selection__placeholder {
+    color: rgba(248, 250, 252, 0.7) !important;
+}
+
+html[data-theme="dark"] .record-filter-form .form-label,
+html[data-theme="dark"] .record-child-filters legend {
+    color: #cbd5e1;
+}

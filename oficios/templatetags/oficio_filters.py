@@ -10,6 +10,7 @@ def estado_badge_class(estado):
         'asignado': 'warning',       # naranja
         'respondido': 'primary',     # azul
         'enviado': 'success',        # verde
+        'en_revision': 'revision',
         'devuelto': 'violet',        # violeta (custom)
         'incompetencia': 'danger',   # rojo
     }

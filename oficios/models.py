@@ -210,6 +210,7 @@ class Oficio(models.Model):
         ('respondido', 'Respondido'),
         ('enviado', 'Enviado'),
         ('devuelto', 'Devuelto'),
+        ('en_revision', 'En revisión'),
         ('incompetencia', 'Incompetencia'),
     ]
     tipo_documento = models.CharField(
@@ -224,6 +225,14 @@ class Oficio(models.Model):
         
         blank=True,
         null=True
+    )
+    numero_interno = models.CharField(
+        max_length=50,
+        verbose_name='Número interno',
+        blank=True,
+        default='',
+        db_index=True,
+        help_text='Identificador utilizado internamente para registrar el oficio.'
     )
     codigo = models.CharField(
         max_length=20,
@@ -320,6 +329,11 @@ class Oficio(models.Model):
     validado_coord = models.BooleanField(
         default=False,
         verbose_name='Validado por coordinación'
+    )
+    revision_pendiente = models.BooleanField(
+        default=False,
+        editable=False,
+        verbose_name='Corrección pendiente de respuesta',
     )
     validado_director = models.BooleanField(
         default=False,
@@ -518,7 +532,8 @@ class Oficio(models.Model):
             'derivado': 'info',          # celeste
             'respondido': 'primary',     # azul
             'enviado': 'success',        # verde
-            'devuelto': 'violet',        # violeta (custom)
+            'en_revision': 'revision',
+        'devuelto': 'violet',        # violeta (custom)
             'incompetencia': 'danger',   # rojo
         }
         return estado_map.get(self.estado, 'light')
@@ -612,6 +627,7 @@ class MovimientoOficio(models.Model):
         ('respondido', 'Respondido'),
         ('enviado', 'Enviado'),
         ('devuelto', 'Devuelto'),
+        ('en_revision', 'En revisión'),
         ('incompetencia', 'Incompetencia'),
     ]
     

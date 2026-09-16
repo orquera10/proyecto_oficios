@@ -1,6 +1,7 @@
 import django_filters
 from django import forms
-from django.db.models import Q
+from django.db.models import Q, Value
+from django.db.models.functions import Replace
 from .models import Caso, CasoNino, CasoParte
 from personas.models import Nino, Parte
 
@@ -11,7 +12,7 @@ class CasoFilter(django_filters.FilterSet):
         label='Buscar',
         widget=forms.TextInput(attrs={
             'class': 'form-control form-control-sm',
-            'placeholder': 'Buscar por código, DNI, nombre o apellido de niño/parte...'
+            'placeholder': 'Identificador del caso (CS-00001-2026), DNI o nombre'
         })
     )
 
@@ -30,6 +31,16 @@ class CasoFilter(django_filters.FilterSet):
         widget=forms.Select(attrs={'class': 'form-select form-select-sm'})
     )
 
+    dni_nino = django_filters.CharFilter(
+        method='filtro_dni_nino',
+        label='DNI del niño/a',
+        widget=forms.TextInput(attrs={
+            'class': 'form-control form-control-sm',
+            'placeholder': 'DNI completo, con o sin puntos',
+            'inputmode': 'numeric',
+        })
+    )
+
     fecha_desde = django_filters.DateFilter(
         field_name='creado',
         lookup_expr='gte',
@@ -39,6 +50,15 @@ class CasoFilter(django_filters.FilterSet):
             'class': 'form-control form-control-sm',
             'placeholder': 'Desde...'
         })
+    )
+
+    codigo_oficio = django_filters.CharFilter(
+        method='filtro_oficio', label='Identificador del oficio',
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: OF-00010-2026'}),
+    )
+    numero_interno = django_filters.CharFilter(
+        method='filtro_oficio', label='Número interno del oficio',
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: 7543'}),
     )
 
     fecha_hasta = django_filters.DateFilter(
@@ -58,9 +78,33 @@ class CasoFilter(django_filters.FilterSet):
             'busqueda',
             'estado',
             'nino',
+            'dni_nino',
+            'codigo_oficio',
+            'numero_interno',
             'fecha_desde',
             'fecha_hasta'
         ]
+
+    def filtro_oficio(self, queryset, name, value):
+        from oficios.models import Oficio
+
+        # Both identifiers must belong to the same related document.
+        criterios = {
+            f'{campo_modelo}__icontains': self.form.cleaned_data[campo]
+            for campo, campo_modelo in (('codigo_oficio', 'codigo'), ('numero_interno', 'numero_interno'))
+            if self.form.cleaned_data.get(campo)
+        }
+        oficios = Oficio.objects.filter(**criterios).exclude(caso_id=None)
+        return queryset.filter(pk__in=oficios.values('caso_id'))
+
+    def filtro_dni_nino(self, queryset, name, value):
+        dni = value.replace('.', '').replace(' ', '')
+        if not dni:
+            return queryset.none()
+        ninos = Nino.objects.annotate(
+            dni_normalizado=Replace(Replace('dni', Value('.'), Value('')), Value(' '), Value(''))
+        ).filter(dni_normalizado=dni)
+        return queryset.filter(ninos__in=ninos).distinct()
 
     def filtro_busqueda(self, queryset, name, value):
         if not value:

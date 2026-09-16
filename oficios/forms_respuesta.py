@@ -34,13 +34,13 @@ class RespuestaForm(forms.ModelForm):
         fields = ['id_profesional', 'respuesta', 'respuesta_pdf', 'fecha_hora']
         widgets = {
             'id_profesional': forms.Select(),
-            'respuesta': forms.Textarea(attrs={'rows': 4}),
+            'respuesta': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Escriba las observaciones o aclaraciones que acompañan la respuesta.'}),
             'respuesta_pdf': forms.FileInput(attrs={'accept': '.pdf'}),
             'fecha_hora': forms.DateTimeInput(attrs={'type': 'datetime-local'}, format='%Y-%m-%dT%H:%M'),
         }
         labels = {
             'id_institucion': 'Institución',
-            'respuesta': 'Respuesta',
+            'respuesta': 'Observaciones',
             'respuesta_pdf': 'Archivo PDF de la respuesta',
             'fecha_hora': 'Fecha y hora',
         }
@@ -54,8 +54,6 @@ class RespuestaForm(forms.ModelForm):
         if not self.instance.pk and not self.initial.get('fecha_hora'):
             local_now = timezone.localtime(timezone.now())
             self.initial['fecha_hora'] = local_now.strftime('%Y-%m-%dT%H:%M')
-        if not self.instance.pk and not self.initial.get('respuesta'):
-            self.initial['respuesta'] = 'SE RESPONDIO CORRECTAMENTE EL OFICIO DESDE LA INSTITUCION'
         self.fields['respuesta_pdf'].required = False
         # Filtrar profesionales por institución del oficio
         try:
@@ -78,7 +76,9 @@ class RespuestaForm(forms.ModelForm):
         for field in self.fields.values():
             existing = field.widget.attrs.get('class', '')
             # Usar form-select en selects y form-control en otros
-            if isinstance(field.widget, forms.Select):
+            if isinstance(field.widget, forms.CheckboxInput):
+                field.widget.attrs['class'] = 'form-check-input'
+            elif isinstance(field.widget, forms.Select):
                 field.widget.attrs['class'] = (existing + ' form-select').strip()
             else:
                 field.widget.attrs['class'] = (existing + ' form-control').strip()

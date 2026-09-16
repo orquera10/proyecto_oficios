@@ -1,6 +1,7 @@
 import django_filters
 from django import forms
-from django.db.models import Q
+from django.db.models import Q, Value
+from django.db.models.functions import Replace
 from .models import Oficio, Institucion, Juzgado, Caratula
 from personas.models import Nino
 
@@ -13,6 +14,7 @@ class OficioFilter(django_filters.FilterSet):
         ('respondido', 'Respondido'),
         ('enviado', 'Enviado'),
         ('devuelto', 'Devuelto'),
+        ('en_revision', 'En revisión'),
         ('incompetencia', 'Incompetencia'),
     ]
     
@@ -22,10 +24,20 @@ class OficioFilter(django_filters.FilterSet):
         label='Buscar',
         widget=forms.TextInput(attrs={
             'class': 'form-control form-control-sm',
-            'placeholder': 'Buscar por número, descripción, etc.'
+            'placeholder': 'Código del oficio, número interno o número de oficio'
         })
     )
     
+    dni_nino = django_filters.CharFilter(
+        method='filtro_dni_nino',
+        label='DNI del niño/a',
+        widget=forms.TextInput(attrs={
+            'class': 'form-control form-control-sm',
+            'placeholder': 'DNI completo, con o sin puntos',
+            'inputmode': 'numeric',
+        })
+    )
+
     # Filtros básicos
     estado = django_filters.ChoiceFilter(
         field_name='estado',
@@ -103,9 +115,19 @@ class OficioFilter(django_filters.FilterSet):
             'fecha_hasta',
             'institucion',
             'juzgado',
-            'nino'
+            'nino',
+            'dni_nino',
         ]
     
+    def filtro_dni_nino(self, queryset, name, value):
+        dni = value.replace('.', '').replace(' ', '')
+        if not dni:
+            return queryset.none()
+        ninos = Nino.objects.annotate(
+            dni_normalizado=Replace(Replace('dni', Value('.'), Value('')), Value(' '), Value(''))
+        ).filter(dni_normalizado=dni)
+        return queryset.filter(caso__ninos__in=ninos).distinct()
+
     def filtro_busqueda(self, queryset, name, value):
         """
         Filtro personalizado para búsqueda en múltiples campos
@@ -116,7 +138,9 @@ class OficioFilter(django_filters.FilterSet):
                 Q(legajo__icontains=value) |
                 Q(institucion__nombre__icontains=value) |
                 Q(juzgado__nombre__icontains=value) |
-                Q(nro_oficio__icontains=value)
+                Q(nro_oficio__icontains=value) |
+                Q(numero_interno__icontains=value) |
+                Q(codigo__icontains=value)
             ).distinct()
         return queryset
     
