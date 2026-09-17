@@ -94,7 +94,11 @@
                                         {{ form.archivo_pdf|as_crispy_field }}
                                     </div>
                                     <div class="col-12">
-                                        {{ form.instituciones|as_crispy_field }}
+                                        {% if form.institucion %}
+                                            {{ form.institucion|as_crispy_field }}
+                                        {% else %}
+                                            {{ form.instituciones|as_crispy_field }}
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>

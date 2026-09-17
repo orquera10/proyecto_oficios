@@ -20,6 +20,87 @@ from .filters import OficioFilter
 from .models import Oficio, OficioMPA, OficioJudicial, Nota, Institucion, MovimientoOficio, oficio_upload_path
 
 
+class OficioEditInstitucionTests(TestCase):
+    def setUp(self):
+        user = get_user_model().objects.create_user(username='editar_institucion')
+        self.client.force_login(user)
+        self.anterior = Institucion.objects.create(nombre='Anterior')
+        self.nueva = Institucion.objects.create(nombre='Nueva')
+        self.oficio = Oficio.objects.create(institucion=self.anterior)
+        self.url = reverse('oficios:update', args=[self.oficio.pk])
+
+    def test_edit_preselects_current_institution(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['form']['institucion'].value(), self.anterior.pk)
+        self.assertContains(response, 'name="institucion"')
+        self.assertNotContains(response, 'name="instituciones"')
+
+    def test_edit_is_blocked_in_every_state_except_cargado(self):
+        for estado, _ in Oficio.ESTADO_CHOICES:
+            if estado == 'cargado':
+                continue
+            with self.subTest(estado=estado):
+                self.oficio.estado = estado
+                self.oficio.save()
+                before = self.oficio.history.count()
+                response = self.client.get(self.url)
+                self.assertRedirects(response, reverse('oficios:detail', args=[self.oficio.pk]))
+                response = self.client.post(self.url, {
+                    'institucion': self.nueva.pk, 'fecha_emision': '2026-09-17T10:00',
+                })
+                self.assertEqual(response.status_code, 302)
+                self.oficio.refresh_from_db()
+                self.assertEqual(self.oficio.institucion, self.anterior)
+                self.assertEqual(self.oficio.estado, estado)
+                self.assertEqual(self.oficio.history.count(), before)
+
+    def test_edit_buttons_hidden_after_assignment_for_authorized_user(self):
+        user = get_user_model().objects.get(username='editar_institucion')
+        sector = Sector.objects.create(nombre='Informatica')
+        UsuarioPerfil.objects.create(usuario=user, id_sector=sector)
+        caso = Caso.objects.create(usuario=user)
+        self.oficio.caso = caso
+        self.oficio.save()
+        urls = (reverse('oficios:list'), reverse('oficios:detail', args=[self.oficio.pk]),
+                reverse('casos:detail', args=[caso.pk]))
+        for url in urls:
+            self.assertContains(self.client.get(url), f'href="{self.url}"')
+        self.oficio.estado = 'asignado'
+        self.oficio.save()
+        for url in urls:
+            self.assertNotContains(self.client.get(url), f'href="{self.url}"')
+
+    def test_edit_saves_institution_once_without_creating_another_office(self):
+        codigo = self.oficio.codigo
+        history_count = self.oficio.history.count()
+        response = self.client.post(self.url, {
+            'institucion': self.nueva.pk, 'fecha_emision': '2026-09-17T10:00',
+        })
+        self.assertEqual(response.status_code, 302)
+        self.oficio.refresh_from_db()
+        self.assertEqual(self.oficio.institucion, self.nueva)
+        self.assertEqual(self.oficio.codigo, codigo)
+        self.assertEqual(Oficio.objects.count(), 1)
+        self.assertEqual(self.oficio.history.count(), history_count + 1)
+        self.assertEqual(self.oficio.history.first().institucion_id, self.nueva.pk)
+
+    def test_can_clear_institution_and_invalid_selection_is_not_saved(self):
+        response = self.client.post(self.url, {
+            'institucion': 999999, 'fecha_emision': '2026-09-17T10:00',
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('institucion', response.context['form'].errors)
+        self.oficio.refresh_from_db()
+        self.assertEqual(self.oficio.institucion, self.anterior)
+        response = self.client.post(self.url, {
+            'institucion': '', 'fecha_emision': '2026-09-17T10:00',
+        })
+        self.assertEqual(response.status_code, 302)
+        self.oficio.refresh_from_db()
+        self.assertIsNone(self.oficio.institucion)
+
+
 class AsignacionEmailTests(TestCase):
     def setUp(self):
         self.user = get_user_model().objects.create_user(username='asignacion_mail')

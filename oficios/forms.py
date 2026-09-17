@@ -140,6 +140,21 @@ class OficioForm(forms.ModelForm):
         return instance
 
 
+class OficioUpdateForm(OficioForm):
+    class Meta(OficioForm.Meta):
+        fields = [field for field in OficioForm.Meta.fields if field != 'instituciones'] + ['institucion']
+        widgets = {
+            **OficioForm.Meta.widgets,
+            'institucion': forms.Select(attrs={'class': 'form-control'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields.pop('instituciones', None)
+        self.fields['institucion'].queryset = Institucion.objects.order_by('nombre')
+        self.fields['institucion'].empty_label = 'Sin institución'
+
+
 class OficioMPAForm(OficioForm):
     class Meta(OficioForm.Meta):
         model = OficioMPA

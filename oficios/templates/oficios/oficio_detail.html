@@ -55,9 +55,11 @@
             </button>
             {% endif %}
             {% if user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'informatica' or user.perfil.id_sector and 'despacho' in user.perfil.id_sector.nombre|lower %}
+            {% if oficio.estado == 'cargado' %}
             <a href="{% url 'oficios:update' oficio.pk %}" class="btn btn-warning">
                 <i class="bi bi-pencil-square me-1"></i> Editar
             </a>
+            {% endif %}
             {% endif %}
             {% if user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'coordinador' %}
             {% if oficio.estado == 'respondido' %}
@@ -848,9 +850,11 @@
     <div class="mt-4 d-flex justify-content-end align-items-center flex-wrap gap-2">
         <div class="btn-group" role="group" aria-label="Acciones">
             {% if user.perfil.id_sector and 'despacho' in user.perfil.id_sector.nombre|lower or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'informatica' %}
+            {% if oficio.estado == 'cargado' %}
             <a href="{% url 'oficios:update' oficio.pk %}" class="btn btn-warning" title="Editar">
                 <i class="bi bi-pencil-square me-1"></i> Editar
             </a>
+            {% endif %}
             {% endif %}
             {% if user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'informatica' %}
             <a href="{% url 'oficios:delete' oficio.pk %}" class="btn btn-danger" title="Eliminar">

@@ -21,7 +21,7 @@ from .models import (
     Oficio, OficioMPA, OficioJudicial, Nota, Institucion, Caratula, Juzgado, MovimientoOficio, Respuesta
 )
 from casos.models import Caso
-from .forms import OficioForm, OficioMPAForm, OficioJudicialForm, NotaForm
+from .forms import OficioForm, OficioUpdateForm, OficioMPAForm, OficioJudicialForm, NotaForm
 from .forms_respuesta import RespuestaForm
 from .filters import OficioFilter
 from .permissions import is_coordinacion_opd
@@ -376,8 +376,21 @@ class OficioDesvincularCasoView(LoginRequiredMixin, View):
 
 class OficioUpdateView(LoginRequiredMixin, UpdateView):
     model = Oficio
-    form_class = OficioForm
+    form_class = OficioUpdateForm
     template_name = 'oficios/oficio_form.html'
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.select_for_update() if self.request.method == 'POST' else queryset
+
+    @transaction.atomic
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            oficio = self.get_object()
+            if oficio.estado != 'cargado':
+                messages.error(request, 'Solo se pueden editar oficios en estado Cargado.')
+                return redirect('oficios:detail', pk=oficio.pk)
+        return super().dispatch(request, *args, **kwargs)
 
     def get_success_url(self):
         return reverse_lazy('oficios:detail', kwargs={'pk': self.object.pk})
@@ -386,7 +399,6 @@ class OficioUpdateView(LoginRequiredMixin, UpdateView):
         context['titulo'] = 'Editar Oficio'
         return context
     def form_valid(self, form):
-        self.object = form.save()
         messages.success(self.request, 'El oficio se ha actualizado correctamente.')
         return super().form_valid(form)
 

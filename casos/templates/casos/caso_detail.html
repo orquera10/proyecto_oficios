@@ -194,9 +194,11 @@
                                     <i class="bi bi-eye-fill"></i>
                                 </a>
                                 {% if user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'informatica' or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'coordinador' or user.perfil.id_sector and user.perfil.id_sector.nombre|slugify == 'director-ninez' %}
+                                {% if oficio.estado == 'cargado' %}
                                 <a href="{% url 'oficios:update' oficio.pk %}" class="btn btn-warning" title="Editar">
                                     <i class="bi bi-pencil-square"></i>
                                 </a>
+                                {% endif %}
                                 {% endif %}
                             </div>
                         </td>
