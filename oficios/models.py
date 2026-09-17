@@ -219,6 +219,10 @@ class Oficio(models.Model):
         default=TIPO_DOCUMENTO_LEGACY,
         verbose_name='Tipo de documento'
     )
+    grupo_creacion = models.UUIDField(
+        null=True, blank=True, editable=False, db_index=True,
+        verbose_name='Grupo de creación múltiple',
+    )
     nro_oficio = models.CharField(
         max_length=50,
         verbose_name='Número de Oficio',
@@ -368,9 +372,24 @@ class Oficio(models.Model):
         verbose_name = 'Oficio'
         verbose_name_plural = 'Oficios'
         ordering = ['-fecha_emision']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['grupo_creacion', 'institucion'],
+                name='oficio_grupo_institucion_unica',
+            ),
+        ]
 
     def clean(self):
         super().clean()
+        if self.grupo_creacion and self.institucion_id:
+            otro = Oficio.objects.filter(
+                grupo_creacion=self.grupo_creacion,
+                institucion_id=self.institucion_id,
+            ).exclude(pk=self.pk).first()
+            if otro:
+                raise ValidationError({
+                    'institucion': f'Esta institución ya corresponde al oficio {otro.codigo}, creado en la misma carga. Seleccione otra institución.',
+                })
         if self.tipo_documento == self.TIPO_DOCUMENTO_MPA:
             if not self.nro_oficio:
                 raise ValidationError({'nro_oficio': 'El número de oficio es obligatorio para oficios MPA.'})

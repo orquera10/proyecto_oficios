@@ -9,7 +9,8 @@ from django.conf import settings
 from django.core.mail import EmailMessage
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
-from django.db import transaction
+from django.db import transaction, IntegrityError
+import uuid
 from django.db.models import Q, F
 from django.views.decorators.http import require_http_methods
 import unicodedata
@@ -269,6 +270,8 @@ class OficioCreateView(LoginRequiredMixin, CreateView):
         creados = []
         archivo = form.cleaned_data.get("archivo_pdf")
         plantilla = form.save(commit=False)
+        if len(instituciones) > 1:
+            plantilla.grupo_creacion = uuid.uuid4()
         # Each destination needs a fresh parent and child row, not a reused
         # multi-table inheritance instance with only its child PK cleared.
         datos = {
@@ -399,8 +402,22 @@ class OficioUpdateView(LoginRequiredMixin, UpdateView):
         context['titulo'] = 'Editar Oficio'
         return context
     def form_valid(self, form):
+        try:
+            with transaction.atomic():
+                self.object = form.save()
+        except ValidationError as exc:
+            form.add_error(None, '; '.join(exc.messages))
+            return self.form_invalid(form)
+        except IntegrityError:
+            if not (form.instance.grupo_creacion and form.instance.institucion_id and
+                    Oficio.objects.filter(grupo_creacion=form.instance.grupo_creacion,
+                                          institucion_id=form.instance.institucion_id)
+                    .exclude(pk=form.instance.pk).exists()):
+                raise
+            form.add_error('institucion', 'Otro oficio de la misma carga ya tiene esta institución. Seleccione otra.')
+            return self.form_invalid(form)
         messages.success(self.request, 'El oficio se ha actualizado correctamente.')
-        return super().form_valid(form)
+        return HttpResponseRedirect(self.get_success_url())
 
 
 class OficioEnviarView(LoginRequiredMixin, View):

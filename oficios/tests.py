@@ -1,6 +1,7 @@
 import os
 import tempfile
 from unittest.mock import patch
+from django.db import IntegrityError, transaction
 from types import SimpleNamespace
 
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -366,6 +367,57 @@ class OficioMultiInstitucionTests(TestCase):
         self.client.force_login(self.user)
         self.instituciones = [Institucion.objects.create(nombre=nombre) for nombre in ('Primera', 'Segunda')]
         self.caso = Caso.objects.create(usuario=self.user)
+
+    def test_edit_cannot_reuse_sibling_institution(self):
+        for tipo, model, extra in (
+            ('mpa', OficioMPA, {'nro_oficio': '401/25'}),
+            ('judicial', OficioJudicial, {'expediente': 'VJ-16791/2026'}),
+            ('nota', Nota, {}),
+        ):
+            with self.subTest(tipo=tipo):
+                response = self.client.post(reverse('oficios:create_tipo', kwargs={'tipo': tipo}), {
+                    'fecha_emision': '2026-09-17T10:00',
+                    'instituciones': [inst.pk for inst in self.instituciones], **extra,
+                })
+                self.assertEqual(response.status_code, 302)
+                first, second = list(model.objects.order_by('pk'))
+                first = Oficio.objects.get(pk=first.pk)
+                second = Oficio.objects.get(pk=second.pk)
+                self.assertIsNotNone(first.grupo_creacion)
+                self.assertEqual(first.grupo_creacion, second.grupo_creacion)
+                before = first.history.count()
+                url = reverse('oficios:update', args=[first.pk])
+                data = {'fecha_emision': '2026-09-17T10:00', 'institucion': second.institucion_id, **extra}
+                response = self.client.post(url, data)
+                self.assertEqual(response.status_code, 200)
+                self.assertIn('institucion', response.context['form'].errors)
+                self.assertContains(response, second.codigo)
+                first.refresh_from_db()
+                self.assertNotEqual(first.institucion_id, second.institucion_id)
+                self.assertEqual(first.history.count(), before)
+                destination = Institucion.objects.create(nombre='Nueva ' + tipo)
+                response = self.client.post(url, {**data, 'institucion': destination.pk})
+                self.assertEqual(response.status_code, 302)
+                first.refresh_from_db()
+                second.refresh_from_db()
+                self.assertEqual(first.institucion, destination)
+                self.assertEqual(second.institucion, self.instituciones[1])
+                self.assertEqual(first.grupo_creacion, second.grupo_creacion)
+                # A direct update cannot bypass the database protection.
+                with self.assertRaises(IntegrityError):
+                    with transaction.atomic():
+                        Oficio.objects.filter(pk=first.pk).update(institucion_id=second.institucion_id)
+
+    def test_separate_batches_can_use_same_institution(self):
+        for _ in range(2):
+            response = self.client.post(reverse('oficios:create_tipo', kwargs={'tipo': 'nota'}), {
+                'fecha_emision': '2026-09-17T10:00',
+                'numero_interno': '7543',
+                'instituciones': [inst.pk for inst in self.instituciones],
+            })
+            self.assertEqual(response.status_code, 302)
+        self.assertEqual(Oficio.objects.count(), 4)
+        self.assertEqual(len(set(Oficio.objects.values_list('grupo_creacion', flat=True))), 2)
 
     def test_single_or_no_institution_still_creates_one_document(self):
         for instituciones in ([], [self.instituciones[0].pk]):

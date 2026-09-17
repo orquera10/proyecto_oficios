@@ -26,6 +26,8 @@ Resumen operativo y tecnico del flujo de oficios dentro de la aplicacion.
 
 ## Reglas y permisos
 
+- Los oficios creados juntos para varias instituciones comparten un grupo de creación. Una institución no puede repetirse dentro de ese grupo al editar o reasignar. El formulario indica el oficio en conflicto y la base de datos también impide duplicados. Las cargas anteriores a esta validación no se agrupan automáticamente, ya que no guardaban ese vínculo.
+
 - En **Asignar**, el envío de correo es opcional: al marcarlo se exige asunto, correo válido de la institución y archivo adjunto del oficio. Se envía una copia del oficio después de guardar. El detalle de la asignación es interno y nunca se incluye en el correo. Si el envío falla, la asignación se conserva y se muestra un aviso. La carga de respuestas no envía correos.
 
 - **En revisión**: desde Respondido, el coordinador puede solicitar correcciones; el director puede hacerlo luego del visto bueno de coordinación. El motivo es obligatorio y queda en movimientos.
