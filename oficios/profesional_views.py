@@ -23,6 +23,7 @@ class ProfesionalListView(LoginRequiredMixin, ListView):
         qs = (
             User.objects.filter(perfil__es_profesional=True)
             .select_related('perfil', 'perfil__id_institucion')
+            .prefetch_related('perfil__instituciones')
             .order_by('first_name', 'last_name', 'username')
         )
         q = (self.request.GET.get('q') or '').strip()
@@ -31,8 +32,9 @@ class ProfesionalListView(LoginRequiredMixin, ListView):
                 Q(username__icontains=q) |
                 Q(first_name__icontains=q) |
                 Q(last_name__icontains=q) |
-                Q(perfil__id_institucion__nombre__icontains=q)
-            )
+                Q(perfil__id_institucion__nombre__icontains=q) |
+                Q(perfil__instituciones__nombre__icontains=q)
+            ).distinct()
         return qs
 
 
@@ -67,7 +69,7 @@ class ProfesionalDetailView(LoginRequiredMixin, DetailView):
     context_object_name = 'profesional'
 
     def get_queryset(self):
-        return User.objects.filter(perfil__es_profesional=True).select_related('perfil')
+        return User.objects.filter(perfil__es_profesional=True).select_related('perfil', 'perfil__id_institucion').prefetch_related('perfil__instituciones')
 
 
 class ProfesionalDeleteView(LoginRequiredMixin, DeleteView):

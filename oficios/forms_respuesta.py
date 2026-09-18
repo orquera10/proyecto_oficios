@@ -67,7 +67,12 @@ class RespuestaForm(forms.ModelForm):
 
             qs = get_user_model().objects.all()
             if institucion:
-                qs = qs.filter(perfil__id_institucion=institucion, perfil__es_profesional=True, is_active=True)
+                from django.db.models import Q
+                qs = qs.filter(
+                    Q(perfil__instituciones=institucion) | Q(perfil__id_institucion=institucion),
+                    perfil__es_profesional=True,
+                    is_active=True
+                ).distinct()
             else:
                 qs = qs.none()
             self.fields['id_profesional'].queryset = qs.order_by('first_name', 'last_name', 'username')

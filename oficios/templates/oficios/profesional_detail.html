@@ -19,8 +19,14 @@
         <dd class="col-sm-9">{{ profesional.get_full_name|default:profesional.username }}</dd>
         <dt class="col-sm-3">Email</dt>
         <dd class="col-sm-9">{{ profesional.email|default:'-' }}</dd>
-        <dt class="col-sm-3">Institución</dt>
-        <dd class="col-sm-9">{{ profesional.perfil.id_institucion.nombre|default:'-' }}</dd>
+        <dt class="col-sm-3">Instituciones</dt>
+        <dd class="col-sm-9">
+          {% for inst in profesional.perfil.instituciones.all %}
+            <span class="badge bg-primary me-1">{{ inst.nombre }}</span>
+          {% empty %}
+            {{ profesional.perfil.id_institucion.nombre|default:'-' }}
+          {% endfor %}
+        </dd>
         <dt class="col-sm-3">Activo</dt>
         <dd class="col-sm-9">{% if profesional.is_active %}Sí{% else %}No{% endif %}</dd>
       </dl>

@@ -37,8 +37,14 @@
             </div>
           </div>
           <div class="col-md-6">
-            <label class="form-label" for="id_id_institucion">Institución</label>
-            {{ form.id_institucion }}
+            <label class="form-label" for="id_instituciones">Instituciones Asignadas</label>
+            {{ form.instituciones }}
+            {% if form.instituciones.help_text %}
+              <div class="form-text text-muted">{{ form.instituciones.help_text }}</div>
+            {% endif %}
+            {% for error in form.instituciones.errors %}
+              <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
           </div>
           <div class="col-md-3">
             <label class="form-label" for="id_password1">Contraseña</label>

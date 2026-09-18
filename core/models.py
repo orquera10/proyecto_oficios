@@ -44,7 +44,13 @@ class UsuarioPerfil(models.Model):
         null=True,
         blank=True,
         related_name='perfiles',
-        verbose_name='Institucion'
+        verbose_name='Institución Principal'
+    )
+    instituciones = models.ManyToManyField(
+        'oficios.Institucion',
+        blank=True,
+        related_name='perfiles_asignados',
+        verbose_name='Instituciones'
     )
     history = HistoricalRecords()
 

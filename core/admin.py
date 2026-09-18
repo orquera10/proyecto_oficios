@@ -17,9 +17,10 @@ class UsuarioPerfilAdmin(SimpleHistoryAdmin):
     list_display = ('usuario', 'id_sector', 'es_profesional', 'id_institucion')
     search_fields = (
         'usuario__username', 'usuario__first_name', 'usuario__last_name',
-        'id_sector__nombre', 'id_institucion__nombre'
+        'id_sector__nombre', 'id_institucion__nombre', 'instituciones__nombre'
     )
     autocomplete_fields = ('usuario', 'id_sector', 'id_institucion')
+    filter_horizontal = ('instituciones',)
     list_filter = ('es_profesional', 'id_sector', 'id_institucion')
 
 
@@ -28,7 +29,8 @@ class UsuarioPerfilInline(admin.StackedInline):
     can_delete = False
     fk_name = 'usuario'
     autocomplete_fields = ('id_sector', 'id_institucion')
-    fields = ('id_sector', 'es_profesional', 'id_institucion')
+    filter_horizontal = ('instituciones',)
+    fields = ('id_sector', 'es_profesional', 'id_institucion', 'instituciones')
 
 
 class UserAdmin(BaseUserAdmin):

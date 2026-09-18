@@ -8,10 +8,11 @@ User = get_user_model()
 
 
 class ProfesionalForm(forms.ModelForm):
-    id_institucion = forms.ModelChoiceField(
+    instituciones = forms.ModelMultipleChoiceField(
         queryset=Institucion.objects.all().order_by('nombre'),
         required=False,
-        label='Institución'
+        label='Instituciones asignadas',
+        help_text='Puede seleccionar una o varias instituciones (mantenga presionado Ctrl para seleccionar varias).'
     )
     password1 = forms.CharField(
         label='Contraseña',
@@ -37,15 +38,20 @@ class ProfesionalForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Inicializar institución desde el perfil
+        # Inicializar instituciones desde el perfil
         perfil = getattr(self.instance, 'perfil', None)
-        if perfil and perfil.id_institucion_id and 'id_institucion' in self.fields:
-            self.fields['id_institucion'].initial = perfil.id_institucion_id
+        if perfil and 'instituciones' in self.fields:
+            insts = list(perfil.instituciones.values_list('pk', flat=True))
+            if not insts and perfil.id_institucion_id:
+                insts = [perfil.id_institucion_id]
+            self.fields['instituciones'].initial = insts
         # Estilos bootstrap
         for name, field in self.fields.items():
             base = field.widget.attrs.get('class', '')
             if isinstance(field.widget, forms.CheckboxInput):
                 field.widget.attrs['class'] = (base + ' form-check-input').strip()
+            elif isinstance(field.widget, (forms.Select, forms.SelectMultiple)):
+                field.widget.attrs['class'] = (base + ' form-select').strip()
             else:
                 field.widget.attrs['class'] = (base + ' form-control').strip()
 
@@ -70,9 +76,12 @@ class ProfesionalForm(forms.ModelForm):
             user.set_password(p1)
         if commit:
             user.save()
-        # Asegurar perfil profesional e institución
+        # Asegurar perfil profesional e instituciones
         perfil, _ = UsuarioPerfil.objects.get_or_create(usuario=user)
         perfil.es_profesional = True
-        perfil.id_institucion = self.cleaned_data.get('id_institucion')
+        insts = self.cleaned_data.get('instituciones')
+        if insts is not None:
+            perfil.instituciones.set(insts)
+            perfil.id_institucion = insts.first() if insts.exists() else None
         perfil.save(update_fields=['es_profesional', 'id_institucion'])
         return user
